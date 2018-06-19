@@ -35,12 +35,12 @@ func main() {
 			Usage: "instance type",
 		},
 		cli.StringFlag{
-			Name:  "access-key",
+			Name:  "access_key",
 			Value: "",
 			Usage: "access key for your AWS account",
 		},
 		cli.StringFlag{
-			Name:  "secret-key",
+			Name:  "secret_key",
 			Value: "",
 			Usage: "secret key for your AWS account",
 		},
@@ -58,7 +58,7 @@ func main() {
 					path = "./darknode"
 				}
 				var err error
-				path, err = mkdir(path)
+				path, err = Mkdir(path)
 				if err != nil {
 					return err
 				}
@@ -68,7 +68,7 @@ func main() {
 		},
 		{
 			Name:  "destroy",
-			Usage: "tear down the darkndoe and clean up everything",
+			Usage: "tear down the darknode and clean up everything",
 			Action: func(c *cli.Context) error {
 				panic("todo ")
 			},
@@ -93,31 +93,5 @@ func main() {
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-// mkdir tries to create folder with the given name. If not success,
-// it will try appending number appended to the name.
-func mkdir(name string) (string, error) {
-	// Try creating directory with the exact name we get
-	if _, err := os.Stat(name); os.IsNotExist(err) {
-		err = os.Mkdir(name, os.ModePerm)
-		if err == nil {
-			return name, nil
-		}
-	}
-
-	// Try creating directory with number appended to the name.
-	i := 1
-	for {
-		dirName := fmt.Sprintf("%v_%d", name, i)
-		if _, err := os.Stat(dirName); os.IsNotExist(err) {
-			err = os.Mkdir(dirName, os.ModePerm)
-			if err != nil {
-				return "", err
-			}
-			return dirName, nil
-		}
-		i++
 	}
 }
