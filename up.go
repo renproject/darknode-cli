@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"encoding/json"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
@@ -46,6 +47,12 @@ func deployToAWS(ctx *cli.Context, path string) error {
 	if err != nil {
 		return err
 	}
+	configData, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
+	ioutil.WriteFile(fmt.Sprintf("%v/config.json", path), configData, 0600)
+
 	pubKey, keyPath, err := NewSshKeyPair(path)
 	if err != nil {
 		return err

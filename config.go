@@ -30,7 +30,7 @@ func NewConfig() (config.Config, error) {
 		URI:     "https://kovan.infura.io",
 	}
 
-	return config.Config{
+	cfg := config.Config{
 		Keystore:                keystore,
 		Host:                    "0.0.0.0",
 		Port:                    "18514",
@@ -46,5 +46,7 @@ func NewConfig() (config.Config, error) {
 			},
 		},
 		Ethereum: ethereumConfig,
-	}, nil
+	}
+
+	return cfg, nil
 }
