@@ -63,7 +63,7 @@ func main() {
 					return err
 				}
 
-				return deployNode(c)
+				return deployNode(c, path)
 			},
 		},
 		{
