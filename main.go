@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
+	"os/exec"
+	"io/ioutil"
 )
 
 func main() {
@@ -76,14 +78,14 @@ func main() {
 			Name:  "update",
 			Usage: "update your darknode to the latest release",
 			Action: func(c *cli.Context) error {
-				panic("todo ")
+				return updateNode(c)
 			},
 		},
 		{
 			Name:  "ssh",
 			Usage: "ssh into your cloud service instance",
 			Action: func(c *cli.Context) error {
-				panic("todo ")
+				return sshNode(c)
 			},
 		},
 	}
@@ -93,4 +95,36 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// updateNode update the darknode to the latest release from master branch.
+// This will restart the darknode.
+func updateNode(ctx *cli.Context) error {
+	update , err := ioutil.ReadFile("./scripts/update.sh")
+	if err != nil {
+		return err
+	}
+
+	// FIXME : GET IP ADDRESS FROM TERRAFORM OUTPUT
+	ip := "ubuntu@52.14.25.55"
+	updateCmd := exec.Command("ssh", "-i", "ssh_keypair",ip , string(update))
+	pipeToStd(updateCmd)
+	if err := updateCmd.Start(); err != nil {
+		return err
+	}
+
+	return updateCmd.Wait()
+}
+
+// sshNode will ssh into the darknode
+func sshNode(ctx *cli.Context) error {
+	// FIXME : GET IP ADDRESS FROM TERRAFORM OUTPUT
+	ip := "ubuntu@52.14.25.55"
+	ssh := exec.Command("ssh", "-i", "ssh_keypair",ip )
+	pipeToStd(ssh)
+	if err := ssh.Start(); err != nil {
+		return err
+	}
+
+	return ssh.Wait()
 }
