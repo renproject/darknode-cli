@@ -30,13 +30,20 @@ func main() {
 			Usage: "instance type",
 		},
 		cli.StringFlag{
-			Name:  "access_key",
+			Name:  "access-key",
 			Value: "",
 			Usage: "access key for your AWS account",
 		},
 		cli.StringFlag{
-			Name:  "secret_key",
+			Name:  "secret-key",
 			Value: "",
+			Usage: "secret key for your AWS account",
+		},
+	}
+
+	destroyFlags := []cli.Flag{
+		cli.BoolFlag{
+			Name:  "skip-prompt",
 			Usage: "secret key for your AWS account",
 		},
 	}
@@ -54,6 +61,7 @@ func main() {
 		{
 			Name:  "destroy",
 			Usage: "tear down the darknode and clean up everything",
+			Flags: destroyFlags,
 			Action: func(c *cli.Context) error {
 				return destroyNode(c)
 			},
