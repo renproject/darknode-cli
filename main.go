@@ -108,7 +108,7 @@ func updateNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	updateCmd := exec.Command("ssh", "-i", "ssh_keypair",ip , string(update))
+	updateCmd := exec.Command("ssh", "-i", "ssh_keypair", "ubuntu@" + ip , string(update))
 	pipeToStd(updateCmd)
 	if err := updateCmd.Start(); err != nil {
 		return err
@@ -123,7 +123,7 @@ func sshNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	ssh := exec.Command("ssh", "-i", "./ssh_keypair",ip )
+	ssh := exec.Command("ssh", "-i", "./ssh_keypair", "ubuntu@" + ip)
 	pipeToStd(ssh)
 	if err := ssh.Start(); err != nil {
 		return err
