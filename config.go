@@ -10,8 +10,7 @@ import (
 	"github.com/republicprotocol/republic-go/logger"
 )
 
-// todo : any good way of defining the bootstrap node addresses
-// move it to a config file.
+// Fixme : right now the bootstrapnode address are hardcoded
 var BootstrapNodes = func() []identity.MultiAddress {
 	b1, _ := identity.NewMultiAddressFromString("/ip4/34.203.9.146/tcp/18514/republic/8MJBssiB8aT6pGAM6MYj7YNUJTgxt7")
 	b2, _ := identity.NewMultiAddressFromString("/ip4/54.250.246.106/tcp/18514/republic/8MJY6fvSCBCi3ujBqzTNTUkfF7WhFN")

@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
-	"io/ioutil"
 
 	"github.com/republicprotocol/republic-go/identity"
 )
@@ -56,14 +56,14 @@ func pipeToStd(cmd *exec.Cmd) {
 
 // getIp parses the ip address from a bytes representation of
 // multiAddress.
-func getIp() (string, error ) {
-	data, err  := ioutil.ReadFile("./multiAddress.out")
+func getIp() (string, error) {
+	data, err := ioutil.ReadFile("./multiAddress.out")
 	if err != nil {
 		return "", err
 	}
 	multi, err := identity.NewMultiAddressFromString(strings.TrimSpace(string(data)))
 	if err != nil {
-		return "",err
+		return "", err
 	}
 
 	return multi.ValueForProtocol(identity.IP4Code)

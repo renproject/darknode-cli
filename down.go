@@ -8,7 +8,8 @@ import (
 
 // destroyNode will tear down the deployed darknode, but keep the config file.
 func destroyNode(ctx *cli.Context) error {
-	// todo : how do we distinguish between AWS, digitalOcean and others.
+	// FIXME : currently it only supports tear down AWS deployment.
+	// Needs to figure out way which suits for all kinds of cloud service.
 	return destroyAwsNode()
 }
 

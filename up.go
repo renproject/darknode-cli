@@ -113,7 +113,6 @@ variable "ssh_private_key_location" {
 	`, accessKey, secretKey, strings.TrimSpace(pubKey), keyPath)
 
 	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
-	//Fixme : does the bootstrap field important?
 	mode := fmt.Sprintf(`
 module "node-%v" {
     source = "./instance"

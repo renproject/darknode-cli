@@ -5,21 +5,15 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
-	"os/exec"
 	"io/ioutil"
+	"os/exec"
 )
 
 func main() {
 	// Create new cli application
 	app := cli.NewApp()
 
-	// fixme: Define flags
 	upFlags := []cli.Flag{
-		//cli.StringFlag{
-		//	Name:  "name",
-		//	Value: "darknode",
-		//	Usage: "give your darknode a name",
-		//},
 		cli.StringFlag{
 			Name:  "provider",
 			Value: "AWS",
@@ -54,16 +48,6 @@ func main() {
 			Usage: "deploying a new darknode",
 			Flags: upFlags,
 			Action: func(c *cli.Context) error {
-				//path := fmt.Sprintf("./%v", c.String("name"))
-				//if path == "./" {
-				//	path = "./darknode"
-				//}
-				//var err error
-				//path, err = Mkdir(path)
-				//if err != nil {
-				//	return err
-				//}
-
 				return deployNode(c)
 			},
 		},
@@ -100,15 +84,15 @@ func main() {
 // updateNode update the darknode to the latest release from master branch.
 // This will restart the darknode.
 func updateNode(ctx *cli.Context) error {
-	ip, err  := getIp()
+	ip, err := getIp()
 	if err != nil {
 		return err
 	}
-	update , err := ioutil.ReadFile("./scripts/update.sh")
+	update, err := ioutil.ReadFile("./scripts/update.sh")
 	if err != nil {
 		return err
 	}
-	updateCmd := exec.Command("ssh", "-i", "ssh_keypair", "ubuntu@" + ip , string(update))
+	updateCmd := exec.Command("ssh", "-i", "ssh_keypair", "ubuntu@"+ip, string(update))
 	pipeToStd(updateCmd)
 	if err := updateCmd.Start(); err != nil {
 		return err
@@ -119,11 +103,11 @@ func updateNode(ctx *cli.Context) error {
 
 // sshNode will ssh into the darknode
 func sshNode(ctx *cli.Context) error {
-	ip, err  := getIp()
+	ip, err := getIp()
 	if err != nil {
 		return err
 	}
-	ssh := exec.Command("ssh", "-i", "./ssh_keypair", "ubuntu@" + ip)
+	ssh := exec.Command("ssh", "-i", "./ssh_keypair", "ubuntu@"+ip)
 	pipeToStd(ssh)
 	if err := ssh.Start(); err != nil {
 		return err
