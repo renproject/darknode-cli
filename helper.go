@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"github.com/republicprotocol/republic-go/identity"
 )
 
 // StringInSlice checks whether the string is in the slice
@@ -48,4 +49,15 @@ func pipeToStd(cmd *exec.Cmd) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+}
+
+// getIpFromMultiAddress parses the ip address from a bytes representation of
+// multiAddress.
+func getIpFromMultiAddress(data []byte) (string, error ) {
+	multi, err := identity.NewMultiAddressFromString(string(data))
+	if err != nil {
+		return "",err
+	}
+
+	return multi.ValueForProtocol(identity.IP4Code)
 }
