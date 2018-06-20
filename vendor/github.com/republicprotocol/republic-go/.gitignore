@@ -1,0 +1,27 @@
+# Output of the go coverage tool
+*.out
+
+# Output of the go profiler and test
+*.pdf
+*.test
+
+# Dep vendors
+# vendor
+# Gopkg.lock
+
+# Secrets
+cmd/secrets
+
+# DS_Store
+.DS_Store
+.idea
+
+# Binaries
+cmd/darknode/darknode
+cmd/deregister/deregister
+cmd/epoch/epoch
+cmd/ganacher/ganacher
+cmd/keygen/keygen
+cmd/register/register
+cmd/relay/relay
+cmd/trader/trader

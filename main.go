@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"fmt"
 	"github.com/urfave/cli"
 )
 
@@ -14,11 +13,11 @@ func main() {
 
 	// fixme: Define flags
 	upFlags := []cli.Flag{
-		cli.StringFlag{
-			Name:  "name",
-			Value: "darknode",
-			Usage: "give your darknode a name",
-		},
+		//cli.StringFlag{
+		//	Name:  "name",
+		//	Value: "darknode",
+		//	Usage: "give your darknode a name",
+		//},
 		cli.StringFlag{
 			Name:  "provider",
 			Value: "AWS",
@@ -53,24 +52,24 @@ func main() {
 			Usage: "deploying a new darknode",
 			Flags: upFlags,
 			Action: func(c *cli.Context) error {
-				path := fmt.Sprintf("./%v", c.String("name"))
-				if path == "./" {
-					path = "./darknode"
-				}
-				var err error
-				path, err = Mkdir(path)
-				if err != nil {
-					return err
-				}
+				//path := fmt.Sprintf("./%v", c.String("name"))
+				//if path == "./" {
+				//	path = "./darknode"
+				//}
+				//var err error
+				//path, err = Mkdir(path)
+				//if err != nil {
+				//	return err
+				//}
 
-				return deployNode(c, path)
+				return deployNode(c)
 			},
 		},
 		{
 			Name:  "destroy",
 			Usage: "tear down the darknode and clean up everything",
 			Action: func(c *cli.Context) error {
-				panic("todo ")
+				return destroyNode(c)
 			},
 		},
 		{

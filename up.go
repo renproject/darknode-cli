@@ -1,14 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os/exec"
 	"strings"
 
-	"encoding/json"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
@@ -17,11 +18,11 @@ import (
 var KeyNotFound error = errors.New("please provide your AWS access key and secret key")
 
 // deployNode deploys node depending on the provider.
-func deployNode(ctx *cli.Context, path string) error {
+func deployNode(ctx *cli.Context) error {
 	provider := strings.ToLower(ctx.String("provider"))
 	switch provider {
 	case "aws":
-		return deployToAWS(ctx, path)
+		return deployToAWS(ctx)
 	case "digital-ocean":
 		return deployToDigitalOcean(ctx)
 	default:
@@ -31,7 +32,7 @@ func deployNode(ctx *cli.Context, path string) error {
 
 // deployToAWS parses the AWS credentials and use terraform to deploy the node
 // to AWS.
-func deployToAWS(ctx *cli.Context, path string) error {
+func deployToAWS(ctx *cli.Context) error {
 	accessKey := ctx.String("access_key")
 	secretKey := ctx.String("secret_key")
 	if accessKey == "" || secretKey == "" {
@@ -43,7 +44,7 @@ func deployToAWS(ctx *cli.Context, path string) error {
 	if err != nil {
 		return err
 	}
-	config, err := NewConfig()
+	config, err := GetConfigOrGenerateNew()
 	if err != nil {
 		return err
 	}
@@ -51,16 +52,18 @@ func deployToAWS(ctx *cli.Context, path string) error {
 	if err != nil {
 		return err
 	}
-	ioutil.WriteFile(fmt.Sprintf("%v/config.json", path), configData, 0600)
-
-	pubKey, keyPath, err := NewSshKeyPair(path)
+	if err := ioutil.WriteFile("./config.json", configData, 0600); err != nil {
+		return err
+	}
+	pubKey, keyPath, err := NewSshKeyPair()
 	if err != nil {
 		return err
 	}
+	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, keyPath); err != nil {
+		return err
+	}
 
-	generateTerraformConfig(config, path, accessKey, secretKey, region, instance, pubKey, keyPath)
-
-	return nil
+	return runTerraform()
 }
 
 // runTerraform initializes and applies terraform
@@ -72,7 +75,7 @@ func runTerraform() error {
 	if err := init.Wait(); err != nil {
 		return err
 	}
-
+	log.Println("Deploying dark nodes to AWS...")
 	apply := exec.Command("./terraform", "apply", "-auto-approve")
 	if err := apply.Run(); err != nil {
 		return err
@@ -80,7 +83,7 @@ func runTerraform() error {
 	return apply.Wait()
 }
 
-func generateTerraformConfig(config config.Config, path, accessKey, secretKey, region, instance, pubKey, keyPath string) error {
+func generateTerraformConfig(config config.Config, accessKey, secretKey, region, instance, pubKey, keyPath string) error {
 	terraformConfig := fmt.Sprintf(`
 variable "access_key" {
 	default = "%v"
@@ -103,7 +106,7 @@ variable "ssh_private_key_location" {
 	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
 	//Fixme : does the bootstrap field important?
 	mode := fmt.Sprintf(`
-module "{node-%v}" {
+module "node-%v" {
     source = "./instance"
     ami = "%v"
     region = "%v"
@@ -114,13 +117,13 @@ module "{node-%v}" {
     ssh_private_key_location = "${var.ssh_private_key_location}"
     access_key = "${var.access_key}"
     secret_key = "${var.secret_key}"
-    config = "%v/config.json"
+    config = "./config.json"
 	bootstraps = []
     is_bootstrap = "false"
     port = "%v"
-}`, config.Address, AMIs[region], region, avz, config.Address, instance, path, config.Port)
+}`, config.Address, AMIs[region], region, avz, config.Address, instance, config.Port)
 
-	return ioutil.WriteFile(fmt.Sprintf("%v/main.tf", path), []byte(terraformConfig+mode), 0600)
+	return ioutil.WriteFile("./main.tf", []byte(terraformConfig+mode), 0600)
 }
 
 // deployToDigitalOcean parses the digital ocean credentials and use terraform

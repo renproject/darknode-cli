@@ -120,6 +120,7 @@ const (
 	M524XLarge = "m5.24xlarge"
 )
 
+// AllAwsInstances contains all instance types available on AWS
 var AllAwsInstances = []string{
 	T2Nano,
 	T2Micro,
@@ -142,6 +143,7 @@ var AllAwsInstances = []string{
 	M524XLarge,
 }
 
+// AllAwsInstances contains all instance types available in eu-west-3 region
 var AllAwsInstancesInEuWest3 = []string{
 	T2Nano,
 	T2Micro,
@@ -158,6 +160,8 @@ var AllAwsInstancesInEuWest3 = []string{
 	M524XLarge,
 }
 
+// AllAwsInstances contains all instance types available in ap-northeast-1
+// region
 var AllAwsInstancesInApNortheast1 = []string{
 	T2Nano,
 	T2Micro,
@@ -210,10 +214,10 @@ func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
 
 // NewSshKeyPair generate a new ssh key pair and writes the keys into files.
 // It returns the public ssh key and the path of the rsa key file.
-func NewSshKeyPair(path string) (string, string, error) {
+func NewSshKeyPair() (string, string, error) {
 	// Path to save the ssh keys
-	keyPairPath := path + "/ssh_keypair"
-	pubKeyPath := path + "/ssh_keypair.pub"
+	keyPairPath := "./ssh_keypair"
+	pubKeyPath := "./ssh_keypair.pub"
 
 	rsaKey, err := crypto.RandomRsaKey()
 	if err != nil {

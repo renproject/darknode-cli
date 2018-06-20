@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/republicprotocol/republic-go/blockchain/ethereum"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/crypto"
@@ -9,6 +11,7 @@ import (
 )
 
 // todo : any good way of defining the bootstrap node addresses
+// move it to a config file.
 var BootstrapNodes = func() []identity.MultiAddress {
 	b1, _ := identity.NewMultiAddressFromString("/ip4/34.203.9.146/tcp/18514/republic/8MJBssiB8aT6pGAM6MYj7YNUJTgxt7")
 	b2, _ := identity.NewMultiAddressFromString("/ip4/54.250.246.106/tcp/18514/republic/8MJY6fvSCBCi3ujBqzTNTUkfF7WhFN")
@@ -19,8 +22,13 @@ var BootstrapNodes = func() []identity.MultiAddress {
 	return []identity.MultiAddress{b1, b2, b3, b4, b5}
 }()
 
-// NewConfig will generate a new config for the darknode.
-func NewConfig() (config.Config, error) {
+// GetConfigOrGenerateNew will generate a new config for the darknode.
+func GetConfigOrGenerateNew() (config.Config, error) {
+	// Try creating directory with the exact name we get
+	if _, err := os.Stat("./config.json"); err == nil {
+		return config.NewConfigFromJSONFile("./config.json")
+	}
+
 	keystore, err := crypto.RandomKeystore()
 	if err != nil {
 		return config.Config{}, err
@@ -30,7 +38,7 @@ func NewConfig() (config.Config, error) {
 		URI:     "https://kovan.infura.io",
 	}
 
-	cfg := config.Config{
+	return config.Config{
 		Keystore:                keystore,
 		Host:                    "0.0.0.0",
 		Port:                    "18514",
@@ -46,7 +54,5 @@ func NewConfig() (config.Config, error) {
 			},
 		},
 		Ethereum: ethereumConfig,
-	}
-
-	return cfg, nil
+	}, nil
 }
