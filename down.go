@@ -6,12 +6,6 @@ import (
 	"os/exec"
 )
 
-var (
-	green = "\x1B[1;32m"
-	red   = "\x1B[1;31m"
-	noc   = "\x1B[0m"
-)
-
 // destroyNode will tear down the deployed darknode, but keep the config file.
 func destroyNode(ctx *cli.Context) error {
 	// todo : how do we distinguish between AWS, digitalOcean and others.
@@ -21,10 +15,11 @@ func destroyNode(ctx *cli.Context) error {
 // destroyAwsNode tear down the AWS instance.
 func destroyAwsNode() error {
 	log.Println("Destroying your darknode ...")
-	init := exec.Command("./terraform", "destroy", "--force")
-	if err := init.Run(); err != nil {
+	destroy := exec.Command("./terraform", "destroy", "--force")
+	pipeToStd(destroy)
+	if err := destroy.Start(); err != nil {
 		return err
 	}
 
-	return init.Wait()
+	return destroy.Wait()
 }

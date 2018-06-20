@@ -7,11 +7,11 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"os/exec"
 	"strings"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
+	"os/exec"
 )
 
 // KeyNotFound is returned when no AWS access-key nor secret-key provided.
@@ -69,7 +69,8 @@ func deployToAWS(ctx *cli.Context) error {
 // runTerraform initializes and applies terraform
 func runTerraform() error {
 	init := exec.Command("./terraform", "init")
-	if err := init.Run(); err != nil {
+	pipeToStd(init)
+	if err := init.Start(); err != nil {
 		return err
 	}
 	if err := init.Wait(); err != nil {
@@ -77,7 +78,8 @@ func runTerraform() error {
 	}
 	log.Println("Deploying dark nodes to AWS...")
 	apply := exec.Command("./terraform", "apply", "-auto-approve")
-	if err := apply.Run(); err != nil {
+	pipeToStd(apply)
+	if err := apply.Start(); err != nil {
 		return err
 	}
 	return apply.Wait()

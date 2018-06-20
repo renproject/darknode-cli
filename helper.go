@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 )
 
 // StringInSlice checks whether the string is in the slice
@@ -39,4 +40,12 @@ func Mkdir(name string) (string, error) {
 		}
 		i++
 	}
+}
+
+// pipeToStd set the input and output stream of the command to os standard
+// input/output stream
+func pipeToStd(cmd *exec.Cmd) {
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 }
