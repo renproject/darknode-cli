@@ -100,11 +100,7 @@ func main() {
 // updateNode update the darknode to the latest release from master branch.
 // This will restart the darknode.
 func updateNode(ctx *cli.Context) error {
-	multi, err  := ioutil.ReadFile("./multiAddress.out")
-	if err != nil {
-		return err
-	}
-	ip, err  := getIpFromMultiAddress(multi)
+	ip, err  := getIp()
 	if err != nil {
 		return err
 	}
@@ -123,15 +119,11 @@ func updateNode(ctx *cli.Context) error {
 
 // sshNode will ssh into the darknode
 func sshNode(ctx *cli.Context) error {
-	multi, err  := ioutil.ReadFile("./multiAddress.out")
+	ip, err  := getIp()
 	if err != nil {
 		return err
 	}
-	ip, err  := getIpFromMultiAddress(multi)
-	if err != nil {
-		return err
-	}
-	ssh := exec.Command("ssh", "-i", "ssh_keypair",ip )
+	ssh := exec.Command("ssh", "-i", "./ssh_keypair",ip )
 	pipeToStd(ssh)
 	if err := ssh.Start(); err != nil {
 		return err

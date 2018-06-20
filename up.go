@@ -62,8 +62,15 @@ func deployToAWS(ctx *cli.Context) error {
 	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, keyPath); err != nil {
 		return err
 	}
-
-	return runTerraform()
+	if err := runTerraform(); err != nil {
+		return err
+	}
+	ip, err := getIp()
+	if err != nil {
+		return err
+	}
+	log.Printf("You can view the darknode status from the below URL\nhttps://darknode.republicprotocol.com/ip4/%v", ip)
+	return nil
 }
 
 // runTerraform initializes and applies terraform
