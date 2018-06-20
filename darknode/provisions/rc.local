@@ -1,0 +1,4 @@
+go get -u github.com/republicprotocol/republic-go/cmd/dark-node
+rm darknode.log
+sudo systemctl restart darknode.service
+exit 0
