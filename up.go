@@ -69,7 +69,8 @@ func deployToAWS(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("You can view the darknode status from the below URL\nhttps://darknode.republicprotocol.com/ip4/%v", ip)
+	fmt.Printf("Congratulations! You darknode is deployed and running.\n")
+	fmt.Printf("Start regitering your node by going to the following URL\n ---- https://darknode.republicprotocol.com/ip4/%v ----", ip)
 	return nil
 }
 
