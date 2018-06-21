@@ -33,8 +33,8 @@ func deployNode(ctx *cli.Context) error {
 // deployToAWS parses the AWS credentials and use terraform to deploy the node
 // to AWS.
 func deployToAWS(ctx *cli.Context) error {
-	accessKey := ctx.String("access_key")
-	secretKey := ctx.String("secret_key")
+	accessKey := ctx.String("access-key")
+	secretKey := ctx.String("secret-key")
 	if accessKey == "" || secretKey == "" {
 		//TODO : Read FROM ~/aws/  FOLDER
 		return KeyNotFound
