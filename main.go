@@ -61,6 +61,7 @@ func main() {
 		{
 			Name:  "destroy",
 			Usage: "tear down the darknode and clean up everything",
+			Aliases: []string{"down"},
 			Flags: destroyFlags,
 			Action: func(c *cli.Context) error {
 				return destroyNode(c)
