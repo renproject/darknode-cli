@@ -12,18 +12,16 @@ do
   sleep $((delay)) &&
     echo "Checking for darknode updates..."
     timestamp=$(date +%Y-%m-%d-%H-%M-%S) &&
-    # Install darknode
     export GOBIN=/home/ubuntu/go/bin &&
+    export GOPATH=/home/ubuntu/go/src &&
     mkdir -p /home/ubuntu/go/src/github.com/republicprotocol &&
     cd /home/ubuntu/go/src/github.com/republicprotocol &&
     cd republic-go &&
-    git pull &&
+    git fetch origin master &&
+    git reset --hard origin/master
     cd cmd/darknode &&
     go install &&
-    # mv $GOBIN/darknode $GOBIN/dark-node &&
     cd /home/ubuntu &&
-    # go get -u github.com/republicprotocol/republic-go/cmd/dark-node &&
-    # cp -r /home/ubuntu/go/src/github.com/republicprotocol/republic-go/dark-node-ui/* /home/ubuntu/.darknode/ui &&
     sudo systemctl restart darknode.service &&
     echo $timestamp > $HOME/.darknode/update.log
 done

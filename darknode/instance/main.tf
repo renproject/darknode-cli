@@ -12,10 +12,6 @@ variable "secret_key" {}
 variable "is_bootstrap" {}
 variable "port" {}
 
-variable "bootstraps" {
-  default = []
-}
-
 provider "aws" {
   alias      = "falcon0"
   access_key = "${var.access_key}"
@@ -26,8 +22,9 @@ provider "aws" {
 resource "aws_security_group" "falcon0" {
   provider    = "aws.falcon0"
   name        = "falcon-sg-${var.id}"
-  description = "Allow inbound SSH and Republic Protocol traffic"
+  description = "Allow inbound SSH ,Republic Protocol traffic and logstash/kibana"
 
+  // SSH
   ingress {
     from_port   = 22
     to_port     = 22
@@ -35,6 +32,23 @@ resource "aws_security_group" "falcon0" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  // Logstash
+  ingress {
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  // Kibana
+  ingress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  // Republic Protocol
   ingress {
     from_port   = 18514
     to_port     = 18515
