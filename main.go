@@ -43,7 +43,7 @@ func main() {
 
 	destroyFlags := []cli.Flag{
 		cli.BoolFlag{
-			Name:  "skip-prompt",
+			Name:  "skip",
 			Usage: "secret key for your AWS account",
 		},
 	}

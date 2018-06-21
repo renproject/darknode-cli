@@ -14,18 +14,13 @@ import (
 func destroyNode(ctx *cli.Context) error {
 	// FIXME : currently it only supports tear down AWS deployment.
 	// Needs to figure out way which suits for all kinds of cloud service.
-	skip := ctx.Bool("skip-prompt")
+	skip := ctx.Bool("skip")
 	if !skip {
-		for {
-			fmt.Println("Have you deregistered your node and withdrawn all fees? (Yes/No)")
-			reader := bufio.NewReader(os.Stdin)
-			text, _ := reader.ReadString('\n')
-			if strings.ToLower(strings.TrimSpace(text)) == "yes"{
-				break
-			}
-			if strings.ToLower(strings.TrimSpace(text)) == "no"{
-				return nil
-			}
+		fmt.Println("Have you deregistered your node and withdrawn all fees? (Yes/No)")
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		if strings.ToLower(strings.TrimSpace(text))!= "yes"{
+			return nil
 		}
 	}
 
