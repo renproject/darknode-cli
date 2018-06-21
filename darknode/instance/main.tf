@@ -100,6 +100,6 @@ resource "aws_instance" "falcon0" {
   }
 
   provisioner "local-exec" {
-      command = "echo /ip4/${aws_instance.falcon0.public_ip}/tcp/${var.port}/republic/${var.id} >> multiAddress.out"
+      command = "echo /ip4/${aws_instance.falcon0.public_ip}/tcp/${var.port}/republic/${var.id} > multiAddress.out"
   }
 }
