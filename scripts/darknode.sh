@@ -16,6 +16,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         wget https://darknode.republicprotocol.com/darknode_darwin
         mv darknode_darwin ./bin/darknode
 fi
+chmod +x bin/darknode
 
 wget $TERRAFORM_URL
 
@@ -25,6 +26,7 @@ unzip terraform
 
 # chmod +x darknode-setup
 chmod +x terraform
+mv terraform bin/terraform
 
 # rm darknode.zip
 rm darknode.zip

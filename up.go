@@ -150,7 +150,8 @@ module "node-%v" {
     config = "%v/config.json"
     is_bootstrap = "false"
     port = "%v"
-}`, config.Address, Directory, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port)
+    path = "%v"
+}`, config.Address, Directory, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory)
 
 	return ioutil.WriteFile( nodeDirectory  + "/main.tf", []byte(terraformConfig+mode), 0600)
 }

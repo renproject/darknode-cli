@@ -11,6 +11,7 @@ variable "access_key" {}
 variable "secret_key" {}
 variable "is_bootstrap" {}
 variable "port" {}
+variable "path" {}
 
 provider "aws" {
   alias      = "falcon0"
@@ -93,7 +94,7 @@ resource "aws_instance" "falcon0" {
   }
 
   provisioner "file" {
-    source      = "./provisions"
+    source      = "${var.path}/provisions"
     destination = "/home/ubuntu/provisions"
 
     connection {
@@ -104,7 +105,7 @@ resource "aws_instance" "falcon0" {
   }
 
   provisioner "remote-exec" {
-    script = "./scripts/onCreate.sh"
+    script = "${var.path}/scripts/onCreate.sh"
 
     connection {
       type        = "ssh"

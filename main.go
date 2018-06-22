@@ -26,6 +26,11 @@ func main() {
 
 	upFlags := []cli.Flag{
 		cli.StringFlag{
+			Name : "name",
+			Value : "",
+			Usage : "name of your darknode so that you can easily distinguish between them",
+		},
+		cli.StringFlag{
 			Name:  "provider",
 			Value: "AWS",
 			Usage: "cloud service provider you want to use for your darknode, default to AWS",
@@ -53,9 +58,22 @@ func main() {
 	}
 
 	destroyFlags := []cli.Flag{
+		cli.StringFlag{
+			Name : "name",
+			Value : "",
+			Usage : "name of your darknode so that you can easily distinguish between them",
+		},
 		cli.BoolFlag{
 			Name:  "skip",
 			Usage: "secret key for your AWS account",
+		},
+	}
+
+	nameFlag := []cli.Flag{
+		cli.StringFlag{
+			Name : "name",
+			Value : "",
+			Usage : "name of your darknode so that you can easily distinguish between them",
 		},
 	}
 
@@ -81,12 +99,14 @@ func main() {
 		{
 			Name:  "update",
 			Usage: "update your darknode to the latest release",
+			Flags: nameFlag,
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
 			},
 		},
 		{
 			Name:  "ssh",
+			Flags: nameFlag,
 			Usage: "ssh into your cloud service instance",
 			Action: func(c *cli.Context) error {
 				return sshNode(c)
@@ -148,3 +168,4 @@ func sshNode(ctx *cli.Context) error {
 
 	return ssh.Wait()
 }
+// curl https://darknode.republicprotocol.com/darknode.sh -sSf | sh
