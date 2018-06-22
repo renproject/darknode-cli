@@ -13,13 +13,9 @@ import (
 
 // Fixme : right now the bootstrap node address are hardcoded
 var BootstrapNodes = func() []identity.MultiAddress {
-	b1, _ := identity.NewMultiAddressFromString("/ip4/34.203.9.146/tcp/18514/republic/8MJBssiB8aT6pGAM6MYj7YNUJTgxt7")
-	b2, _ := identity.NewMultiAddressFromString("/ip4/54.250.246.106/tcp/18514/republic/8MJY6fvSCBCi3ujBqzTNTUkfF7WhFN")
-	b3, _ := identity.NewMultiAddressFromString("/ip4/54.233.183.222/tcp/18514/republic/8MJ4LffVe6hDAha7AfKRt8Hr12xrVR")
-	b4, _ := identity.NewMultiAddressFromString("/ip4/34.245.26.34/tcp/18514/republic/8MG9AZnq9s8UGqUcMMeq3r7azc58Mk")
-	b5, _ := identity.NewMultiAddressFromString("/ip4/13.209.15.151/tcp/18514/republic/8MGLgu2wx8h5iiZDVLsgKLhTXqP7Uj")
+	b1, _ := identity.NewMultiAddressFromString("/ip4/54.166.33.47/tcp/18514/republic/8MJ5XE5TwzknpizmVypzADLfYh5BfM")
 
-	return []identity.MultiAddress{b1, b2, b3, b4, b5}
+	return []identity.MultiAddress{b1}
 }()
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
