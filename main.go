@@ -168,4 +168,3 @@ func sshNode(ctx *cli.Context) error {
 
 	return ssh.Wait()
 }
-// curl https://darknode.republicprotocol.com/darknode.sh -sSf | sh
