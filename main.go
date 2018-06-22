@@ -138,7 +138,7 @@ func updateNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	keyPairPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair")
+	keyPairPath := nodeDirectory + "/ssh_keypair"
 	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no",  string(update))
 	pipeToStd(updateCmd)
 	if err := updateCmd.Start(); err != nil {
@@ -159,7 +159,7 @@ func sshNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	keyPairPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair")
+	keyPairPath := nodeDirectory + "/ssh_keypair"
 	ssh := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip)
 	pipeToStd(ssh)
 	if err := ssh.Start(); err != nil {
