@@ -133,7 +133,7 @@ func updateNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	updateScript  :=  path.Join(os.Getenv("HOME"), ".darknode/update.sh")
+	updateScript  :=  path.Join(os.Getenv("HOME"), ".darknode/scripts/update.sh")
 	update, err := ioutil.ReadFile(updateScript)
 	if err != nil {
 		return err
