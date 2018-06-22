@@ -15,13 +15,21 @@ import (
 // ErrNoDeploymentFound is returned when no node can be found for destroying
 var ErrNoDeploymentFound = errors.New("cannot found any deployed node")
 
+// ErrEmptyNodeName is returned when user doesn't provide the node name.
+var ErrEmptyNodeName = errors.New("please provide the node name")
+
 // destroyNode will tear down the deployed darknode, but keep the config file.
 func destroyNode(ctx *cli.Context) error {
 	// FIXME : currently it only supports tear down AWS deployment.
 	// Needs to figure out way which suits for all kinds of cloud service.
 	skip := ctx.Bool("skip")
+	name := ctx.String("name")
+	if name == ""{
+		return ErrEmptyNodeName
+	}
+	nodeDirectory := Directory + "/darknodes/"+  name
 	if !skip {
-		ip, err := getIp()
+		ip, err := getIp(nodeDirectory)
 		if err != nil {
 			return ErrNoDeploymentFound
 		}

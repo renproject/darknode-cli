@@ -16,12 +16,15 @@ func main() {
 	// Create new cli application
 	app := cli.NewApp()
 
-	upFlags := []cli.Flag{
+	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name : "name",
 			Value : "",
 			Usage : "name of your darknode so that you can easily distinguish between them",
 		},
+	}
+
+	upFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "provider",
 			Value: "AWS",
@@ -101,7 +104,12 @@ func main() {
 // updateNode update the darknode to the latest release from master branch.
 // This will restart the darknode.
 func updateNode(ctx *cli.Context) error {
-	ip, err := getIp()
+	name := ctx.String("name")
+	if name == ""{
+		return ErrEmptyNodeName
+	}
+	nodeDirectory := Directory + "/darknodes/"+  name
+	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
 	}
@@ -122,7 +130,12 @@ func updateNode(ctx *cli.Context) error {
 
 // sshNode will ssh into the darknode
 func sshNode(ctx *cli.Context) error {
-	ip, err := getIp()
+	name := ctx.String("name")
+	if name == ""{
+		return ErrEmptyNodeName
+	}
+	nodeDirectory := Directory + "/darknodes/"+  name
+	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
 	}

@@ -80,10 +80,10 @@ func deployToAWS(ctx *cli.Context) error {
 	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, nodeDirectory); err != nil {
 		return err
 	}
-	if err := runTerraform(); err != nil {
+	if err := runTerraform(nodeDirectory); err != nil {
 		return err
 	}
-	ip, err := getIp()
+	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
 	}
@@ -96,9 +96,9 @@ func deployToAWS(ctx *cli.Context) error {
 }
 
 // runTerraform initializes and applies terraform
-func runTerraform() error {
+func runTerraform(nodeDirectory string ) error {
 
-	init := exec.Command("terraform", "init")
+	init := exec.Command("terraform", "init", nodeDirectory)
 	pipeToStd(init)
 	if err := init.Start(); err != nil {
 		return err
@@ -107,7 +107,7 @@ func runTerraform() error {
 		return err
 	}
 	log.Println("Deploying dark nodes to AWS...")
-	apply := exec.Command("terraform", "apply", "-auto-approve")
+	apply := exec.Command("terraform", "apply", "-auto-approve" ,nodeDirectory )
 	pipeToStd(apply)
 	if err := apply.Start(); err != nil {
 		return err
