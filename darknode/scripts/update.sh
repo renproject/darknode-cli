@@ -2,9 +2,9 @@
 
 cd ./go/src/github.com/republicprotocol/republic-go
 sudo git stash
-sudo git checkout master
-sudo git fetch origin master
-sudo git reset --hard origin/master
+sudo git checkout nightly
+sudo git fetch origin nightly
+sudo git reset --hard origin/nightly
 cd cmd/darknode
 go install
 cd
