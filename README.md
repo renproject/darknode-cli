@@ -43,6 +43,8 @@ It will keep the node config in case you want use the same config.
 
 ```bash
 $ darknode destroy
+# Or
+$ darknode down
 ``` 
 
 You will be asked to deregister your node and withdrawn your fees before your destroy node.
@@ -51,6 +53,8 @@ You can also specify the "--skip" flag to ignore this question and start destroy
 
 ```bash
 $ darknode destroy --skip
+# Or
+$ darknode down --skip
 ``` 
 
 ### SSH into your node
