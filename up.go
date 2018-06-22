@@ -132,7 +132,7 @@ variable "ssh_public_key" {
 variable "ssh_private_key_location" {
 	default = "%v"
 }
-	`, accessKey, secretKey, strings.TrimSpace(pubKey), nodeDirectory +  "/ssh_keypair", Directory )
+	`, accessKey, secretKey, strings.TrimSpace(pubKey), nodeDirectory +  "/ssh_keypair" )
 
 	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
 	mode := fmt.Sprintf(`
