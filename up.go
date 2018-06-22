@@ -9,16 +9,17 @@ import (
 	"strings"
 	"os/exec"
 	"os"
-	"path"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
 
-var terraformPath  =  path.Join(os.Getenv("HOME"), ".darknode/terraform")
+// ErrKeyNotFound is returned when no AWS access-key nor secret-key provided.
+var ErrKeyNotFound = errors.New("please provide your AWS access key and secret key")
 
-// KeyNotFound is returned when no AWS access-key nor secret-key provided.
-var KeyNotFound error = errors.New("please provide your AWS access key and secret key")
+// ErrNodeExist is returned when trying to created a new node with name already
+// exists.
+var ErrNodeExist = errors.New("node with the name already exists")
 
 // deployNode deploys node depending on the provider.
 func deployNode(ctx *cli.Context) error {
@@ -38,24 +39,45 @@ func deployNode(ctx *cli.Context) error {
 func deployToAWS(ctx *cli.Context) error {
 	accessKey := ctx.String("access-key")
 	secretKey := ctx.String("secret-key")
+	name := ctx.String("name")
+
+	// Check input flags
+	var nodeDirectory string
 	if accessKey == "" || secretKey == "" {
 		//TODO : Read FROM ~/aws/  FOLDER
-		return KeyNotFound
+		return ErrKeyNotFound
 	}
+	if name == ""{
+		for i := 1; ;i ++ {
+			if _, err := os.Stat(Directory+ fmt.Sprintf("/darknodes/darknode%d",i)); os.IsNotExist(err) {
+				nodeDirectory = Directory+ fmt.Sprintf("/darknodes/darknode%d",i)
+				break
+			}
+		}
+	} else {
+		if _, err := os.Stat(Directory+ "/darknodes/"+ name); !os.IsNotExist(err) {
+			return ErrNodeExist
+		}
+		nodeDirectory = Directory+ "/darknodes/"+  name
+	}
+	os.Mkdir(nodeDirectory, 0777)
 
+	// Parse region and instance type
 	region, instance, err := parseRegionAndInstance(ctx)
 	if err != nil {
 		return err
 	}
-	config, err := GetConfigOrGenerateNew()
+
+	// Generate configs for the node
+	config, err := GetConfigOrGenerateNew(nodeDirectory)
 	if err != nil {
 		return err
 	}
-	pubKey, keyPath, err := NewSshKeyPair()
+	pubKey, err := NewSshKeyPair(nodeDirectory)
 	if err != nil {
 		return err
 	}
-	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, keyPath); err != nil {
+	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, nodeDirectory); err != nil {
 		return err
 	}
 	if err := runTerraform(); err != nil {
@@ -76,7 +98,7 @@ func deployToAWS(ctx *cli.Context) error {
 // runTerraform initializes and applies terraform
 func runTerraform() error {
 
-	init := exec.Command(terraformPath, "init")
+	init := exec.Command("terraform", "init")
 	pipeToStd(init)
 	if err := init.Start(); err != nil {
 		return err
@@ -85,7 +107,7 @@ func runTerraform() error {
 		return err
 	}
 	log.Println("Deploying dark nodes to AWS...")
-	apply := exec.Command(terraformPath, "apply", "-auto-approve")
+	apply := exec.Command("terraform", "apply", "-auto-approve")
 	pipeToStd(apply)
 	if err := apply.Start(); err != nil {
 		return err
@@ -93,12 +115,12 @@ func runTerraform() error {
 	return apply.Wait()
 }
 
-func generateTerraformConfig(config config.Config, accessKey, secretKey, region, instance, pubKey, keyPath string) error {
+func generateTerraformConfig(config config.Config, accessKey, secretKey, region, instance, pubKey , nodeDirectory string) error {
 	terraformConfig := fmt.Sprintf(`
 variable "access_key" {
 	default = "%v"
 }
-	
+
 variable "secret_key" {
 	default = "%v"	
 }
@@ -110,13 +132,12 @@ variable "ssh_public_key" {
 variable "ssh_private_key_location" {
 	default = "%v"
 }
-
-	`, accessKey, secretKey, strings.TrimSpace(pubKey), keyPath)
+	`, accessKey, secretKey, strings.TrimSpace(pubKey), nodeDirectory +  "/ssh_keypair", Directory )
 
 	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
 	mode := fmt.Sprintf(`
 module "node-%v" {
-    source = "./instance"
+    source = "%v/instance"
     ami = "%v"
     region = "%v"
     avz = "%v"
@@ -126,13 +147,12 @@ module "node-%v" {
     ssh_private_key_location = "${var.ssh_private_key_location}"
     access_key = "${var.access_key}"
     secret_key = "${var.secret_key}"
-    config = "./config.json"
+    config = "%v/config.json"
     is_bootstrap = "false"
     port = "%v"
-}`, config.Address, AMIs[region], region, avz, config.Address, instance, config.Port)
+}`, config.Address, Directory, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port)
 
-	terraformConfigPath :=  path.Join(os.Getenv("HOME"), ".darknode/main.tf")
-	return ioutil.WriteFile(terraformConfigPath, []byte(terraformConfig+mode), 0600)
+	return ioutil.WriteFile( nodeDirectory  + "/main.tf", []byte(terraformConfig+mode), 0600)
 }
 
 // deployToDigitalOcean parses the digital ocean credentials and use terraform

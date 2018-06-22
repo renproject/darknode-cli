@@ -5,16 +5,23 @@ import (
 	"os"
 	"io/ioutil"
 	"os/exec"
+	"path"
 
 	"github.com/urfave/cli"
-	"path"
 )
+
+var Directory =  path.Join(os.Getenv("HOME"), ".darknode")
 
 func main() {
 	// Create new cli application
 	app := cli.NewApp()
 
 	upFlags := []cli.Flag{
+		cli.StringFlag{
+			Name : "name",
+			Value : "",
+			Usage : "name of your darknode so that you can easily distinguish between them",
+		},
 		cli.StringFlag{
 			Name:  "provider",
 			Value: "AWS",
@@ -23,7 +30,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "region",
 			Value: "",
-			Usage: "deployment region",
+			Usage: "region you want to deploy to",
 		},
 		cli.StringFlag{
 			Name:  "instance",

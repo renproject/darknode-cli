@@ -11,8 +11,6 @@ import (
 	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
-	"os"
-	"path"
 )
 
 // UnknownRegion is returned when the provided region is not valid on AWS.
@@ -216,14 +214,14 @@ func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
 
 // NewSshKeyPair generate a new ssh key pair and writes the keys into files.
 // It returns the public ssh key and the path of the rsa key file.
-func NewSshKeyPair() (string, string, error) {
+func NewSshKeyPair(directory string ) (string, error) {
 	// Path to save the ssh keys
-	keyPairPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair")
-	pubKeyPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair.pub")
+	keyPairPath := directory +  "/ssh_keypair"
+	pubKeyPath := directory + "/ssh_keypair.pub"
 
 	rsaKey, err := crypto.RandomRsaKey()
 	if err != nil {
-		return "", "", nil
+		return "", nil
 	}
 
 	// Write the private key to file
@@ -239,10 +237,10 @@ func NewSshKeyPair() (string, string, error) {
 	// Write the public key to file
 	publicRsaKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
 	if err != nil {
-		return "", "", err
+		return "",  err
 	}
 	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
 	ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
 
-	return string(pubKeyBytes), keyPairPath, nil
+	return string(pubKeyBytes), nil
 }

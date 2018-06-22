@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-	"path"
 	"io/ioutil"
 	"encoding/json"
 
@@ -13,7 +11,7 @@ import (
 	"github.com/republicprotocol/republic-go/logger"
 )
 
-// Fixme : right now the bootstrapnode address are hardcoded
+// Fixme : right now the bootstrap node address are hardcoded
 var BootstrapNodes = func() []identity.MultiAddress {
 	b1, _ := identity.NewMultiAddressFromString("/ip4/34.203.9.146/tcp/18514/republic/8MJBssiB8aT6pGAM6MYj7YNUJTgxt7")
 	b2, _ := identity.NewMultiAddressFromString("/ip4/54.250.246.106/tcp/18514/republic/8MJY6fvSCBCi3ujBqzTNTUkfF7WhFN")
@@ -25,12 +23,7 @@ var BootstrapNodes = func() []identity.MultiAddress {
 }()
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew() (config.Config, error) {
-	// Try creating directory with the exact name we get
-	configPath :=  path.Join(os.Getenv("HOME"), ".darknode/config.json")
-	if _, err := os.Stat(configPath); err == nil {
-		return config.NewConfigFromJSONFile(configPath)
-	}
+func GetConfigOrGenerateNew(directory string ) (config.Config, error) {
 
 	keystore, err := crypto.RandomKeystore()
 	if err != nil {
@@ -63,7 +56,7 @@ func GetConfigOrGenerateNew() (config.Config, error) {
 	if err != nil {
 		return config.Config{}, err
 	}
-	if err := ioutil.WriteFile(configPath, configData, 0600); err != nil {
+	if err := ioutil.WriteFile(directory + "/config.json", configData, 0600); err != nil {
 		return config.Config{}, err
 	}
 
