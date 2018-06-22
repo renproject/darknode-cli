@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/republicprotocol/republic-go/identity"
+	"path"
 )
 
 // StringInSlice checks whether the string is in the slice
@@ -57,7 +58,8 @@ func pipeToStd(cmd *exec.Cmd) {
 // getIp parses the ip address from a bytes representation of
 // multiAddress.
 func getIp() (string, error) {
-	data, err := ioutil.ReadFile("./multiAddress.out")
+	addressFile  :=  path.Join(os.Getenv("HOME"), ".darknode/multiAddress.out")
+	data, err := ioutil.ReadFile(addressFile)
 	if err != nil {
 		return "", err
 	}

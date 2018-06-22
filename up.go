@@ -1,18 +1,21 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"strings"
+	"os/exec"
+	"os"
+	"path"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
-	"os/exec"
 )
+
+var terraformPath  =  path.Join(os.Getenv("HOME"), ".darknode/terraform")
 
 // KeyNotFound is returned when no AWS access-key nor secret-key provided.
 var KeyNotFound error = errors.New("please provide your AWS access key and secret key")
@@ -48,13 +51,6 @@ func deployToAWS(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	configData, err := json.Marshal(config)
-	if err != nil {
-		return err
-	}
-	if err := ioutil.WriteFile("./config.json", configData, 0600); err != nil {
-		return err
-	}
 	pubKey, keyPath, err := NewSshKeyPair()
 	if err != nil {
 		return err
@@ -76,7 +72,8 @@ func deployToAWS(ctx *cli.Context) error {
 
 // runTerraform initializes and applies terraform
 func runTerraform() error {
-	init := exec.Command("./terraform", "init")
+
+	init := exec.Command(terraformPath, "init")
 	pipeToStd(init)
 	if err := init.Start(); err != nil {
 		return err
@@ -85,7 +82,7 @@ func runTerraform() error {
 		return err
 	}
 	log.Println("Deploying dark nodes to AWS...")
-	apply := exec.Command("./terraform", "apply", "-auto-approve")
+	apply := exec.Command(terraformPath, "apply", "-auto-approve")
 	pipeToStd(apply)
 	if err := apply.Start(); err != nil {
 		return err
@@ -127,12 +124,12 @@ module "node-%v" {
     access_key = "${var.access_key}"
     secret_key = "${var.secret_key}"
     config = "./config.json"
-	bootstraps = []
     is_bootstrap = "false"
     port = "%v"
 }`, config.Address, AMIs[region], region, avz, config.Address, instance, config.Port)
 
-	return ioutil.WriteFile("./main.tf", []byte(terraformConfig+mode), 0600)
+	terraformConfigPath :=  path.Join(os.Getenv("HOME"), ".darknode/main.tf")
+	return ioutil.WriteFile(terraformConfigPath, []byte(terraformConfig+mode), 0600)
 }
 
 // deployToDigitalOcean parses the digital ocean credentials and use terraform

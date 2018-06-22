@@ -3,10 +3,11 @@ package main
 import (
 	"log"
 	"os"
-
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"os/exec"
+
+	"github.com/urfave/cli"
+	"path"
 )
 
 func main() {
@@ -97,11 +98,13 @@ func updateNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	update, err := ioutil.ReadFile("./scripts/update.sh")
+	updateScript  :=  path.Join(os.Getenv("HOME"), ".darknode/update.sh")
+	update, err := ioutil.ReadFile(updateScript)
 	if err != nil {
 		return err
 	}
-	updateCmd := exec.Command("ssh", "-i", "ssh_keypair", "ubuntu@"+ip, "-oStrictHostKeyChecking=no",  string(update))
+	keyPairPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair")
+	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no",  string(update))
 	pipeToStd(updateCmd)
 	if err := updateCmd.Start(); err != nil {
 		return err
@@ -116,7 +119,8 @@ func sshNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	ssh := exec.Command("ssh", "-i", "./ssh_keypair", "ubuntu@"+ip)
+	keyPairPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair")
+	ssh := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip)
 	pipeToStd(ssh)
 	if err := ssh.Start(); err != nil {
 		return err

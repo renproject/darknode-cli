@@ -13,4 +13,3 @@ KillSignal=SIGHUP
 
 [Install]
 WantedBy=default.target
-

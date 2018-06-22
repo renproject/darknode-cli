@@ -11,6 +11,8 @@ import (
 	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
+	"os"
+	"path"
 )
 
 // UnknownRegion is returned when the provided region is not valid on AWS.
@@ -216,8 +218,8 @@ func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
 // It returns the public ssh key and the path of the rsa key file.
 func NewSshKeyPair() (string, string, error) {
 	// Path to save the ssh keys
-	keyPairPath := "./ssh_keypair"
-	pubKeyPath := "./ssh_keypair.pub"
+	keyPairPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair")
+	pubKeyPath := path.Join(os.Getenv("HOME"), ".darknode/ssh_keypair.pub")
 
 	rsaKey, err := crypto.RandomRsaKey()
 	if err != nil {

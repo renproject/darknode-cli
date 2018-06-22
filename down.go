@@ -1,15 +1,17 @@
 package main
 
 import (
-	"github.com/urfave/cli"
 	"log"
 	"os/exec"
 	"bufio"
 	"os"
 	"fmt"
 	"strings"
+
 	"github.com/pkg/errors"
+	"github.com/urfave/cli"
 )
+
 
 // ErrNoDeploymentFound is returned when no node can be found for destroying
 var ErrNoDeploymentFound = errors.New("cannot found any deployed node")
@@ -40,7 +42,7 @@ func destroyNode(ctx *cli.Context) error {
 // destroyAwsNode tear down the AWS instance.
 func destroyAwsNode() error {
 	log.Println("Destroying your darknode ...")
-	destroy := exec.Command("./terraform", "destroy", "--force")
+	destroy := exec.Command(terraformPath, "destroy", "--force")
 	pipeToStd(destroy)
 	if err := destroy.Start(); err != nil {
 		return err
