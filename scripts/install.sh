@@ -9,11 +9,11 @@ unzip darknode.zip
 # Download terraform
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
         TERRAFORM_URL="https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip"
-        wget https://darknode.republicprotocol.com/darknode_linux
+        wget https://darknode.republicprotocol.com/darknode_linux_amd64
         mv darknode_linux ./bin/darknode
 elif [[ "$OSTYPE" == "darwin"* ]]; then
         TERRAFORM_URL="https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_darwin_amd64.zip"
-        wget https://darknode.republicprotocol.com/darknode_darwin
+        wget https://darknode.republicprotocol.com/darknode_darwin_amd64
         mv darknode_darwin ./bin/darknode
 fi
 chmod +x bin/darknode
