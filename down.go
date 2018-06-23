@@ -1,14 +1,14 @@
 package main
 
 import (
-	"log"
-	"os/exec"
 	"bufio"
-	"os"
+	"errors"
 	"fmt"
+	"log"
+	"os"
+	"os/exec"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
 
@@ -24,10 +24,10 @@ func destroyNode(ctx *cli.Context) error {
 	// Needs to figure out way which suits for all kinds of cloud service.
 	skip := ctx.Bool("skip")
 	name := ctx.String("name")
-	if name == ""{
+	if name == "" {
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := Directory + "/darknodes/"+  name
+	nodeDirectory := Directory + "/darknodes/" + name
 	if !skip {
 		ip, err := getIp(nodeDirectory)
 		if err != nil {
@@ -38,7 +38,7 @@ func destroyNode(ctx *cli.Context) error {
 		fmt.Printf("You can easily do that by going to https://darknode.republicprotocol.com/ip4/%v", ip)
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
-		if strings.ToLower(strings.TrimSpace(text))!= "yes"{
+		if strings.ToLower(strings.TrimSpace(text)) != "yes" {
 			return nil
 		}
 	}
@@ -49,7 +49,7 @@ func destroyNode(ctx *cli.Context) error {
 // destroyAwsNode tear down the AWS instance.
 func destroyAwsNode() error {
 	log.Println("Destroying your darknode ...")
-	destroy := exec.Command(Directory + "/terraform", "destroy", "--force")
+	destroy := exec.Command(Directory+"/terraform", "destroy", "--force")
 	pipeToStd(destroy)
 	if err := destroy.Start(); err != nil {
 		return err
