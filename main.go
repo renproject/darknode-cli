@@ -16,14 +16,6 @@ func main() {
 	// Create new cli application
 	app := cli.NewApp()
 
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name : "name",
-			Value : "",
-			Usage : "name of your darknode so that you can easily distinguish between them",
-		},
-	}
-
 	upFlags := []cli.Flag{
 		cli.StringFlag{
 			Name : "name",
@@ -33,32 +25,32 @@ func main() {
 		cli.StringFlag{
 			Name:  "provider",
 			Value: "AWS",
-			Usage: "cloud service provider you want to use for your darknode, default to AWS",
+			Usage: "cloud service provider you want to use for your darknode. (default to AWS)",
 		},
 		cli.StringFlag{
 			Name:  "region",
 			Value: "",
-			Usage: "region you want to deploy to",
+			Usage: "region you want to deploy to. (default to random)",
 		},
 		cli.StringFlag{
 			Name:  "instance",
 			Value: "",
-			Usage: "instance type",
+			Usage: "instance type. (default to `t2.small`)",
 		},
 		cli.StringFlag{
 			Name:  "access-key",
 			Value: "",
-			Usage: "access key for your AWS account",
+			Usage: "access key for your AWS account, can be read from the default .aws/credential file",
 		},
 		cli.StringFlag{
 			Name:  "secret-key",
 			Value: "",
-			Usage: "secret key for your AWS account",
+			Usage: "secret key for your AWS account, can be read from the default .aws/credential file",
 		},
 		cli.StringFlag{
 			Name:  "network",
 			Value: "testnet",
-			Usage: "which network you want to deploy your node to.",
+			Usage: "which network you want to deploy your node to.(default to `testnet`)",
 		},
 	}
 
@@ -70,7 +62,7 @@ func main() {
 		},
 		cli.BoolFlag{
 			Name:  "skip",
-			Usage: "secret key for your AWS account",
+			Usage: "secret key for your AWS account.(default to `false`)",
 		},
 	}
 
