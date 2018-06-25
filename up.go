@@ -12,6 +12,7 @@ import (
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
+	"github.com/republicprotocol/republic-go/contract"
 )
 
 // ErrKeyNotFound is returned when no AWS access-key nor secret-key provided.
@@ -40,6 +41,7 @@ func deployToAWS(ctx *cli.Context) error {
 	accessKey := ctx.String("access-key")
 	secretKey := ctx.String("secret-key")
 	name := ctx.String("name")
+	network := ctx.String("network")
 
 	// Check input flags
 	var nodeDirectory string
@@ -69,7 +71,10 @@ func deployToAWS(ctx *cli.Context) error {
 	}
 
 	// Generate configs for the node
-	config, err := GetConfigOrGenerateNew(nodeDirectory)
+	if network == ""{
+		network = string(contract.NetworkTestnet)
+	}
+	config, err := GetConfigOrGenerateNew(nodeDirectory, network)
 	if err != nil {
 		return err
 	}
@@ -117,7 +122,7 @@ func runTerraform(nodeDirectory string ) error {
 	if err:=  apply.Wait();err !=nil {
 		return err
 	}
-	return  exec.Command("cd","-").Run()
+	return  nil
 }
 
 func generateTerraformConfig(config config.Config, accessKey, secretKey, region, instance, pubKey , nodeDirectory string) error {

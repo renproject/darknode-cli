@@ -34,8 +34,9 @@ func destroyNode(ctx *cli.Context) error {
 			return ErrNoDeploymentFound
 		}
 
+		fmt.Printf("Make sure you have deregistered your node and withdrawn all fees.\n")
+		fmt.Printf("You can do that by going to https://darknode.republicprotocol.com/ip4/%v\n", ip)
 		fmt.Println("Have you deregistered your node and withdrawn all fees? (Yes/No)")
-		fmt.Printf("You can easily do that by going to https://darknode.republicprotocol.com/ip4/%v", ip)
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		if strings.ToLower(strings.TrimSpace(text)) != "yes" {
@@ -43,17 +44,17 @@ func destroyNode(ctx *cli.Context) error {
 		}
 	}
 
-	return destroyAwsNode()
+	return destroyAwsNode(nodeDirectory)
 }
 
 // destroyAwsNode tear down the AWS instance.
-func destroyAwsNode() error {
+func destroyAwsNode(nodeDirectory string) error {
 	log.Println("Destroying your darknode ...")
-	destroy := exec.Command(Directory+"/terraform", "destroy", "--force")
+	cmd := fmt.Sprintf("cd %v && terraform destroy --force && rm -rf %v",nodeDirectory, nodeDirectory)
+	destroy := exec.Command( "bash", "-c", cmd)
 	pipeToStd(destroy)
 	if err := destroy.Start(); err != nil {
 		return err
 	}
-
 	return destroy.Wait()
 }

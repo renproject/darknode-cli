@@ -45,7 +45,6 @@ rm terraform.zip
 if ! [ -x "$(command -v darknode)" ]; then
   if test -n $ZSH_VERSION; then
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.zshrc
-    source ~/.zshrc
   elif test -n $BASH_VERSION; then
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.bash_profile
     source ~/.bash_profile

@@ -55,6 +55,11 @@ func main() {
 			Value: "",
 			Usage: "secret key for your AWS account",
 		},
+		cli.StringFlag{
+			Name:  "network",
+			Value: "testnet",
+			Usage: "which network you want to deploy your node to.",
+		},
 	}
 
 	destroyFlags := []cli.Flag{

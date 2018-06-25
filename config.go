@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"encoding/json"
 
-	"github.com/republicprotocol/republic-go/blockchain/ethereum"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/crypto"
+	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/identity"
 	"github.com/republicprotocol/republic-go/logger"
 )
@@ -19,14 +19,14 @@ var BootstrapNodes = func() []identity.MultiAddress {
 }()
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew(directory string ) (config.Config, error) {
+func GetConfigOrGenerateNew(directory , network string ) (config.Config, error) {
 
 	keystore, err := crypto.RandomKeystore()
 	if err != nil {
 		return config.Config{}, err
 	}
-	ethereumConfig := ethereum.Config{
-		Network: ethereum.NetworkKovan,
+	ethereumConfig := contract.Config{
+		Network: contract.Network(network),
 		URI:     "https://kovan.infura.io",
 	}
 
