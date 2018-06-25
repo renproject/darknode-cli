@@ -1,19 +1,20 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-	"io/ioutil"
 	"os/exec"
 	"path"
-	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
 	"github.com/republicprotocol/republic-go/identity"
+	"github.com/urfave/cli"
 )
 
-var Directory =  path.Join(os.Getenv("HOME"), ".darknode")
+// Directory is the directory address of the deployer and darknodes.
+var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 
 func main() {
 	// Create new cli application
@@ -21,59 +22,59 @@ func main() {
 
 	upFlags := []cli.Flag{
 		cli.StringFlag{
-			Name : "name",
-			Value : "",
-			Usage : "name of your darknode so that you can easily distinguish between them",
+			Name:  "name",
+			Value: "",
+			Usage: "name of your darknode so that you can easily distinguish between them",
 		},
 		cli.StringFlag{
 			Name:  "provider",
 			Value: "AWS",
-			Usage: "cloud service provider you want to use for your darknode. (default to AWS)",
+			Usage: "cloud service provider you want to use for your darknode.",
 		},
 		cli.StringFlag{
 			Name:  "region",
 			Value: "",
-			Usage: "region you want to deploy to. (default to random)",
+			Usage: "region you want to deploy to. (default: random)",
 		},
 		cli.StringFlag{
 			Name:  "instance",
 			Value: "",
-			Usage: "instance type. (default to `t2.small`)",
+			Usage: "instance type.",
 		},
 		cli.StringFlag{
 			Name:  "access-key",
 			Value: "",
-			Usage: "access key for your AWS account, can be read from the default .aws/credential file",
+			Usage: "access key for your AWS account, can be read from the default ~/.aws/credential file",
 		},
 		cli.StringFlag{
 			Name:  "secret-key",
 			Value: "",
-			Usage: "secret key for your AWS account, can be read from the default .aws/credential file",
+			Usage: "secret key for your AWS account, can be read from the default ~/.aws/credential file",
 		},
 		cli.StringFlag{
 			Name:  "network",
 			Value: "testnet",
-			Usage: "which network you want to deploy your node to.(default to `testnet`)",
+			Usage: "which network you want to deploy your node to",
 		},
 	}
 
 	destroyFlags := []cli.Flag{
 		cli.StringFlag{
-			Name : "name",
-			Value : "",
-			Usage : "name of your darknode so that you can easily distinguish between them",
+			Name:  "name",
+			Value: "",
+			Usage: "name of your darknode so that you can easily distinguish between them",
 		},
 		cli.BoolFlag{
 			Name:  "skip",
-			Usage: "secret key for your AWS account.(default to `false`)",
+			Usage: "skip all the questions and start destroying directly ",
 		},
 	}
 
 	nameFlag := []cli.Flag{
 		cli.StringFlag{
-			Name : "name",
-			Value : "",
-			Usage : "name of your darknode so that you can easily distinguish between them",
+			Name:  "name",
+			Value: "",
+			Usage: "name of your darknode so that you can easily distinguish between them",
 		},
 	}
 
@@ -88,10 +89,10 @@ func main() {
 			},
 		},
 		{
-			Name:  "destroy",
-			Usage: "tear down the darknode and clean up everything",
+			Name:    "destroy",
+			Usage:   "tear down the darknode and clean up everything",
 			Aliases: []string{"down"},
-			Flags: destroyFlags,
+			Flags:   destroyFlags,
 			Action: func(c *cli.Context) error {
 				return destroyNode(c)
 			},
@@ -107,16 +108,16 @@ func main() {
 		{
 			Name:  "ssh",
 			Flags: nameFlag,
-			Usage: "ssh into your cloud service instance",
+			Usage: "ssh into your darknode",
 			Action: func(c *cli.Context) error {
 				return sshNode(c)
 			},
 		},
 		{
 			Name:  "list",
-			Usage: "list all the d",
+			Usage: "list all the deployed darknodes ",
 			Action: func(c *cli.Context) error {
-				return listAllNodes(c)
+				return listAllNodes()
 			},
 		},
 	}
@@ -132,21 +133,21 @@ func main() {
 // This will restart the darknode.
 func updateNode(ctx *cli.Context) error {
 	name := ctx.String("name")
-	if name == ""{
+	if name == "" {
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := Directory + "/darknodes/"+  name
+	nodeDirectory := Directory + "/darknodes/" + name
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
 	}
-	updateScript  :=  path.Join(os.Getenv("HOME"), ".darknode/scripts/update.sh")
+	updateScript := path.Join(os.Getenv("HOME"), ".darknode/scripts/update.sh")
 	update, err := ioutil.ReadFile(updateScript)
 	if err != nil {
 		return err
 	}
 	keyPairPath := nodeDirectory + "/ssh_keypair"
-	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no",  string(update))
+	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", string(update))
 	pipeToStd(updateCmd)
 	if err := updateCmd.Start(); err != nil {
 		return err
@@ -158,10 +159,10 @@ func updateNode(ctx *cli.Context) error {
 // sshNode will ssh into the darknode
 func sshNode(ctx *cli.Context) error {
 	name := ctx.String("name")
-	if name == ""{
+	if name == "" {
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := Directory + "/darknodes/"+  name
+	nodeDirectory := Directory + "/darknodes/" + name
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
@@ -177,16 +178,16 @@ func sshNode(ctx *cli.Context) error {
 }
 
 // listAllNodes will ssh into the darknode
-func listAllNodes(ctx *cli.Context) error {
+func listAllNodes() error {
 	files, err := ioutil.ReadDir(Directory + "/darknodes")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	fmt.Printf("%10s | %30s | %15s |\n", "name","Address", "ip" )
+	fmt.Printf("%10s | %30s | %15s |\n", "name", "Address", "ip")
 
 	for _, f := range files {
-		addressFile :=  Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
+		addressFile := Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
 		data, err := ioutil.ReadFile(addressFile)
 		if err != nil {
 			continue
@@ -204,7 +205,7 @@ func listAllNodes(ctx *cli.Context) error {
 			continue
 		}
 
-		fmt.Printf( "%10s | %30s | %15s |\n", f.Name(), address, ip)
+		fmt.Printf("%10s | %30s | %15s |\n", f.Name(), address, ip)
 	}
 
 	return nil

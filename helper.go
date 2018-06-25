@@ -58,7 +58,7 @@ func pipeToStd(cmd *exec.Cmd) {
 // multiAddress.
 func getIp(nodeDirectory string) (string, error) {
 
-	addressFile :=  nodeDirectory +  "/multiAddress.out"
+	addressFile := nodeDirectory + "/multiAddress.out"
 	data, err := ioutil.ReadFile(addressFile)
 	if err != nil {
 		return "", err

@@ -50,8 +50,8 @@ func destroyNode(ctx *cli.Context) error {
 // destroyAwsNode tear down the AWS instance.
 func destroyAwsNode(nodeDirectory string) error {
 	log.Println("Destroying your darknode ...")
-	cmd := fmt.Sprintf("cd %v && terraform destroy --force && rm -rf %v",nodeDirectory, nodeDirectory)
-	destroy := exec.Command( "bash", "-c", cmd)
+	cmd := fmt.Sprintf("cd %v && terraform destroy --force && rm -rf %v", nodeDirectory, nodeDirectory)
+	destroy := exec.Command("bash", "-c", cmd)
 	pipeToStd(destroy)
 	if err := destroy.Start(); err != nil {
 		return err
