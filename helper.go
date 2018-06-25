@@ -57,7 +57,6 @@ func pipeToStd(cmd *exec.Cmd) {
 // getIp parses the ip address from a bytes representation of
 // multiAddress.
 func getIp(nodeDirectory string) (string, error) {
-
 	addressFile := nodeDirectory + "/multiAddress.out"
 	data, err := ioutil.ReadFile(addressFile)
 	if err != nil {

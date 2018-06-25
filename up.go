@@ -47,6 +47,7 @@ func deployToAWS(ctx *cli.Context) error {
 	// Check input flags
 	var nodeDirectory string
 	if accessKey == "" || secretKey == "" {
+		// Try reading the credentials from the default file.
 		creds := credentials.NewSharedCredentials("", "default")
 		credValue, err := creds.Get()
 		if err != nil {
@@ -70,7 +71,9 @@ func deployToAWS(ctx *cli.Context) error {
 		}
 		nodeDirectory = Directory + "/darknodes/" + name
 	}
-	os.Mkdir(nodeDirectory, 0777)
+	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
+		return err
+	}
 
 	// Parse region and instance type
 	region, instance, err := parseRegionAndInstance(ctx)
@@ -110,7 +113,6 @@ func deployToAWS(ctx *cli.Context) error {
 
 // runTerraform initializes and applies terraform
 func runTerraform(nodeDirectory string) error {
-
 	cmd := fmt.Sprintf("cd %v && terraform init", nodeDirectory)
 	init := exec.Command("bash", "-c", cmd)
 	pipeToStd(init)
