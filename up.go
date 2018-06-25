@@ -13,6 +13,7 @@ import (
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 	"github.com/republicprotocol/republic-go/contract"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 )
 
 // ErrKeyNotFound is returned when no AWS access-key nor secret-key provided.
@@ -47,7 +48,15 @@ func deployToAWS(ctx *cli.Context) error {
 	var nodeDirectory string
 	if accessKey == "" || secretKey == "" {
 		//TODO : Read FROM ~/aws/  FOLDER
-		return ErrKeyNotFound
+		creds := credentials.NewSharedCredentials("", "default")
+		credValue, err := creds.Get()
+		if err != nil {
+			return err
+		}
+		accessKey , secretKey = credValue.AccessKeyID, credValue.SecretAccessKey
+		if accessKey == "" || secretKey == ""{
+			return ErrKeyNotFound
+		}
 	}
 	if name == ""{
 		for i := 1; ;i ++ {
