@@ -6,15 +6,15 @@ cd $HOME/.darknode
 wget https://darknode.republicprotocol.com/darknode.zip
 unzip darknode.zip
 
-ostype='$(uname -s)'
-cputype='$(uname -m)'
+ostype="$(uname -s)"
+cputype="$(uname -m)"
 
 # Download terraform
-if [[ $ostype = 'Linux' -a $cputype = 'x86_64' ]]; then
+if [ $ostype = 'Linux' -a $cputype = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip'
     wget https://darknode.republicprotocol.com/darknode_linux_amd64
     mv darknode_linux_amd64 ./bin/darknode
-elif [[ $ostype = 'Darwin' -a $cputype = 'x86_64' ]]; then
+elif [ $ostype = 'Darwin' -a $cputype = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_darwin_amd64.zip'
     wget https://darknode.republicprotocol.com/darknode_darwin_amd64
     mv darknode_darwin_amd64 ./bin/darknode
@@ -42,7 +42,7 @@ rm darknode.zip
 rm terraform.zip
 
 # make sure the binary is installed in the path
-if ! [ -x '$(command -v darknode)' ]; then
+if ! [ -x "$(command -v darknode)" ]; then
   if test -n $ZSH_VERSION; then
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.zshrc
     source ~/.zshrc
