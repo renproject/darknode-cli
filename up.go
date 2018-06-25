@@ -47,7 +47,9 @@ func deployToAWS(ctx *cli.Context) error {
 	// Check input flags
 	var nodeDirectory string
 	if accessKey == "" || secretKey == "" {
-		//TODO : Read FROM ~/aws/  FOLDER
+		if _, err := os.Stat("~/.aws/credentials"); os.IsNotExist(err) {
+			return ErrKeyNotFound
+		}
 		creds := credentials.NewSharedCredentials("", "default")
 		credValue, err := creds.Get()
 		if err != nil {
