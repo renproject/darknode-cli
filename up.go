@@ -103,11 +103,11 @@ func deployToAWS(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("---------------------------------------------------------------\n")
-	fmt.Printf("--- Congratulations! You darknode is deployed and running -----\n")
-	fmt.Printf("--- Start regitering your node by going to the following URL --\n")
-	fmt.Printf("--- https://darknode.republicprotocol.com/ip4/%v ----\n", ip)
-	fmt.Printf("---------------------------------------------------------------\n")
+	fmt.Printf("\n")
+	fmt.Printf("Congratulations! Your Darknode is deployed and running.\n")
+	fmt.Printf("Join the network by registering your Darknode at")
+	fmt.Printf("https://darknode.republicprotocol.com/status/%v\n", ip)
+	fmt.Printf("\n")
 	return nil
 }
 

@@ -6,8 +6,11 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path"
+	"fmt"
+	"strings"
 
 	"github.com/urfave/cli"
+	"github.com/republicprotocol/republic-go/identity"
 )
 
 var Directory =  path.Join(os.Getenv("HOME"), ".darknode")
@@ -109,6 +112,13 @@ func main() {
 				return sshNode(c)
 			},
 		},
+		{
+			Name:  "list",
+			Usage: "list all the d",
+			Action: func(c *cli.Context) error {
+				return listAllNodes(c)
+			},
+		},
 	}
 
 	// Start the app
@@ -164,4 +174,38 @@ func sshNode(ctx *cli.Context) error {
 	}
 
 	return ssh.Wait()
+}
+
+// listAllNodes will ssh into the darknode
+func listAllNodes(ctx *cli.Context) error {
+	files, err := ioutil.ReadDir(Directory + "/darknodes")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%10s | %30s | %15s |\n", "name","Address", "ip" )
+
+	for _, f := range files {
+		addressFile :=  Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
+		data, err := ioutil.ReadFile(addressFile)
+		if err != nil {
+			continue
+		}
+		multi, err := identity.NewMultiAddressFromString(strings.TrimSpace(string(data)))
+		if err != nil {
+			continue
+		}
+		address, err := multi.ValueForProtocol(identity.RepublicCode)
+		if err != nil {
+			continue
+		}
+		ip, err := multi.ValueForProtocol(identity.IP4Code)
+		if err != nil {
+			continue
+		}
+
+		fmt.Printf( "%10s | %30s | %15s |\n", f.Name(), address, ip)
+	}
+
+	return nil
 }

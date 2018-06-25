@@ -34,9 +34,9 @@ func destroyNode(ctx *cli.Context) error {
 			return ErrNoDeploymentFound
 		}
 
-		fmt.Printf("Make sure you have deregistered your node and withdrawn all fees.\n")
-		fmt.Printf("You can do that by going to https://darknode.republicprotocol.com/ip4/%v\n", ip)
-		fmt.Println("Have you deregistered your node and withdrawn all fees? (Yes/No)")
+		fmt.Printf("You need to deregister your Darknode and withdraw all fees at\n")
+		fmt.Printf("https://darknode.republicprotocol.com/status/%v\n", ip)
+		fmt.Println("Have you deregistered your Darknode and withdrawn all fees? (Yes/No)")
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		if strings.ToLower(strings.TrimSpace(text)) != "yes" {
