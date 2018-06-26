@@ -201,8 +201,7 @@ func listAllNodes() error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("%10s | %30s | %15s |\n", "name", "Address", "ip")
+	nodes := [][]string{}
 
 	for _, f := range files {
 		addressFile := Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
@@ -223,7 +222,16 @@ func listAllNodes() error {
 			continue
 		}
 
-		fmt.Printf("%10s | %30s | %15s |\n", f.Name(), address, ip)
+		nodes = append(nodes, []string{f.Name(), address, ip})
+	}
+
+	if len(nodes) == 0 {
+		return fmt.Errorf("%scannot find any node%s", red, reset)
+	} else {
+		fmt.Printf("%10s | %30s | %15s |\n", "name", "Address", "ip")
+		for i := range nodes {
+			fmt.Printf("%10s | %30s | %15s |\n", nodes[i][0], nodes[i][1], nodes[i][2])
+		}
 	}
 
 	return nil

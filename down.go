@@ -24,6 +24,7 @@ func destroyNode(ctx *cli.Context) error {
 	skip := ctx.Bool("skip")
 	name := ctx.String("name")
 	if name == "" {
+		cli.ShowCommandHelp(ctx, "down")
 		return ErrEmptyNodeName
 	}
 	nodeDirectory := Directory + "/darknodes/" + name
