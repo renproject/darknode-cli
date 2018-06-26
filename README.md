@@ -1,72 +1,90 @@
-# darknode-deployer
-The tool for deploying darknode. 
+# Darknode Deployer
+
+The Darknode Deployer is a command-line tool for managing Darknodes on Republic Protocol.
+
+## Getting Started on AWS
+
+To jump straight into running your first Darknode on AWS, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
+
+## Getting Started on Digital Ocean
+
+> Coming soon!
+
+## Installation
+
+To download and install the Darknode Deployer, open a terminal and run:
+
+```sh
+curl https://darknode.republicprotocol.com/install.sh -sSf | sh
+```
+
+This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode Deployer tool.
 
 ## Usage 
 
-### Deploy a new darknode on AWS
+### Deploy a Darknode
 
-Download the [darknode.zip](https://republicprotocol.com) and unzip the file.
+#### AWS
 
-Open terminal and go to the unzipped folder
+To deploy a Darknode on AWS, open a terminal and run:
 
-```bash
-$ ./darknode up --provider=aws --access_key=YOUR-AWS-ACCESS-KEY --secret_key=YOUR-AWS-SECRET-KEY
-# Replace `YOUR-AWS-ACCESS-KEY` and `YOUR-AWS-SECRET-KEY` fields with your actual AWS access key and secret key.
-``` 
-You can also specify the region and instance type you want to use for the darknode.
-
-```bash
-$ ./darknode up --provider=aws --access_key=YOUR-AWS-ACCESS-KEY --secret_key=YOUR-AWS-SECRET-KEY --region=eu-west-1 --instance=t2.small
+```sh
+darknode up --name my-first-darknode --provider aws --access-key YOUR-AWS-ACCESS-KEY --secret-key YOUR-AWS-SECRET-KEY
 ``` 
 
-You can find all available regions and available instance type Sof each region from [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html)
+The Darknode Deployer will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
 
-When finishing deploying, an url will be displayed in the terminal. You can track your node status by opening the url in your browser.
+You can also specify the region and instance type you want to use for the Darknode:
 
-
-### Deploy a new darknode on digitalOcean
-
-> TBD
-
-### Deploy multiple nodes 
-
-Unzip the compressed file as many time as you like and keep them in separate folders.
-The nodes can use different cloud service providers. Just follow the instructions above 
-of the provider you want. 
-
-### Destroy a node
-
-Destroy will stop the darknode and tear down the instance from your service provider.
-It will keep the node config in case you want use the same config.
-
-```bash
-$ ./darknode destroy
+```sh
+darknode up --name my-first-darknode --provider aws --access-key YOUR-AWS-ACCESS-KEY --secret-key YOUR-AWS-SECRET-KEY --region eu-west-1 --instance t2.small
 ``` 
 
-You will be asked to deregister your node and withdrawn your fees before your destroy node.
-Enter "Yes" to continue or "No" to cancel.
-You can also specify the "--skip" flag to ignore this question and start destroying node straight.
+You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
-```bash
-$ ./darknode destroy --skip
+
+#### Digital Ocean
+
+> Coming soon!
+
+### Destroy a Darknode
+
+_WARNING: Before destroying a Darknode make sure you have deregistered it, and withdrawn all fees earned!_
+
+Destroying a Darknode will turn it off and tear down all resources allocated by the cloud provider. To destroy a Darknode, open a terminal and run:
+
+```sh
+darknode destroy --name my-first-darknode
 ``` 
 
-### SSH into your node
+To avoid the command-line prompt reminding you to deregister your Darknode, use the `--skip` argument: 
 
-```bash
-$ ./darknode ssh  # Make sure you are in the right directory
+```sh
+darknode destroy --name my-first-darknode --skip
+```
+
+We do not recommend using the `--skip` argument unless you are developing custom tools that manage your Darknodes automatically.
+
+### List all Darknodes
+
+The Darknode Deployer supports deploying multiple Darknodes. To list all available Darknodes, open a terminal and run:
+
+```sh
+darknode list
+```
+
+### SSH into Darknode
+
+To access your Darknode using SSH, open a terminal and run:
+
+```sh
+darknode ssh --name my-first-darknode
 ``` 
 
-### Update your node 
+### Update a Darknode
 
-```bash
-$ ./darknode update # Make sure you are in the right directory
-``` 
+To update your Darknode to the latest stable version, open a terminal and run:
 
-### Help 
-
-If you have any question, you can use the help command.
-
-```bash
-$ ./darknode help
+```sh
+darknode update --name my-first-darknode
 ``` 

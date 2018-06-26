@@ -1,32 +1,54 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"os"
+	"os/exec"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
+	"github.com/republicprotocol/republic-go/contract"
 	"github.com/urfave/cli"
-	"os/exec"
 )
 
-// KeyNotFound is returned when no AWS access-key nor secret-key provided.
-var KeyNotFound error = errors.New("please provide your AWS access key and secret key")
+const (
+	reset = "\x1b[0m"
+	green = "\x1b[32;1m"
+	red   = "\x1b[31;1m"
+)
+
+// ErrKeyNotFound is returned when no AWS access-key nor secret-key provided.
+var ErrKeyNotFound = fmt.Errorf("%splease provide your AWS access key and secret key%s", red, reset)
+
+// ErrNodeExist is returned when user tries to created a new node with name
+// already exists.
+var ErrNodeExist = fmt.Errorf("%snode with the name already exists%s", red, reset)
+
+// ErrUnknownProvider is returned when user wants to deploy darknode to an
+// unknown service provider
+var ErrUnknownProvider = fmt.Errorf("%sunknown service provider%s", red, reset)
+
+// ErrNilProvider is returned when the provider is nil.
+var ErrNilProvider = fmt.Errorf("%sprovider cannot be nil%s", red, reset)
 
 // deployNode deploys node depending on the provider.
 func deployNode(ctx *cli.Context) error {
 	provider := strings.ToLower(ctx.String("provider"))
+
 	switch provider {
+	case "":
+		cli.ShowCommandHelp(ctx, "up")
+		return ErrNilProvider
 	case "aws":
 		return deployToAWS(ctx)
 	case "digital-ocean":
 		return deployToDigitalOcean(ctx)
 	default:
-		return errors.New("unsupported service provider")
+		return ErrUnknownProvider
 	}
 }
 
@@ -35,48 +57,80 @@ func deployNode(ctx *cli.Context) error {
 func deployToAWS(ctx *cli.Context) error {
 	accessKey := ctx.String("access-key")
 	secretKey := ctx.String("secret-key")
+	name := ctx.String("name")
+	network := ctx.String("network")
+
+	// Check input flags
+	var nodeDirectory string
 	if accessKey == "" || secretKey == "" {
-		//TODO : Read FROM ~/aws/  FOLDER
-		return KeyNotFound
+		// Try reading the credentials from the default file.
+		creds := credentials.NewSharedCredentials("", "default")
+		credValue, err := creds.Get()
+		if err != nil {
+			return err
+		}
+		accessKey, secretKey = credValue.AccessKeyID, credValue.SecretAccessKey
+		if accessKey == "" || secretKey == "" {
+			return ErrKeyNotFound
+		}
+	}
+	if name == "" {
+		for i := 1; ; i++ {
+			if _, err := os.Stat(Directory + fmt.Sprintf("/darknodes/darknode%d", i)); os.IsNotExist(err) {
+				nodeDirectory = Directory + fmt.Sprintf("/darknodes/darknode%d", i)
+				break
+			}
+		}
+	} else {
+		if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
+			return ErrNodeExist
+		}
+		nodeDirectory = Directory + "/darknodes/" + name
+	}
+	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
+		return err
 	}
 
+	// Parse region and instance type
 	region, instance, err := parseRegionAndInstance(ctx)
 	if err != nil {
 		return err
 	}
-	config, err := GetConfigOrGenerateNew()
+
+	// Generate configs for the node
+	if network == "" {
+		network = string(contract.NetworkTestnet)
+	}
+	config, err := GetConfigOrGenerateNew(nodeDirectory, network)
 	if err != nil {
 		return err
 	}
-	configData, err := json.Marshal(config)
+	pubKey, err := NewSshKeyPair(nodeDirectory)
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile("./config.json", configData, 0600); err != nil {
+	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, nodeDirectory); err != nil {
 		return err
 	}
-	pubKey, keyPath, err := NewSshKeyPair()
+	if err := runTerraform(nodeDirectory); err != nil {
+		return err
+	}
+	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
 	}
-	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, keyPath); err != nil {
-		return err
-	}
-	if err := runTerraform(); err != nil {
-		return err
-	}
-	ip, err := getIp()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Congratulations! You darknode is deployed and running.\n")
-	fmt.Printf("Start regitering your node by going to the following URL\n ---- https://darknode.republicprotocol.com/ip4/%v ----", ip)
+	fmt.Printf("\n")
+	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", green, reset)
+	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", green, reset)
+	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", green, ip, reset)
+	fmt.Printf("\n")
 	return nil
 }
 
 // runTerraform initializes and applies terraform
-func runTerraform() error {
-	init := exec.Command("./terraform", "init")
+func runTerraform(nodeDirectory string) error {
+	cmd := fmt.Sprintf("cd %v && terraform init", nodeDirectory)
+	init := exec.Command("bash", "-c", cmd)
 	pipeToStd(init)
 	if err := init.Start(); err != nil {
 		return err
@@ -84,21 +138,25 @@ func runTerraform() error {
 	if err := init.Wait(); err != nil {
 		return err
 	}
-	log.Println("Deploying dark nodes to AWS...")
-	apply := exec.Command("./terraform", "apply", "-auto-approve")
+	log.Printf("%sDeploying dark nodes to AWS%s...\n", green, reset)
+	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
+	apply := exec.Command("bash", "-c", cmd)
 	pipeToStd(apply)
 	if err := apply.Start(); err != nil {
 		return err
 	}
-	return apply.Wait()
+	if err := apply.Wait(); err != nil {
+		return err
+	}
+	return nil
 }
 
-func generateTerraformConfig(config config.Config, accessKey, secretKey, region, instance, pubKey, keyPath string) error {
+func generateTerraformConfig(config config.Config, accessKey, secretKey, region, instance, pubKey, nodeDirectory string) error {
 	terraformConfig := fmt.Sprintf(`
 variable "access_key" {
 	default = "%v"
 }
-	
+
 variable "secret_key" {
 	default = "%v"	
 }
@@ -110,13 +168,12 @@ variable "ssh_public_key" {
 variable "ssh_private_key_location" {
 	default = "%v"
 }
-
-	`, accessKey, secretKey, strings.TrimSpace(pubKey), keyPath)
+	`, accessKey, secretKey, strings.TrimSpace(pubKey), nodeDirectory+"/ssh_keypair")
 
 	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
 	mode := fmt.Sprintf(`
 module "node-%v" {
-    source = "./instance"
+    source = "%v/instance"
     ami = "%v"
     region = "%v"
     avz = "%v"
@@ -126,13 +183,13 @@ module "node-%v" {
     ssh_private_key_location = "${var.ssh_private_key_location}"
     access_key = "${var.access_key}"
     secret_key = "${var.secret_key}"
-    config = "./config.json"
-	bootstraps = []
+    config = "%v/config.json"
     is_bootstrap = "false"
     port = "%v"
-}`, config.Address, AMIs[region], region, avz, config.Address, instance, config.Port)
+    path = "%v"
+}`, config.Address, Directory, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory)
 
-	return ioutil.WriteFile("./main.tf", []byte(terraformConfig+mode), 0600)
+	return ioutil.WriteFile(nodeDirectory+"/main.tf", []byte(terraformConfig+mode), 0600)
 }
 
 // deployToDigitalOcean parses the digital ocean credentials and use terraform

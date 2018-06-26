@@ -66,27 +66,3 @@ sudo systemctl start darknode.service
 sudo systemctl start logstash.service
 sudo systemctl start darknode-auto-updater.service
 sudo systemctl start metricbeat.service
-
-## Limit syslog to 1
-#
-#sudo echo '/var/log/syslog
-#{
-#        daily
-#        size 100k
-#        missingok
-#        notifempty
-#        delaycompress
-#        compress
-#        postrotate
-#        /usr/lib/rsyslog/rsyslog-rotate
-#        endscript
-#}' > /etc/logrotate.d/rsyslog
-
-# boots="\"bootstrapAddresses\": ["
-# while read line; do
-#    boots="${boots}\n\"${line}\","
-# done <public_ips
-
-# boots="${boots}\n],"
-
-# sed "/.../$boots/" .darknode/config.json

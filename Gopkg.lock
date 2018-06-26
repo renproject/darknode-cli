@@ -8,6 +8,16 @@
   revision = "06cfa1db77dae2425e143980408e642f7a9d5b09"
 
 [[projects]]
+  name = "github.com/aws/aws-sdk-go"
+  packages = [
+    "aws/awserr",
+    "aws/credentials",
+    "internal/shareddefaults"
+  ]
+  revision = "e79e9fd4ec11ccc242a472f980be78830f9eba80"
+  version = "v1.14.13"
+
+[[projects]]
   branch = "master"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
@@ -43,6 +53,12 @@
   ]
   revision = "dea1ce052a10cd7d401a5c04f83f371a06fe293c"
   version = "v1.8.11"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "06f5f3d67269ccec1fe5fe4134ba6e982984f7f5"
+  version = "v1.37.0"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -84,19 +100,19 @@
   branch = "master"
   name = "github.com/mr-tron/base58"
   packages = ["base58"]
-  revision = "c1bdf7c52f59d6685ca597b9955a443ff95eeee6"
+  revision = "4df4dc6e86a912614d09719d10cad427b087cbfb"
 
 [[projects]]
   branch = "master"
   name = "github.com/multiformats/go-multiaddr"
   packages = ["."]
-  revision = "84fb105635d33c95b41a9385064329b663f6f56f"
+  revision = "96804982667ed1672985566d0d0c2a7ed6f10e1f"
 
 [[projects]]
-  branch = "master"
   name = "github.com/multiformats/go-multihash"
   packages = ["."]
   revision = "8be2a682ab9f254311de1375145a2f78a809b07d"
+  version = "v1.0.8"
 
 [[projects]]
   name = "github.com/pborman/uuid"
@@ -114,19 +130,25 @@
   branch = "master"
   name = "github.com/republicprotocol/republic-go"
   packages = [
-    "blockchain/ethereum",
     "cmd/darknode/config",
+    "contract",
+    "contract/bindings",
     "crypto",
     "identity",
-    "logger"
+    "logger",
+    "order",
+    "registry",
+    "shamir",
+    "stackint",
+    "stackint/asm"
   ]
-  revision = "58b16193fec86de272c63a80abb080153a9e3cec"
+  revision = "88e37045b2a9262fe44dc9ac26258806084d13b2"
 
 [[projects]]
   branch = "master"
   name = "github.com/rjeczalik/notify"
   packages = ["."]
-  revision = "d152f3ce359a5464dc41e84a8919fc67e55bbbf0"
+  revision = "f7ce7f74cca0c606cd22c366f8ac3a09ded2aac0"
 
 [[projects]]
   name = "github.com/rs/cors"
@@ -157,7 +179,7 @@
     "leveldb/table",
     "leveldb/util"
   ]
-  revision = "e2150783cd35f5b607daca48afd8c57ec54cc995"
+  revision = "0d5a0ceb10cf9ab89fdd744cc8c50a83134f6697"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -181,13 +203,13 @@
     "sha3",
     "ssh"
   ]
-  revision = "7f39a6fea4fe9364fb61e1def6a268a51b4f3a06"
+  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["websocket"]
-  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
+  revision = "afe8f62b1d6bbd81f31868121a50b06d8188e1f9"
 
 [[projects]]
   branch = "master"
@@ -196,7 +218,7 @@
     "cpu",
     "unix"
   ]
-  revision = "fc8bd948cf46f9c7af0f07d34151ce25fe90e477"
+  revision = "63fc586f45fe72d95d5240a5d5eb95e6503907d3"
 
 [[projects]]
   branch = "master"
@@ -206,7 +228,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "53440098a4ee92255ee62fe260cd95970c544076"
+  revision = "25b95b48224cce18163c7d49dcfb89a2d5ecd209"
 
 [[projects]]
   name = "gopkg.in/fatih/set.v0"
@@ -229,6 +251,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8797f92ae22c174f2efc53a7e1db27c7dddfde63771ef8e025b5d069b12f8c9b"
+  inputs-digest = "bd0642d0d9a28e231ca98968f12428b4481c97c357c9f8bd98b4755b9931f910"
   solver-name = "gps-cdcl"
   solver-version = 1
