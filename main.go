@@ -31,7 +31,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "provider",
-			Value: "AWS",
+			Value: "",
 			Usage: "The cloud service provider you want to use for your Darknode",
 		},
 		cli.StringFlag{
@@ -126,9 +126,9 @@ func main() {
 	}
 
 	// Show error message and display the help page for the app
-	app.CommandNotFound = func(c *cli.Context, command string){
-		fmt.Fprintf(c.App.Writer, "%scommand `%q` not found%s.\n", red, command,reset)
-		cli.ShowAppHelpAndExit(c , 1 )
+	app.CommandNotFound = func(c *cli.Context, command string) {
+		cli.ShowAppHelp(c)
+		fmt.Fprintf(c.App.Writer, "%scommand %q not found%s.\n", red, command, reset)
 	}
 
 	// Start the app
@@ -143,7 +143,7 @@ func main() {
 func updateNode(ctx *cli.Context) error {
 	name := ctx.String("name")
 	if name == "" {
-
+		cli.ShowCommandHelp(ctx, "update")
 		return ErrEmptyNodeName
 	}
 	nodeDirectory := Directory + "/darknodes/" + name
@@ -163,7 +163,7 @@ func updateNode(ctx *cli.Context) error {
 		return err
 	}
 
-	if err:= updateCmd.Wait() ; err != nil {
+	if err := updateCmd.Wait(); err != nil {
 		return err
 	}
 	fmt.Printf("%sDarknode has been updated to the latest version.%s", green, reset)
@@ -175,7 +175,7 @@ func updateNode(ctx *cli.Context) error {
 func sshNode(ctx *cli.Context) error {
 	name := ctx.String("name")
 	if name == "" {
-		cli.ShowCommandHelpAndExit(ctx ,"ssh", 1)
+		cli.ShowCommandHelp(ctx, "ssh")
 		return ErrEmptyNodeName
 	}
 	nodeDirectory := Directory + "/darknodes/" + name

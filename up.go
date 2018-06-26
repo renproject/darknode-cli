@@ -32,10 +32,17 @@ var ErrNodeExist = fmt.Errorf("%snode with the name already exists%s", red, rese
 // unknown service provider
 var ErrUnknownProvider = fmt.Errorf("%sunknown service provider%s", red, reset)
 
+// ErrNilProvider is returned when the provider is nil.
+var ErrNilProvider = fmt.Errorf("%sprovider cannot be nil%s", red, reset)
+
 // deployNode deploys node depending on the provider.
 func deployNode(ctx *cli.Context) error {
 	provider := strings.ToLower(ctx.String("provider"))
+
 	switch provider {
+	case "":
+		cli.ShowCommandHelp(ctx, "up")
+		return ErrNilProvider
 	case "aws":
 		return deployToAWS(ctx)
 	case "digital-ocean":
