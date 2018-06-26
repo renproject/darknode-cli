@@ -19,6 +19,8 @@ var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 func main() {
 	// Create new cli application
 	app := cli.NewApp()
+	app.Name = "Darknode Deployer"
+	app.Version = "1.0.0"
 
 	upFlags := []cli.Flag{
 		cli.StringFlag{

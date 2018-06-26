@@ -16,12 +16,19 @@ import (
 	"github.com/urfave/cli"
 )
 
+const (
+	reset  = "\x1b[0m"
+	yellow = "\x1b[33;1m"
+	green  = "\x1b[32;1m"
+	red    = "\x1b[31;1m"
+)
+
 // ErrKeyNotFound is returned when no AWS access-key nor secret-key provided.
-var ErrKeyNotFound = errors.New("please provide your AWS access key and secret key")
+var ErrKeyNotFound = fmt.Errorf("%splease provide your AWS access key and secret key%s", red, reset)
 
 // ErrNodeExist is returned when trying to created a new node with name already
 // exists.
-var ErrNodeExist = errors.New("node with the name already exists")
+var ErrNodeExist = fmt.Errorf("%snode with the name already exists%s", red, reset)
 
 // deployNode deploys node depending on the provider.
 func deployNode(ctx *cli.Context) error {
@@ -104,9 +111,9 @@ func deployToAWS(ctx *cli.Context) error {
 		return err
 	}
 	fmt.Printf("\n")
-	fmt.Printf("Congratulations! Your Darknode is deployed and running.\n")
-	fmt.Printf("Join the network by registering your Darknode at")
-	fmt.Printf("https://darknode.republicprotocol.com/status/%v\n", ip)
+	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", green, reset)
+	fmt.Printf("%sJoin the network by registering your Darknode at%s", green, reset)
+	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n",green,ip, reset)
 	fmt.Printf("\n")
 	return nil
 }
@@ -122,7 +129,7 @@ func runTerraform(nodeDirectory string) error {
 	if err := init.Wait(); err != nil {
 		return err
 	}
-	log.Println("Deploying dark nodes to AWS...")
+	log.Printf("%sDeploying dark nodes to AWS%s...\n", green, reset)
 	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
 	apply := exec.Command("bash", "-c", cmd)
 	pipeToStd(apply)

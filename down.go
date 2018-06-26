@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,10 +12,10 @@ import (
 )
 
 // ErrNoDeploymentFound is returned when no node can be found for destroying
-var ErrNoDeploymentFound = errors.New("cannot found any deployed node")
+var ErrNoDeploymentFound = fmt.Errorf("%scannot found any deployed node%s", red , reset)
 
 // ErrEmptyNodeName is returned when user doesn't provide the node name.
-var ErrEmptyNodeName = errors.New("please provide the node name")
+var ErrEmptyNodeName = fmt.Errorf("%splease provide the node name%s", red , reset)
 
 // destroyNode will tear down the deployed darknode, but keep the config file.
 func destroyNode(ctx *cli.Context) error {
@@ -34,7 +33,7 @@ func destroyNode(ctx *cli.Context) error {
 			return ErrNoDeploymentFound
 		}
 
-		fmt.Printf("You need to deregister your Darknode and withdraw all fees at\n")
+		fmt.Printf("You need to %sderegister your Darknode%s and %swithdraw all fees%s at\n", red,reset, red, reset)
 		fmt.Printf("https://darknode.republicprotocol.com/status/%v\n", ip)
 		fmt.Println("Have you deregistered your Darknode and withdrawn all fees? (Yes/No)")
 		reader := bufio.NewReader(os.Stdin)
