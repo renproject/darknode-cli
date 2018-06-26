@@ -64,7 +64,7 @@ Now, you can deploy a Darknode. Think of a catchy name, and run:
 darknode up --name my-first-darknode --provider aws --access-key YOUR-AWS-ACCESS-KEY --secret-key YOUR-AWS-SECRET-KEY
 ```
 
-Once this has finished, it will give you a link that you can use to register you Darknode and send it ETH.
+Once this has finished, it will give you a link that you can use to register your Darknode and send it ETH.
 
 Congratulations! You have deployed your first Darknode. You can deploy as many as you like, distinguishing between them by their names. If you forget what you called them, you can list all available Darknodes by running:
 
