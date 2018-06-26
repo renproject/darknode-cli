@@ -62,7 +62,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "name",
 			Value: "",
-			Usage: "name of your darknode so that you can easily distinguish between them",
+			Usage: "name of the darknode you want to destroy",
 		},
 		cli.BoolFlag{
 			Name:  "skip",
@@ -74,7 +74,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "name",
 			Value: "",
-			Usage: "name of your darknode so that you can easily distinguish between them",
+			Usage: "name of the darknode you want to operate",
 		},
 	}
 
