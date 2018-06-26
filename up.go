@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -17,18 +16,21 @@ import (
 )
 
 const (
-	reset  = "\x1b[0m"
-	yellow = "\x1b[33;1m"
-	green  = "\x1b[32;1m"
-	red    = "\x1b[31;1m"
+	reset = "\x1b[0m"
+	green = "\x1b[32;1m"
+	red   = "\x1b[31;1m"
 )
 
 // ErrKeyNotFound is returned when no AWS access-key nor secret-key provided.
 var ErrKeyNotFound = fmt.Errorf("%splease provide your AWS access key and secret key%s", red, reset)
 
-// ErrNodeExist is returned when trying to created a new node with name already
-// exists.
+// ErrNodeExist is returned when user tries to created a new node with name
+// already exists.
 var ErrNodeExist = fmt.Errorf("%snode with the name already exists%s", red, reset)
+
+// ErrUnknownProvider is returned when user wants to deploy darknode to an
+// unknown service provider
+var ErrUnknownProvider = fmt.Errorf("%sunknown service provider%s", red, reset)
 
 // deployNode deploys node depending on the provider.
 func deployNode(ctx *cli.Context) error {
@@ -39,7 +41,7 @@ func deployNode(ctx *cli.Context) error {
 	case "digital-ocean":
 		return deployToDigitalOcean(ctx)
 	default:
-		return errors.New("unsupported service provider")
+		return ErrUnknownProvider
 	}
 }
 
@@ -113,7 +115,7 @@ func deployToAWS(ctx *cli.Context) error {
 	fmt.Printf("\n")
 	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", green, reset)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s", green, reset)
-	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n",green,ip, reset)
+	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", green, ip, reset)
 	fmt.Printf("\n")
 	return nil
 }
