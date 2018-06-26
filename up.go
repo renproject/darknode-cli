@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	reset  = "\x1b[0m"
-	green  = "\x1b[32;1m"
-	red    = "\x1b[31;1m"
+	reset = "\x1b[0m"
+	green = "\x1b[32;1m"
+	red   = "\x1b[31;1m"
 )
 
 // ErrKeyNotFound is returned when no AWS access-key nor secret-key provided.
@@ -115,7 +115,7 @@ func deployToAWS(ctx *cli.Context) error {
 	fmt.Printf("\n")
 	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", green, reset)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s", green, reset)
-	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n",green,ip, reset)
+	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", green, ip, reset)
 	fmt.Printf("\n")
 	return nil
 }
