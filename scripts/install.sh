@@ -3,7 +3,7 @@
 # creating working directory
 mkdir -p $HOME/.darknode
 cd $HOME/.darknode
-curl https://darknode.republicprotocol.com/darknode.zip
+curl -s 'https://darknode.republicprotocol.com/darknode.zip' > darknode.zip
 unzip darknode.zip
 
 ostype="$(uname -s)"
@@ -12,12 +12,10 @@ cputype="$(uname -m)"
 # Download terraform
 if [ $ostype = 'Linux' -a $cputype = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip'
-    curl https://darknode.republicprotocol.com/darknode_linux_amd64
-    mv darknode_linux_amd64 ./bin/darknode
+    curl -s 'https://darknode.republicprotocol.com/darknode_linux_amd64' > ./bin/darknode
 elif [ $ostype = 'Darwin' -a $cputype = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_darwin_amd64.zip'
-    curl https://darknode.republicprotocol.com/darknode_darwin_amd64
-    mv darknode_darwin_amd64 ./bin/darknode
+    curl -s 'https://darknode.republicprotocol.com/darknode_darwin_amd64' > ./bin/darknode
 else
    echo 'unsupported OS type'
    cd ..
@@ -27,7 +25,7 @@ fi
 
 chmod +x bin/darknode
 
-curl $TERRAFORM_URL
+curl -s "$TERRAFORM_URL" > terraform.zip
 
 # unzip darknode
 mv terraform* terraform.zip
@@ -62,5 +60,5 @@ if ! [ -x "$(command -v darknode)" ]; then
 fi
 
 echo ''
-echo 'Done! Run the command below to begin.'
+echo 'Done! Restart terminal and run the command below to begin.'
 echo 'darknode up --help'
