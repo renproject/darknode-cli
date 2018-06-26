@@ -41,22 +41,22 @@ rm terraform.zip
 
 # make sure the binary is installed in the path
 if ! [ -x "$(command -v darknode)" ]; then
-  if test -n $ZSH_VERSION; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.zshrc
-    source ~/.zshrc
-  elif test -n $BASH_VERSION; then
+  if test -n $BASH_VERSION && [ -f '~/.bash_profile' ] ; then
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.bash_profile
     source ~/.bash_profile
-  elif test -n $KSH_VERSION; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.kshrc
-    source ~/.kshrc
-  elif test -n $FCEDIT; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.kshrc
-    source ~/.kshrc
+  elif test -n $ZSH_VERSION && [ -f '~/.zprofile' ] ; then
+    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.zprofile
+    source ~/.zprofile
   else
-    echo 'Seems your are using a custom sh.'
-    echo 'Please add /.darknode/bin to the PATH variable'
+    if [ -f '~/.profile' ]; then
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.profile
+      source ~/.profile
+    fi
   fi
+
+  echo ''
+  echo 'If you are using a custom shell, make sure you update your PATH.'
+  echo '$ export PATH=$PATH:$HOME/.darknode/bin'
 fi
 
 echo ''
