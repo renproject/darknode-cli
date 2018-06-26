@@ -18,7 +18,7 @@ To download and install the Darknode Deployer, open a terminal and run:
 curl https://darknode.republicprotocol.com/install.sh -sSf | sh
 ```
 
-This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal, or run `source $HOME/.darknode/bin` to begin using the Darknode Deployer tool.
+This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode Deployer tool.
 
 ## Usage 
 
