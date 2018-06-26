@@ -12,6 +12,14 @@ curl https://darknode.republicprotocol.com/install.sh -sSf | sh
 
 This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal, or run `source $HOME/.darknode/bin` to begin using the Darknode Deployer tool.
 
+## Getting Started on AWS
+
+To jump straight into running your first Darknode on AWS, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
+
+## Getting Started on Digital Ocean
+
+> Coming soon!
+
 ## Usage 
 
 ### Deploy a Darknode
