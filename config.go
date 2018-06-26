@@ -1,12 +1,12 @@
 package main
 
 import (
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
-	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/republicprotocol/republic-go/contract"
+	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/republicprotocol/republic-go/identity"
 	"github.com/republicprotocol/republic-go/logger"
 )
@@ -19,7 +19,7 @@ var BootstrapNodes = func() []identity.MultiAddress {
 }()
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew(directory , network string ) (config.Config, error) {
+func GetConfigOrGenerateNew(directory, network string) (config.Config, error) {
 
 	keystore, err := crypto.RandomKeystore()
 	if err != nil {
@@ -30,7 +30,7 @@ func GetConfigOrGenerateNew(directory , network string ) (config.Config, error) 
 		URI:     "https://kovan.infura.io",
 	}
 
-	cfg:=  config.Config{
+	cfg := config.Config{
 		Keystore:                keystore,
 		Host:                    "0.0.0.0",
 		Port:                    "18514",
@@ -48,11 +48,11 @@ func GetConfigOrGenerateNew(directory , network string ) (config.Config, error) 
 		Ethereum: ethereumConfig,
 	}
 
-	configData, err := json.Marshal(cfg)
+	configData, err := json.MarshalIndent(cfg, "", "    ")
 	if err != nil {
 		return config.Config{}, err
 	}
-	if err := ioutil.WriteFile(directory + "/config.json", configData, 0600); err != nil {
+	if err := ioutil.WriteFile(directory+"/config.json", configData, 0600); err != nil {
 		return config.Config{}, err
 	}
 
