@@ -10,14 +10,14 @@ ostype="$(uname -s)"
 cputype="$(uname -m)"
 
 # Download terraform
-if [ $ostype = 'Linux' -a $cputype = 'x86_64' ]; then
+if [ "$ostype" = 'Linux' -a "$cputype" = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip'
     curl -s 'https://darknode.republicprotocol.com/darknode_linux_amd64' > ./bin/darknode
-elif [ $ostype = 'Darwin' -a $cputype = 'x86_64' ]; then
+elif [ "$ostype" = 'Darwin' -a "$cputype" = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_darwin_amd64.zip'
     curl -s 'https://darknode.republicprotocol.com/darknode_darwin_amd64' > ./bin/darknode
 else
-   echo 'unsupported OS type'
+   echo 'unsupported OS type or architecture'
    cd ..
    rm -rf .darknode
    exit 1
@@ -42,14 +42,14 @@ rm terraform.zip
 # make sure the binary is installed in the path
 if ! [ -x "$(command -v darknode)" ]; then
   if test -n $BASH_VERSION  &&  [ -f "$HOME/.bash_profile" ] ; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.bash_profile
-    source ~/.bash_profile
+    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
+    source $HOME/.bash_profile
   elif test -n $ZSH_VERSION && [ -f "$HOME/.zprofile" ] ; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.zprofile
-    source ~/.zprofile
-  elif [ -f '~/.profile' ]; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> ~/.profile
-    source ~/.profile
+    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
+    source $HOME/.zprofile
+  elif [ -f '$HOME/.profile' ]; then
+    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+    source $HOME/.profile
   fi
 
   echo ''

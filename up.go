@@ -138,7 +138,7 @@ func runTerraform(nodeDirectory string) error {
 	if err := init.Wait(); err != nil {
 		return err
 	}
-	log.Printf("%sDeploying dark nodes to AWS%s...\n", green, reset)
+	fmt.Printf("%sDeploying dark nodes to AWS%s...\n", green, reset)
 	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
 	apply := exec.Command("bash", "-c", cmd)
 	pipeToStd(apply)
