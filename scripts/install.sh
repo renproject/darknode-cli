@@ -2,6 +2,7 @@
 
 # creating working directory
 mkdir -p $HOME/.darknode
+mkdir -p $HOME/.darknode/darknodes
 cd $HOME/.darknode
 curl -s 'https://darknode.republicprotocol.com/darknode.zip' > darknode.zip
 unzip darknode.zip
@@ -9,7 +10,7 @@ unzip darknode.zip
 ostype="$(uname -s)"
 cputype="$(uname -m)"
 
-# Download terraform
+# Download deployer binanry and terraform
 if [ "$ostype" = 'Linux' -a "$cputype" = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip'
     curl -s 'https://darknode.republicprotocol.com/darknode_linux_amd64' > ./bin/darknode
@@ -27,15 +28,13 @@ chmod +x bin/darknode
 
 curl -s "$TERRAFORM_URL" > terraform.zip
 
-# unzip darknode
+# unzip terraform
 mv terraform* terraform.zip
 unzip terraform
-
-# chmod +x darknode-setup
 chmod +x terraform
 mv terraform bin/terraform
 
-# rm darknode.zip
+# clean up all the zip files
 rm darknode.zip
 rm terraform.zip
 
