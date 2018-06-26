@@ -134,6 +134,8 @@ func main() {
 	// Start the app
 	err := app.Run(os.Args)
 	if err != nil {
+		// Remove the timestamp for error message
+		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 		log.Fatal(err)
 	}
 }
