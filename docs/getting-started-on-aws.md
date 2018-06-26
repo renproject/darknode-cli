@@ -1,6 +1,6 @@
 # Getting Started on AWS
 
-Before installing and using the Darknode Deployer, make sure that you have created an AWS account.
+Before installing and using the Darknode CLI, make sure that you have created an AWS account.
 
 [Create an AWS account](https://aws.amazon.com)
 
@@ -46,9 +46,9 @@ Click _Create user_. You should see something like this
 
 Download the CSV file containing your _access key ID_, and your _secret access key_. Make sure you keep these values secure, anyone with access to them will be able to control your Darknode.
 
-## Installing the Darknode Deployer
+## Installing the Darknode CLI
 
-To install the Darknode Deployer, open a terminal and run:
+To install the Darknode CLI, open a terminal and run:
 
 ```sh
 curl https://darknode.republicprotocol.com/install.sh -sSf | sh
