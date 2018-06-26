@@ -155,7 +155,12 @@ func updateNode(ctx *cli.Context) error {
 		return err
 	}
 
-	return updateCmd.Wait()
+	if err:= updateCmd.Wait() ; err != nil {
+		return err
+	}
+	fmt.Printf("%sDarknode has been updated to the latest version.%s", green, reset)
+
+	return nil
 }
 
 // sshNode will ssh into the darknode
