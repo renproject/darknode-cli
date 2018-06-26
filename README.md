@@ -2,6 +2,14 @@
 
 The Darknode Deployer is a command-line tool for managing Darknodes on Republic Protocol.
 
+## Getting Started on AWS
+
+To jump straight into running your first Darknode on AWS, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
+
+## Getting Started on Digital Ocean
+
+> Coming soon!
+
 ## Installation
 
 To download and install the Darknode Deployer, open a terminal and run:
@@ -11,14 +19,6 @@ curl https://darknode.republicprotocol.com/install.sh -sSf | sh
 ```
 
 This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal, or run `source $HOME/.darknode/bin` to begin using the Darknode Deployer tool.
-
-## Getting Started on AWS
-
-To jump straight into running your first Darknode on AWS, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
-
-## Getting Started on Digital Ocean
-
-> Coming soon!
 
 ## Usage 
 
