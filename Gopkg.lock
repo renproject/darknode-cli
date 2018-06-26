@@ -8,6 +8,16 @@
   revision = "06cfa1db77dae2425e143980408e642f7a9d5b09"
 
 [[projects]]
+  name = "github.com/aws/aws-sdk-go"
+  packages = [
+    "aws/awserr",
+    "aws/credentials",
+    "internal/shareddefaults"
+  ]
+  revision = "e79e9fd4ec11ccc242a472f980be78830f9eba80"
+  version = "v1.14.13"
+
+[[projects]]
   branch = "master"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
@@ -43,6 +53,12 @@
   ]
   revision = "dea1ce052a10cd7d401a5c04f83f371a06fe293c"
   version = "v1.8.11"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "06f5f3d67269ccec1fe5fe4134ba6e982984f7f5"
+  version = "v1.37.0"
 
 [[projects]]
   name = "github.com/go-stack/stack"
@@ -235,6 +251,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a6d3ca9909ea44b728fd022ff90a4a39ce338b9009fd7c344e1d6e1ce1bc68fb"
+  inputs-digest = "bd0642d0d9a28e231ca98968f12428b4481c97c357c9f8bd98b4755b9931f910"
   solver-name = "gps-cdcl"
   solver-version = 1
