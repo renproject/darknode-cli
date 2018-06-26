@@ -3,7 +3,7 @@
 # creating working directory
 mkdir -p $HOME/.darknode
 cd $HOME/.darknode
-wget https://darknode.republicprotocol.com/darknode.zip
+curl https://darknode.republicprotocol.com/darknode.zip
 unzip darknode.zip
 
 ostype="$(uname -s)"
@@ -12,11 +12,11 @@ cputype="$(uname -m)"
 # Download terraform
 if [ $ostype = 'Linux' -a $cputype = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip'
-    wget https://darknode.republicprotocol.com/darknode_linux_amd64
+    curl https://darknode.republicprotocol.com/darknode_linux_amd64
     mv darknode_linux_amd64 ./bin/darknode
 elif [ $ostype = 'Darwin' -a $cputype = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_darwin_amd64.zip'
-    wget https://darknode.republicprotocol.com/darknode_darwin_amd64
+    curl https://darknode.republicprotocol.com/darknode_darwin_amd64
     mv darknode_darwin_amd64 ./bin/darknode
 else
    echo 'unsupported OS type'
@@ -27,7 +27,7 @@ fi
 
 chmod +x bin/darknode
 
-wget $TERRAFORM_URL
+curl $TERRAFORM_URL
 
 # unzip darknode
 mv terraform* terraform.zip
