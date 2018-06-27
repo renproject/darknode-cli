@@ -19,57 +19,62 @@ var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 func main() {
 	// Create new cli application
 	app := cli.NewApp()
-	app.Name = "Darknode Deployer"
-	app.Usage = "A command-line tool for managing Darknodes on Republic Protocol."
+	app.Name = "Darknode CLI"
+	app.Usage = "A command-line tool for managing Darknodes."
 	app.Version = "1.0.0"
 
 	upFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
-			Value: "",
-			Usage: "A unique name for your Darknode",
+			Value: "string",
+			Usage: "Unique name for the Darknode",
+		},
+		cli.StringFlag{
+			Name:  "tag",
+			Value: "strings",
+			Usage: "Tags for the Darknode (optional)",
+		},
+		cli.StringFlag{
+			Name:  "config",
+			Value: "file",
+			Usage: "Configuration file for the Darknode (optional)",
 		},
 		cli.StringFlag{
 			Name:  "provider",
-			Value: "",
-			Usage: "The cloud service provider you want to use for your Darknode",
+			Value: "aws",
+			Usage: "Cloud provider used to provision the Darknode",
 		},
 		cli.StringFlag{
-			Name:  "region",
-			Value: "",
-			Usage: "The region you want to deploy to (default: random)",
+			Name:  "aws-region",
+			Value: "random",
+			Usage: "AWS region for the Darknode (defaults to random)",
 		},
 		cli.StringFlag{
-			Name:  "instance",
-			Value: "",
-			Usage: "Instance type",
+			Name:  "aws-instance",
+			Value: "t2.small",
+			Usage: "AWS EC2 instance type for the Darknode (defaults to t2.small)",
 		},
 		cli.StringFlag{
-			Name:  "access-key",
-			Value: "",
-			Usage: "Access key for your AWS account, can be read from the default ~/.aws/credential file",
+			Name:  "aws-access-key",
+			Value: "secret",
+			Usage: "AWS access key (defaults to $HOME/.aws/credential)",
 		},
 		cli.StringFlag{
-			Name:  "secret-key",
-			Value: "",
-			Usage: "Secret key for your AWS account, can be read from the default ~/.aws/credential file",
-		},
-		cli.StringFlag{
-			Name:  "network",
-			Value: "testnet",
-			Usage: "The network you want to deploy your node to",
+			Name:  "aws-secret-key",
+			Value: "secret",
+			Usage: "AWS secret key (defaults to $HOME/.aws/credential)",
 		},
 	}
 
 	destroyFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
-			Value: "",
-			Usage: "The name of the Darknode you want to destroy",
+			Value: "string",
+			Usage: "Unique name of the Darknode that will be destroyed",
 		},
 		cli.BoolFlag{
-			Name:  "skip",
-			Usage: "Skip confirmation and begin destroying immediately",
+			Name:  "force",
+			Usage: "Force the Darknode to be destroyed without interactive prompts",
 		},
 	}
 
