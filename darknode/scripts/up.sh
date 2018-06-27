@@ -5,10 +5,9 @@ set -x
 until sudo apt update; do sleep 2; done
 
 # Install services
-sudo mv ./provisions/darknode-auto-updater.service /etc/systemd/system/darknode-auto-updater.service
+sudo mv ./provisions/darknode-updater.service /etc/systemd/system/darknode-updater.service
 sudo mv ./provisions/darknode.service /etc/systemd/system/darknode.service
 sudo mv ./provisions/logstash.service /etc/systemd/system/logstash.service
-sudo mv ./provisions/rc.local /etc/rc.local
 
 # Install golang
 wget https://dl.google.com/go/go1.10.linux-amd64.tar.gz
@@ -24,10 +23,10 @@ rm logstash-6.2.2.tar.gz
 until sudo apt install -y default-jre; do sleep 2; done
 mv ./provisions/logstash.conf ./logstash-6.2.2/darknode.conf
 
-# Configure darknode and autoupdater
+# Configure darknode and the updater
 mkdir ./.darknode/
 mv ./darknode-config.json ./.darknode/config.json
-mv ./scripts/auto-updater.sh ./.darknode/auto-updater.sh
+mv ./scripts/updater.sh ./.darknode/updater.sh
 
 # Install metricbeat
 curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-6.2.2-amd64.deb
@@ -59,10 +58,10 @@ rmdir ./provisions/
 
 # Start services
 sudo systemctl daemon-reload
+sudo systemctl enable darknode-updater.service
 sudo systemctl enable darknode.service 
 sudo systemctl enable logstash.service
-sudo systemctl enable darknode-auto-updater.service
-sudo systemctl start darknode.service 
+sudo systemctl start darknode-updater.service
+sudo systemctl start darknode.service
 sudo systemctl start logstash.service
-sudo systemctl start darknode-auto-updater.service
 sudo systemctl start metricbeat.service

@@ -14,14 +14,14 @@ variable "port" {}
 variable "path" {}
 
 provider "aws" {
-  alias      = "falcon0"
+  alias      = "darknode"
   access_key = "${var.access_key}"
   secret_key = "${var.secret_key}"
   region     = "${var.region}"
 }
 
-resource "aws_security_group" "falcon0" {
-  provider    = "aws.falcon0"
+resource "aws_security_group" "darknode" {
+  provider    = "aws.darknode"
   name        = "falcon-sg-${var.id}"
   description = "Allow inbound SSH ,Republic Protocol traffic and logstash/kibana"
 
@@ -56,7 +56,6 @@ resource "aws_security_group" "falcon0" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -65,22 +64,22 @@ resource "aws_security_group" "falcon0" {
   }
 }
 
-resource "aws_key_pair" "falcon0" {
-  provider   = "aws.falcon0"
+resource "aws_key_pair" "darknode" {
+  provider   = "aws.darknode"
   key_name   = "falcon-kp-${var.id}"
   public_key = "${var.ssh_public_key}"
 }
 
 output "multiaddress" {
-  value       = "/ip4/${aws_instance.falcon0.public_ip}/tcp/18514/republic/${var.id}"
+  value       = "/ip4/${aws_instance.darknode.public_ip}/tcp/18514/republic/${var.id}"
 }
 
-resource "aws_instance" "falcon0" {
-  provider        = "aws.falcon0"
+resource "aws_instance" "darknode" {
+  provider        = "aws.darknode"
   ami             = "${var.ami}"
   instance_type   = "${var.ec2_instance_type}"
-  key_name        = "${aws_key_pair.falcon0.key_name}"
-  security_groups = ["${aws_security_group.falcon0.name}"]
+  key_name        = "${aws_key_pair.darknode.key_name}"
+  security_groups = ["${aws_security_group.darknode.name}"]
 
   provisioner "file" {
     source      = "${var.config}"
@@ -115,6 +114,6 @@ resource "aws_instance" "falcon0" {
   }
 
   provisioner "local-exec" {
-      command = "echo /ip4/${aws_instance.falcon0.public_ip}/tcp/${var.port}/republic/${var.id} > multiAddress.out"
+      command = "echo /ip4/${aws_instance.darknode.public_ip}/tcp/${var.port}/republic/${var.id} > multiAddress.out"
   }
 }
