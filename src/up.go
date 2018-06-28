@@ -10,7 +10,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
-	"github.com/republicprotocol/republic-go/contract"
 	"github.com/urfave/cli"
 )
 
@@ -57,7 +56,7 @@ func deployToAWS(ctx *cli.Context) error {
 	accessKey := ctx.String("access-key")
 	secretKey := ctx.String("secret-key")
 	name := ctx.String("name")
-	network := ctx.String("network")
+	tag := ctx.String("tag")
 
 	// Check input flags
 	var nodeDirectory string
@@ -86,7 +85,14 @@ func deployToAWS(ctx *cli.Context) error {
 		}
 		nodeDirectory = Directory + "/darknodes/" + name
 	}
+
+	// Create directory
 	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
+		return err
+	}
+	// Store the tags
+	tags := strings.Replace(tag, "," , " ", -1 )
+	if err := ioutil.WriteFile(nodeDirectory + "tags.out",[]byte(tags), 0600); err !=nil {
 		return err
 	}
 
@@ -97,10 +103,7 @@ func deployToAWS(ctx *cli.Context) error {
 	}
 
 	// Generate configs for the node
-	if network == "" {
-		network = string(contract.NetworkTestnet)
-	}
-	config, err := GetConfigOrGenerateNew(nodeDirectory, network)
+	config, err := GetConfigOrGenerateNew(nodeDirectory)
 	if err != nil {
 		return err
 	}
@@ -114,6 +117,7 @@ func deployToAWS(ctx *cli.Context) error {
 	if err := runTerraform(nodeDirectory); err != nil {
 		return err
 	}
+
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err

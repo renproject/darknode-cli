@@ -23,14 +23,14 @@ var BootstrapNodes = func() []identity.MultiAddress {
 }()
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew(directory, network string) (config.Config, error) {
+func GetConfigOrGenerateNew(directory string) (config.Config, error) {
 
 	keystore, err := crypto.RandomKeystore()
 	if err != nil {
 		return config.Config{}, err
 	}
 	ethereumConfig := contract.Config{
-		Network: contract.Network(network),
+		Network: "testnet",
 		URI:     "https://kovan.infura.io",
 	}
 

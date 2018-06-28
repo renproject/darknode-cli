@@ -182,8 +182,8 @@ var AllAwsInstancesInApNortheast1 = []string{
 // cli parameters. It will randomly pick a region for the user if it's not
 // specified. The default value for instance is `t2.small`.
 func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
-	region := strings.ToLower(ctx.String("region"))
-	instance := strings.ToLower(ctx.String("instance"))
+	region := strings.ToLower(ctx.String("aws-region"))
+	instance := strings.ToLower(ctx.String("aws-instance"))
 
 	// Parse the input region or pick one region randomly
 	if region == "" {
@@ -195,20 +195,16 @@ func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
 	}
 
 	// Parse the input instance type or use the default one.
-	if instance == "" {
-		instance = "t2.small"
-	} else {
-		if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
-			return "", "", UnSupportedInstanceType
-		}
-		if region == ApNorthEast1 && !StringInSlice(instance, AllAwsInstancesInApNortheast1) {
-			return "", "", UnSupportedInstanceType
-		}
-		if !StringInSlice(instance, AllAwsInstances) {
-			return "", "", UnSupportedInstanceType
-		}
+	if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
+		return "", "", UnSupportedInstanceType
 	}
-
+	if region == ApNorthEast1 && !StringInSlice(instance, AllAwsInstancesInApNortheast1) {
+		return "", "", UnSupportedInstanceType
+	}
+	if !StringInSlice(instance, AllAwsInstances) {
+		return "", "", UnSupportedInstanceType
+	}
+u
 	return region, instance, nil
 }
 

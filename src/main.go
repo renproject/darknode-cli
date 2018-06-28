@@ -21,55 +21,48 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "1.0.0"
+	app.Version = "1.1.0"
 
 	upFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
-			Value: "string",
 			Usage: "Unique name for the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "tag",
-			Value: "strings",
 			Usage: "Tags for the Darknode (optional)",
 		},
 		cli.StringFlag{
 			Name:  "config",
-			Value: "file",
-			Usage: "Configuration file for the Darknode (optional)",
+			Usage: "Configuration `file` for the Darknode (optional)",
 		},
 		cli.StringFlag{
 			Name:  "provider",
-			Value: "aws",
 			Usage: "Cloud provider used to provision the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "aws-region",
 			Value: "random",
-			Usage: "AWS region for the Darknode (defaults to random)",
+			Usage: "AWS region for the Darknode ",
 		},
 		cli.StringFlag{
 			Name:  "aws-instance",
 			Value: "t2.small",
-			Usage: "AWS EC2 instance type for the Darknode (defaults to t2.small)",
+			Usage: "AWS EC2 instance type for the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "aws-access-key",
-			Value: "secret",
-			Usage: "AWS access key (defaults to $HOME/.aws/credential)",
+			Usage: "AWS access `key` (defaults to $HOME/.aws/credential)",
 		},
 		cli.StringFlag{
 			Name:  "aws-secret-key",
-			Value: "secret",
-			Usage: "AWS secret key (defaults to $HOME/.aws/credential)",
+			Usage: "AWS secret `key` (defaults to $HOME/.aws/credential)",
 		},
 	}
 
 	destroyFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
-			Value: "string",
 			Usage: "Unique name of the Darknode that will be destroyed",
 		},
 		cli.BoolFlag{
@@ -81,7 +74,6 @@ func main() {
 	nameFlag := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
-			Value: "",
 			Usage: "The name of the Darknode you want to operate",
 		},
 	}
@@ -209,6 +201,7 @@ func listAllNodes() error {
 	nodes := [][]string{}
 
 	for _, f := range files {
+
 		addressFile := Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
 		data, err := ioutil.ReadFile(addressFile)
 		if err != nil {
@@ -227,15 +220,21 @@ func listAllNodes() error {
 			continue
 		}
 
-		nodes = append(nodes, []string{f.Name(), address, ip})
+		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tags, err := ioutil.ReadFile(tagFile)
+		if err != nil {
+			continue
+		}
+
+		nodes = append(nodes, []string{f.Name(), address, ip, string(tags)})
 	}
 
 	if len(nodes) == 0 {
 		return fmt.Errorf("%scannot find any node%s", red, reset)
 	} else {
-		fmt.Printf("%10s | %30s | %15s |\n", "name", "Address", "ip")
+		fmt.Printf("%15s | %30s | %15s | %20s \n", "name", "Address", "ip", "tags")
 		for i := range nodes {
-			fmt.Printf("%10s | %30s | %15s |\n", nodes[i][0], nodes[i][1], nodes[i][2])
+			fmt.Printf("%15s | %30s | %15s | %20s \n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3])
 		}
 	}
 

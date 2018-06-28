@@ -46,7 +46,7 @@ if ! [ -x "$(command -v darknode)" ]; then
   elif test -n $ZSH_VERSION && [ -f "$HOME/.zprofile" ] ; then
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
     source $HOME/.zprofile
-  elif [ -f '$HOME/.profile' ]; then
+  elif [ -f "$HOME/.profile" ]; then
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
     source $HOME/.profile
   fi
