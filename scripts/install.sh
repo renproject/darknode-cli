@@ -1,6 +1,11 @@
 #!/bin/sh
 
-# Check commands are all available
+# define color escape codes
+RED='\033[0;31m'
+GREEN = '\033[0;32m'
+NC='\033[0m'
+
+# Install unzip if command not found
 if ! [ -x "$(command -v unzip)" ];then
   sudo apt-get install unzip
 fi
@@ -12,12 +17,11 @@ cd $HOME/.darknode
 curl -s 'https://darknode.republicprotocol.com/darknode.zip' > darknode.zip
 unzip darknode.zip
 
-
 # get system information
 ostype="$(uname -s)"
 cputype="$(uname -m)"
 
-# Download terraform
+# download darknode binary depending on the system and architecture
 if [ "$ostype" = 'Linux' -a "$cputype" = 'x86_64' ]; then
     TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip'
     curl -s 'https://darknode.republicprotocol.com/darknode_linux_amd64' > ./bin/darknode
@@ -45,39 +49,55 @@ rm terraform.zip
 
 # make sure the binary is installed in the path
 if ! [ -x "$(command -v darknode)" ]; then
-  if test -n "$ZSH_VERSION" ; then
-    echo "zsh"
+  if [ "$ostype" = 'Linux' ] ; then
+     sourceCommand="."
+  else
+     sourceCommand="source"
+  fi
+
+  path=$SHELL
+  shell=${path##*/}
+
+  if [ "$shell" = 'zsh' ] ; then
     if [ -f "$HOME/.zprofile" ] ; then
-      echo 3
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
-      source $HOME/.zprofile
-    elif [ -f "$HOME/.zshrc" ] ;then
-      echo 4
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zshrc
-      source $HOME/.zshrc
-    fi
-  elif test -n "$BASH_VERSION"; then
-    echo "bash"
-    if [ -f "$HOME/.bash_profile" ] ; then
       echo 1
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
-      source $HOME/.bash_profile
-    elif [ -f "$HOME/.bashrc" ] ; then
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
+      "$sourceCommand" $HOME/.zprofile
+    elif [ -f "$HOME/.zshrc" ] ; then
       echo 2
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
-      source $HOME/.bashrc
+      "$sourceCommand" $HOME/.zshrc
+    elif [ -f "$HOME/.profile" ] ; then
+      echo 3
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+      "$sourceCommand" $HOME/.profile
+    fi
+  elif  [ "$shell" = 'bash' ] ; then
+    if [ -f "$HOME/.bash_profile" ] ; then
+      echo 4
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
+      "$sourceCommand" $HOME/.bash_profile
+    elif [ -f "$HOME/.bashrc" ] ; then
+      echo 5
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
+      "$sourceCommand" $HOME/.bashrc
+    elif [ -f "$HOME/.profile" ] ; then
+      echo 6
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+      "$sourceCommand" $HOME/.profile
     fi
   elif [ -f "$HOME/.profile" ] ; then
-    echo 5
+    echo 7
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
-    . $HOME/.profile
+    "$sourceCommand" $HOME/.profile
   fi
 
   echo ''
   echo 'If you are using a custom shell, make sure you update your PATH.'
-  echo '$ export PATH=$PATH:$HOME/.darknode/bin'
+  echo -e "${GREEN} $ export PATH=\$PATH:\$HOME/.darknode/bin ${NC}"
 fi
 
 echo ''
 echo 'Done! Restart terminal and run the command below to begin.'
-echo 'darknode up --help'
+echo ''
+echo -e "${GREEN} $ darknode up --help ${NC}"
