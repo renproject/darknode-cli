@@ -1,11 +1,17 @@
 #!/usr/bin/sh
 
+# Check commands are all available
+if ! [ -x "$(command -v unzip)" ];then
+  sudo apt-get install unzip
+fi
+
 # creating working directory
 mkdir -p $HOME/.darknode/darknodes
 mkdir -p $HOME/.darknode/bin
 cd $HOME/.darknode
 curl -s 'https://darknode.republicprotocol.com/darknode.zip' > darknode.zip
 unzip darknode.zip
+
 
 # get system information
 ostype="$(uname -s)"
@@ -39,8 +45,9 @@ rm terraform.zip
 
 # make sure the binary is installed in the path
 if ! [ -x "$(command -v darknode)" ]; then
-  if test -n $ZSH_VERSION ; then
-    if  [ -f "$HOME/.zprofile" ] ; then
+  if test -n "$ZSH_VERSION" ; then
+    echo "zsh"
+    if [ -f "$HOME/.zprofile" ] ; then
       echo 3
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
       source $HOME/.zprofile
@@ -49,17 +56,18 @@ if ! [ -x "$(command -v darknode)" ]; then
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zshrc
       source $HOME/.zshrc
     fi
-  elif test -n $BASH_VERSION; then
-    if  [ -f "$HOME/.bash_profile" ] ; then
+  elif test -n "$BASH_VERSION"; then
+    echo "bash"
+    if [ -f "$HOME/.bash_profile" ] ; then
       echo 1
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
       source $HOME/.bash_profile
-    elif [ -f "$HOME/.bashrc" ] ;then
+    elif [ -f "$HOME/.bashrc" ] ; then
       echo 2
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
       source $HOME/.bashrc
     fi
-  elif [ -f '$HOME/.profile' ]; then
+  elif [ -f "$HOME/.profile" ] ; then
     echo 5
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
     . $HOME/.profile
