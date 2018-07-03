@@ -16,8 +16,6 @@ runTest()
   sleep 5s
   exit
   '
-echo ""if you see cannot find any node ,
-
   vagrant destory
 }
 
@@ -29,5 +27,6 @@ for dir in */ ; do
     runTest $dir type
     cd ..
   done
+  cd ..
 done
 

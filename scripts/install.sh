@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 # Check commands are all available
 if ! [ -x "$(command -v unzip)" ];then
