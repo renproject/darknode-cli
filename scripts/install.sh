@@ -1,11 +1,13 @@
 #!/usr/bin/sh
 
 # creating working directory
-mkdir -p $HOME/.darknode
+mkdir -p $HOME/.darknode/darknodes
+mkdir -p $HOME/.darknode/bin
 cd $HOME/.darknode
 curl -s 'https://darknode.republicprotocol.com/darknode.zip' > darknode.zip
 unzip darknode.zip
 
+# get system information
 ostype="$(uname -s)"
 cputype="$(uname -m)"
 
@@ -25,31 +27,42 @@ fi
 
 chmod +x bin/darknode
 
+# download terraform
 curl -s "$TERRAFORM_URL" > terraform.zip
-
-# unzip darknode
-mv terraform* terraform.zip
 unzip terraform
-
-# chmod +x darknode-setup
 chmod +x terraform
 mv terraform bin/terraform
 
-# rm darknode.zip
+# clean up zip files
 rm darknode.zip
 rm terraform.zip
 
 # make sure the binary is installed in the path
 if ! [ -x "$(command -v darknode)" ]; then
-  if test -n $BASH_VERSION  &&  [ -f "$HOME/.bash_profile" ] ; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
-    source $HOME/.bash_profile
-  elif test -n $ZSH_VERSION && [ -f "$HOME/.zprofile" ] ; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
-    source $HOME/.zprofile
+  if test -n $ZSH_VERSION ; then
+    if  [ -f "$HOME/.zprofile" ] ; then
+      echo 3
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
+      source $HOME/.zprofile
+    elif [ -f "$HOME/.zshrc" ] ;then
+      echo 4
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zshrc
+      source $HOME/.zshrc
+    fi
+  elif test -n $BASH_VERSION; then
+    if  [ -f "$HOME/.bash_profile" ] ; then
+      echo 1
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
+      source $HOME/.bash_profile
+    elif [ -f "$HOME/.bashrc" ] ;then
+      echo 2
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
+      source $HOME/.bashrc
+    fi
   elif [ -f '$HOME/.profile' ]; then
+    echo 5
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
-    source $HOME/.profile
+    . $HOME/.profile
   fi
 
   echo ''
