@@ -2,7 +2,7 @@
 
 # define color escape codes
 RED='\033[0;31m'
-GREEN = '\033[0;32m'
+GREEN='\033[0;32m'
 NC='\033[0m'
 
 # Install unzip if command not found
@@ -65,7 +65,7 @@ if ! [ -x "$(command -v darknode)" ]; then
       "$sourceCommand" $HOME/.zprofile
     elif [ -f "$HOME/.zshrc" ] ; then
       echo 2
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
+      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zshrc
       "$sourceCommand" $HOME/.zshrc
     elif [ -f "$HOME/.profile" ] ; then
       echo 3
@@ -94,10 +94,9 @@ if ! [ -x "$(command -v darknode)" ]; then
 
   echo ''
   echo 'If you are using a custom shell, make sure you update your PATH.'
-  echo -e "${GREEN} $ export PATH=\$PATH:\$HOME/.darknode/bin ${NC}"
+  echo "${GREEN} $ export PATH=\$PATH:\$HOME/.darknode/bin ${NC}"
 fi
 
 echo ''
 echo 'Done! Restart terminal and run the command below to begin.'
-echo ''
-echo -e "${GREEN} $ darknode up --help ${NC}"
+echo "${GREEN} $ darknode up --help ${NC}"

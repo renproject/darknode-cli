@@ -1,6 +1,6 @@
-# Darknode Deployer
+# Darknode CLI
 
-The Darknode Deployer is a command-line tool for managing Darknodes on Republic Protocol.
+The Darknode CLI is a command-line tool for managing Darknodes on Republic Protocol.
 
 ## Getting Started on AWS
 
@@ -12,13 +12,13 @@ To jump straight into running your first Darknode on AWS, checkout our [Getting 
 
 ## Installation
 
-To download and install the Darknode Deployer, open a terminal and run:
+To download and install the Darknode CLI, open a terminal and run:
 
 ```sh
 curl https://darknode.republicprotocol.com/install.sh -sSf | sh
 ```
 
-This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode Deployer tool.
+This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode CLI.
 
 ## Usage 
 
@@ -32,7 +32,7 @@ To deploy a Darknode on AWS, open a terminal and run:
 darknode up --name my-first-darknode --provider aws --access-key YOUR-AWS-ACCESS-KEY --secret-key YOUR-AWS-SECRET-KEY
 ``` 
 
-The Darknode Deployer will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
+The Darknode CLI will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
 
 You can also specify the region and instance type you want to use for the Darknode:
 
@@ -67,7 +67,7 @@ We do not recommend using the `--skip` argument unless you are developing custom
 
 ### List all Darknodes
 
-The Darknode Deployer supports deploying multiple Darknodes. To list all available Darknodes, open a terminal and run:
+The Darknode CLI supports deploying multiple Darknodes. To list all available Darknodes, open a terminal and run:
 
 ```sh
 darknode list

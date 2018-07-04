@@ -19,15 +19,15 @@ var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 func main() {
 	// Create new cli application
 	app := cli.NewApp()
-	app.Name = "Darknode Deployer"
-	app.Usage = "A command-line tool for managing Darknodes on Republic Protocol."
+	app.Name = "Darknode CLI"
+	app.Usage = "A command-line tool for managing Darknodes."
 	app.Version = "1.0.0"
 
 	upFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
 			Value: "",
-			Usage: "A unique name for your Darknode",
+			Usage: "Unique name for the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "provider",
@@ -65,11 +65,11 @@ func main() {
 		cli.StringFlag{
 			Name:  "name",
 			Value: "",
-			Usage: "The name of the Darknode you want to destroy",
+			Usage: "Unique name of the Darknode tha will be destroyed",
 		},
 		cli.BoolFlag{
-			Name:  "skip",
-			Usage: "Skip confirmation and begin destroying immediately",
+			Name:  "force",
+			Usage: "Force the Darknode to be destroyed without interactive prompts",
 		},
 	}
 
@@ -77,7 +77,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "name",
 			Value: "",
-			Usage: "The name of the Darknode you want to operate",
+			Usage: "Unique name of the Darknode you want to operate",
 		},
 	}
 
