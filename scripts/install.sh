@@ -49,54 +49,35 @@ rm terraform.zip
 
 # make sure the binary is installed in the path
 if ! [ -x "$(command -v darknode)" ]; then
-  if [ "$ostype" = 'Linux' ] ; then
-     sourceCommand="."
-  else
-     sourceCommand="source"
-  fi
-
   path=$SHELL
   shell=${path##*/}
 
   if [ "$shell" = 'zsh' ] ; then
     if [ -f "$HOME/.zprofile" ] ; then
-      echo 1
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
-      "$sourceCommand" $HOME/.zprofile
     elif [ -f "$HOME/.zshrc" ] ; then
-      echo 2
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zshrc
-      "$sourceCommand" $HOME/.zshrc
     elif [ -f "$HOME/.profile" ] ; then
-      echo 3
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
-      "$sourceCommand" $HOME/.profile
     fi
   elif  [ "$shell" = 'bash' ] ; then
     if [ -f "$HOME/.bash_profile" ] ; then
-      echo 4
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
-      "$sourceCommand" $HOME/.bash_profile
     elif [ -f "$HOME/.bashrc" ] ; then
-      echo 5
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
-      "$sourceCommand" $HOME/.bashrc
     elif [ -f "$HOME/.profile" ] ; then
-      echo 6
       echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
-      "$sourceCommand" $HOME/.profile
     fi
   elif [ -f "$HOME/.profile" ] ; then
-    echo 7
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
-    "$sourceCommand" $HOME/.profile
   fi
 
   echo ''
   echo 'If you are using a custom shell, make sure you update your PATH.'
-  echo "${GREEN} $ export PATH=\$PATH:\$HOME/.darknode/bin ${NC}"
+  echo "${GREEN}export PATH=\$PATH:\$HOME/.darknode/bin ${NC}"
 fi
 
 echo ''
-echo 'Done! Restart terminal and run the command below to begin.'
-echo "${GREEN} $ darknode up --help ${NC}"
+echo "${GREEN}Done! Restart terminal and run the command below to begin.${NC}"
+echo ''
+echo "${GREEN}darknode up --help ${NC}"
