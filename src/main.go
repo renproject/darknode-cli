@@ -26,6 +26,7 @@ func main() {
 	upFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
+			Value: "",
 			Usage: "Unique name for the Darknode",
 		},
 		cli.StringFlag{
@@ -63,7 +64,8 @@ func main() {
 	destroyFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
-			Usage: "Unique name of the Darknode that will be destroyed",
+			Value: "",
+			Usage: "Unique name of the Darknode tha will be destroyed",
 		},
 		cli.BoolFlag{
 			Name:  "force",
@@ -74,7 +76,8 @@ func main() {
 	nameFlag := []cli.Flag{
 		cli.StringFlag{
 			Name:  "name",
-			Usage: "The name of the Darknode you want to operate",
+			Value: "",
+			Usage: "Unique name of the Darknode you want to operate",
 		},
 	}
 
@@ -232,9 +235,9 @@ func listAllNodes() error {
 	if len(nodes) == 0 {
 		return fmt.Errorf("%scannot find any node%s", red, reset)
 	} else {
-		fmt.Printf("%15s | %30s | %15s | %20s \n", "name", "Address", "ip", "tags")
+		fmt.Printf("%20s | %30s | %15s |\n", "name", "Address", "ip")
 		for i := range nodes {
-			fmt.Printf("%15s | %30s | %15s | %20s \n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3])
+			fmt.Printf("%20s | %30s | %15s |\n", nodes[i][0], nodes[i][1], nodes[i][2])
 		}
 	}
 
