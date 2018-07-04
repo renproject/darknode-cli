@@ -9,6 +9,7 @@ import (
 	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/republicprotocol/republic-go/identity"
 	"github.com/republicprotocol/republic-go/logger"
+	"github.com/urfave/cli"
 )
 
 // Fixme : right now the bootstrap node address are hardcoded
@@ -23,33 +24,57 @@ var BootstrapNodes = func() []identity.MultiAddress {
 }()
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew(directory string) (config.Config, error) {
+func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, error) {
+	keystoreFile := ctx.String("keystore")
+	passphrase := ctx.String("passphrase")
+	configFile := ctx.String("config")
 
-	keystore, err := crypto.RandomKeystore()
-	if err != nil {
-		return config.Config{}, err
-	}
-	ethereumConfig := contract.Config{
-		Network: "testnet",
-		URI:     "https://kovan.infura.io",
+	// Parse the keystore or create a new random one.
+	var keystore crypto.Keystore
+	var err error
+	if keystoreFile == "" {
+		keystore, err = crypto.RandomKeystore()
+		if err != nil {
+			return config.Config{}, err
+		}
+	} else {
+		data, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			return config.Config{}, err
+		}
+		if err := keystore.DecryptFromJSON(data, passphrase); err != nil {
+			return config.Config{}, err
+		}
 	}
 
-	cfg := config.Config{
-		Keystore:                keystore,
-		Host:                    "0.0.0.0",
-		Port:                    "18514",
-		Address:                 identity.Address(keystore.Address()),
-		BootstrapMultiAddresses: BootstrapNodes,
-		Logs: logger.Options{
-			Plugins: []logger.PluginOptions{
-				{
-					File: &logger.FilePluginOptions{
-						Path: "/home/ubuntu/.darknode/darknode.out",
+	// Parse the config or create a new random one
+	var cfg config.Config
+	if configFile == "" {
+		cfg = config.Config{
+			Keystore:                keystore,
+			Host:                    "0.0.0.0",
+			Port:                    "18514",
+			Address:                 identity.Address(keystore.Address()),
+			BootstrapMultiAddresses: BootstrapNodes,
+			Logs: logger.Options{
+				Plugins: []logger.PluginOptions{
+					{
+						File: &logger.FilePluginOptions{
+							Path: "/home/ubuntu/.darknode/darknode.out",
+						},
 					},
 				},
 			},
-		},
-		Ethereum: ethereumConfig,
+			Ethereum: contract.Config{
+				Network: "testnet",
+				URI:     "https://kovan.infura.io",
+			},
+		}
+	} else {
+		cfg, err = config.NewConfigFromJSONFile(configFile)
+		if err != nil {
+			return config.Config{}, nil
+		}
 	}
 
 	configData, err := json.MarshalIndent(cfg, "", "    ")

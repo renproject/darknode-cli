@@ -104,7 +104,7 @@ resource "aws_instance" "darknode" {
   }
 
   provisioner "remote-exec" {
-    script = "${var.path}/scripts/onCreate.sh"
+    script = "${var.path}/scripts/up.sh"
 
     connection {
       type        = "ssh"

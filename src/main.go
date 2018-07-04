@@ -23,19 +23,35 @@ func main() {
 	app.Usage = "A command-line tool for managing Darknodes."
 	app.Version = "1.1.0"
 
+	// Define some of the flags
+	nameFlag := cli.StringFlag{
+		Name:  "name",
+		Value: "",
+		Usage: "Unique name of the Darknode",
+	}
+	tagFlag := cli.StringFlag{
+		Name:  "tag",
+		Usage: "Tag of darknodes ",
+	}
+	tagsFlag := cli.StringFlag{
+		Name:  "tags",
+		Usage: "Tags for the Darknode ",
+	}
+
+	// Flag for each command
 	upFlags := []cli.Flag{
+		nameFlag, tagsFlag,
 		cli.StringFlag{
-			Name:  "name",
-			Value: "",
-			Usage: "Unique name for the Darknode",
+			Name:  "keystore",
+			Usage: "Name of the keystore `file` for the Darknode",
 		},
 		cli.StringFlag{
-			Name:  "tag",
-			Usage: "Tags for the Darknode (optional)",
+			Name:  "passphrase",
+			Usage: "Passphrase for decrypting the keystore file",
 		},
 		cli.StringFlag{
 			Name:  "config",
-			Usage: "Configuration `file` for the Darknode (optional)",
+			Usage: "Name of the configuration `file` for the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "provider",
@@ -43,7 +59,6 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "aws-region",
-			Value: "random",
 			Usage: "AWS region for the Darknode ",
 		},
 		cli.StringFlag{
@@ -61,23 +76,19 @@ func main() {
 		},
 	}
 
-	destroyFlags := []cli.Flag{
-		cli.StringFlag{
-			Name:  "name",
-			Value: "",
-			Usage: "Unique name of the Darknode tha will be destroyed",
-		},
+	updateFlags := []cli.Flag{
+		nameFlag, tagFlag,
 		cli.BoolFlag{
-			Name:  "force",
-			Usage: "Force the Darknode to be destroyed without interactive prompts",
+			Name:  "config",
+			Usage: "update the node config to the local one",
 		},
 	}
 
-	nameFlag := []cli.Flag{
-		cli.StringFlag{
-			Name:  "name",
-			Value: "",
-			Usage: "Unique name of the Darknode you want to operate",
+	destroyFlags := []cli.Flag{
+		nameFlag,
+		cli.BoolFlag{
+			Name:  "force",
+			Usage: "Force the Darknode to be destroyed without interactive prompts",
 		},
 	}
 
@@ -103,17 +114,33 @@ func main() {
 		{
 			Name:  "update",
 			Usage: "Update your Darknode to the latest release",
-			Flags: nameFlag,
+			Flags: updateFlags,
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
 			},
 		},
 		{
 			Name:  "ssh",
-			Flags: nameFlag,
+			Flags: []cli.Flag{nameFlag},
 			Usage: "SSH into your Darknode",
 			Action: func(c *cli.Context) error {
 				return sshNode(c)
+			},
+		},
+		{
+			Name:  "start",
+			Flags: []cli.Flag{nameFlag},
+			Usage: "start a darknode by its name",
+			Action: func(c *cli.Context) error {
+				return startNode(c)
+			},
+		},
+		{
+			Name:  "stop",
+			Flags: []cli.Flag{nameFlag},
+			Usage: "stop a darknode by its name",
+			Action: func(c *cli.Context) error {
+				return stopNode(c)
 			},
 		},
 		{
@@ -140,61 +167,6 @@ func main() {
 	}
 }
 
-// updateNode update the Darknode to the latest release from master branch.
-// This will restart the Darknode.
-func updateNode(ctx *cli.Context) error {
-	name := ctx.String("name")
-	if name == "" {
-		cli.ShowCommandHelp(ctx, "update")
-		return ErrEmptyNodeName
-	}
-	nodeDirectory := Directory + "/darknodes/" + name
-	ip, err := getIp(nodeDirectory)
-	if err != nil {
-		return err
-	}
-	updateScript := path.Join(os.Getenv("HOME"), ".darknode/scripts/update.sh")
-	update, err := ioutil.ReadFile(updateScript)
-	if err != nil {
-		return err
-	}
-	keyPairPath := nodeDirectory + "/ssh_keypair"
-	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", string(update))
-	pipeToStd(updateCmd)
-	if err := updateCmd.Start(); err != nil {
-		return err
-	}
-
-	if err := updateCmd.Wait(); err != nil {
-		return err
-	}
-	fmt.Printf("%sDarknode has been updated to the latest version.%s", green, reset)
-
-	return nil
-}
-
-// sshNode will ssh into the Darknode
-func sshNode(ctx *cli.Context) error {
-	name := ctx.String("name")
-	if name == "" {
-		cli.ShowCommandHelp(ctx, "ssh")
-		return ErrEmptyNodeName
-	}
-	nodeDirectory := Directory + "/darknodes/" + name
-	ip, err := getIp(nodeDirectory)
-	if err != nil {
-		return err
-	}
-	keyPairPath := nodeDirectory + "/ssh_keypair"
-	ssh := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip)
-	pipeToStd(ssh)
-	if err := ssh.Start(); err != nil {
-		return err
-	}
-
-	return ssh.Wait()
-}
-
 // listAllNodes will ssh into the Darknode
 func listAllNodes() error {
 	files, err := ioutil.ReadDir(Directory + "/darknodes")
@@ -204,7 +176,6 @@ func listAllNodes() error {
 	nodes := [][]string{}
 
 	for _, f := range files {
-
 		addressFile := Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
 		data, err := ioutil.ReadFile(addressFile)
 		if err != nil {
@@ -235,11 +206,66 @@ func listAllNodes() error {
 	if len(nodes) == 0 {
 		return fmt.Errorf("%scannot find any node%s", red, reset)
 	} else {
-		fmt.Printf("%20s | %30s | %15s |\n", "name", "Address", "ip")
+		fmt.Printf("%20s | %30s | %15s | %20s \n", "name", "Address", "ip", "tags")
 		for i := range nodes {
-			fmt.Printf("%20s | %30s | %15s |\n", nodes[i][0], nodes[i][1], nodes[i][2])
+			fmt.Printf("%20s | %30s | %15s | %20s \n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3])
 		}
 	}
+
+	return nil
+}
+
+// startNode starts a node by its name
+func startNode(ctx *cli.Context) error {
+	name := ctx.String("name")
+	if name == "" {
+		cli.ShowCommandHelp(ctx, "start")
+		return ErrEmptyNodeName
+	}
+	nodeDirectory := Directory + "/darknodes/" + name
+	ip, err := getIp(nodeDirectory)
+	if err != nil {
+		return err
+	}
+	startScript := "sudo systemctl start darknode"
+	keyPairPath := nodeDirectory + "/ssh_keypair"
+	startCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", startScript)
+	pipeToStd(startCmd)
+	if err := startCmd.Start(); err != nil {
+		return err
+	}
+	if err := startCmd.Wait(); err != nil {
+		return err
+	}
+	fmt.Printf("%sDarknode has been turned on.%s \n", green, reset)
+
+	return nil
+}
+
+// stopNode stops a node by its name
+func stopNode(ctx *cli.Context) error {
+
+	name := ctx.String("name")
+	if name == "" {
+		cli.ShowCommandHelp(ctx, "stop")
+		return ErrEmptyNodeName
+	}
+	nodeDirectory := Directory + "/darknodes/" + name
+	ip, err := getIp(nodeDirectory)
+	if err != nil {
+		return err
+	}
+	stopScript := "sudo systemctl stop darknode"
+	keyPairPath := nodeDirectory + "/ssh_keypair"
+	stopCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", stopScript)
+	pipeToStd(stopCmd)
+	if err := stopCmd.Start(); err != nil {
+		return err
+	}
+	if err := stopCmd.Wait(); err != nil {
+		return err
+	}
+	fmt.Printf("%sDarknode has been turned off.%s \n", green, reset)
 
 	return nil
 }

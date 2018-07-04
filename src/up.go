@@ -53,10 +53,10 @@ func deployNode(ctx *cli.Context) error {
 // deployToAWS parses the AWS credentials and use terraform to deploy the node
 // to AWS.
 func deployToAWS(ctx *cli.Context) error {
-	accessKey := ctx.String("access-key")
-	secretKey := ctx.String("secret-key")
+	accessKey := ctx.String("aws-access-key")
+	secretKey := ctx.String("aws-secret-key")
 	name := ctx.String("name")
-	tag := ctx.String("tag")
+	tags := ctx.String("tags")
 
 	// Check input flags
 	var nodeDirectory string
@@ -72,27 +72,20 @@ func deployToAWS(ctx *cli.Context) error {
 			return ErrKeyNotFound
 		}
 	}
+	// Check darknode name and make directory for the node
 	if name == "" {
-		for i := 1; ; i++ {
-			if _, err := os.Stat(Directory + fmt.Sprintf("/darknodes/darknode%d", i)); os.IsNotExist(err) {
-				nodeDirectory = Directory + fmt.Sprintf("/darknodes/darknode%d", i)
-				break
-			}
-		}
-	} else {
-		if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
-			return ErrNodeExist
-		}
-		nodeDirectory = Directory + "/darknodes/" + name
+		return ErrEmptyNodeName
 	}
-
-	// Create directory
+	if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
+		return ErrNodeExist
+	}
+	nodeDirectory = Directory + "/darknodes/" + name
 	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
 		return err
 	}
+
 	// Store the tags
-	tags := strings.Replace(tag, "," , " ", -1 )
-	if err := ioutil.WriteFile(nodeDirectory + "tags.out",[]byte(tags), 0600); err !=nil {
+	if err := ioutil.WriteFile(nodeDirectory+"/tags.out", []byte(strings.ToLower(strings.TrimSpace(tags))), 0666); err != nil {
 		return err
 	}
 
@@ -101,9 +94,8 @@ func deployToAWS(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
 	// Generate configs for the node
-	config, err := GetConfigOrGenerateNew(nodeDirectory)
+	config, err := GetConfigOrGenerateNew(ctx, nodeDirectory)
 	if err != nil {
 		return err
 	}
@@ -115,11 +107,17 @@ func deployToAWS(ctx *cli.Context) error {
 		return err
 	}
 	if err := runTerraform(nodeDirectory); err != nil {
+		if err := cleanUp(nodeDirectory); err != nil {
+			return err
+		}
 		return err
 	}
 
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
+		if err := cleanUp(nodeDirectory); err != nil {
+			return err
+		}
 		return err
 	}
 	fmt.Printf("\n")
@@ -199,4 +197,13 @@ module "node-%v" {
 // to deploy the node to digital ocean.
 func deployToDigitalOcean(ctx *cli.Context) error {
 	panic("unimplemented")
+}
+
+// cleanUp removes the directory
+func cleanUp(nodeDirectory string) error {
+	cleanCmd := exec.Command("rm", "-rf", nodeDirectory)
+	if err := cleanCmd.Start(); err != nil {
+		return err
+	}
+	return cleanCmd.Wait()
 }

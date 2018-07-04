@@ -204,7 +204,7 @@ func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
 	if !StringInSlice(instance, AllAwsInstances) {
 		return "", "", UnSupportedInstanceType
 	}
-u
+
 	return region, instance, nil
 }
 

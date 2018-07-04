@@ -10,6 +10,9 @@ import (
 	"github.com/republicprotocol/republic-go/identity"
 )
 
+// ErrNoNodesFound is returned when no nodes can be found with the given tag.
+var ErrNoNodesFound = fmt.Errorf("%sno nodes can be found with the given tag%s", red, reset)
+
 // StringInSlice checks whether the string is in the slice
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
@@ -68,4 +71,26 @@ func getIp(nodeDirectory string) (string, error) {
 	}
 
 	return multi.ValueForProtocol(identity.IP4Code)
+}
+
+// getNodesByTag return the names of the nodes having the given tag.
+func getNodesByTag(tag string) ([]string, error) {
+	files, err := ioutil.ReadDir(Directory + "/darknodes")
+	if err != nil {
+		return nil, err
+	}
+	nodes := []string{}
+
+	for _, f := range files {
+		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tags, err := ioutil.ReadFile(tagFile)
+		if err != nil {
+			continue
+		}
+		if strings.Contains(string(tags), strings.ToLower(tag)) {
+			nodes = append(nodes, f.Name())
+		}
+	}
+
+	return nodes, nil
 }
