@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"sync"
 
+	"github.com/republicprotocol/republic-go/logger"
 	"github.com/republicprotocol/republic-go/shamir"
 )
 
@@ -25,7 +27,7 @@ var ErrJoinLengthExceedsMax = errors.New("join length exceeds max")
 // A JoinID is used to identify an SMPC join over a network of SMPC nodes. For
 // a value to be joined, all SMPC nodes must use the same JoinID for that
 // value.
-type JoinID [32]byte
+type JoinID [33]byte
 
 // A Join is used to join a set of shamir.Shares. The shamir.Shares within a
 // Join are all associated with different shared values. All shamir.Shares must
@@ -180,6 +182,7 @@ func (joiner *Joiner) insertJoin(join Join, callback Callback, overrideCallback 
 
 		// Insert this join, if it is needed, and set the callback
 		if len(join.Shares) != joinSet.ValuesLen {
+			logger.Error(fmt.Sprintf("%v: expected %v, got %v", ErrJoinLengthUnequal, joinSet.ValuesLen, len(join.Shares)))
 			return ErrJoinLengthUnequal
 		}
 		if !joinSet.ValuesOk {
