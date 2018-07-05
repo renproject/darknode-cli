@@ -10,9 +10,6 @@ import (
 	"github.com/republicprotocol/republic-go/identity"
 )
 
-// ErrNoNodesFound is returned when no nodes can be found with the given tag.
-var ErrNoNodesFound = fmt.Errorf("%sno nodes can be found with the given tag%s", red, reset)
-
 // StringInSlice checks whether the string is in the slice
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {

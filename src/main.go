@@ -53,9 +53,13 @@ func main() {
 			Name:  "config",
 			Usage: "Name of the configuration `file` for the Darknode",
 		},
-		cli.StringFlag{
-			Name:  "provider",
-			Usage: "Cloud provider used to provision the Darknode",
+		cli.BoolFlag{
+			Name:  "aws",
+			Usage: "Use AWS to provision the Darknode",
+		},
+		cli.BoolFlag{
+			Name:  "digitalocean",
+			Usage: "Use digital-ocean to provision the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "aws-region",
@@ -76,7 +80,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "aws-allocation-id",
-			Usage: "Allocation ID of the elastic IP address you want to associate",
+			Usage: "Allocation ID of the elastic IP you want to associate",
 		},
 	}
 
@@ -139,7 +143,7 @@ func main() {
 		{
 			Name:  "start",
 			Flags: []cli.Flag{nameFlag},
-			Usage: "start a darknode by its name",
+			Usage: "Start a Darknode by its name",
 			Action: func(c *cli.Context) error {
 				return startNode(c)
 			},
@@ -147,7 +151,7 @@ func main() {
 		{
 			Name:  "stop",
 			Flags: []cli.Flag{nameFlag},
-			Usage: "stop a darknode by its name",
+			Usage: "Stop a Darknode by its name",
 			Action: func(c *cli.Context) error {
 				return stopNode(c)
 			},

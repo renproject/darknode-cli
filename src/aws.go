@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"io/ioutil"
 	"math/rand"
 	"strings"
@@ -12,13 +11,6 @@ import (
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
 )
-
-// UnknownRegion is returned when the provided region is not valid on AWS.
-var UnknownRegion error = errors.New("there is no such region on AWS")
-
-// UnSupportedInstanceType is returned when the provided instance is not
-// supported in the selected region.
-var UnSupportedInstanceType error = errors.New("instance type is not supported in the region")
 
 // Available regions on AWS.
 const (

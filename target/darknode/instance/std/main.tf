@@ -9,7 +9,6 @@ variable "ssh_public_key" {}
 variable "ssh_private_key_location" {}
 variable "access_key" {}
 variable "secret_key" {}
-variable "is_bootstrap" {}
 variable "port" {}
 variable "path" {}
 
