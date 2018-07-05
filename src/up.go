@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -103,7 +104,7 @@ func deployToAWS(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := generateTerraformConfig(config, accessKey, secretKey, region, instance, pubKey, nodeDirectory); err != nil {
+	if err := generateTerraformConfig(ctx, config, accessKey, secretKey, region, instance, pubKey, nodeDirectory); err != nil {
 		return err
 	}
 	if err := runTerraform(nodeDirectory); err != nil {
@@ -152,7 +153,13 @@ func runTerraform(nodeDirectory string) error {
 	return nil
 }
 
-func generateTerraformConfig(config config.Config, accessKey, secretKey, region, instance, pubKey, nodeDirectory string) error {
+func generateTerraformConfig(ctx *cli.Context, config config.Config, accessKey, secretKey, region, instance, pubKey, nodeDirectory string) error {
+	allocationID := ctx.String("aws-allocation-id")
+	allocationConfig := ""
+	if allocationID != "" {
+		allocationConfig = fmt.Sprintf(`allocation_id = "%v"`, allocationID)
+	}
+
 	terraformConfig := fmt.Sprintf(`
 variable "access_key" {
 	default = "%v"
@@ -185,11 +192,12 @@ module "node-%v" {
     access_key = "${var.access_key}"
     secret_key = "${var.secret_key}"
     config = "%v/config.json"
-    is_bootstrap = "false"
     port = "%v"
     path = "%v"
-}`, config.Address, Directory, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory)
+    %v
+}`, config.Address, Directory, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory, allocationConfig)
 
+	log.Println(mode)
 	return ioutil.WriteFile(nodeDirectory+"/main.tf", []byte(terraformConfig+mode), 0600)
 }
 

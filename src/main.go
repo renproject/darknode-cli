@@ -74,20 +74,29 @@ func main() {
 			Name:  "aws-secret-key",
 			Usage: "AWS secret `key` (defaults to $HOME/.aws/credential)",
 		},
+		cli.StringFlag{
+			Name:  "aws-allocation-id",
+			Usage: "Allocation ID of the elastic IP address you want to associate",
+		},
 	}
 
 	updateFlags := []cli.Flag{
 		nameFlag, tagFlag,
 		cli.BoolFlag{
-			Name:  "config",
+			Name:  "config, c",
 			Usage: "update the node config to the local one",
+		},
+		cli.StringFlag{
+			Name:  "branch, b",
+			Value: "master",
+			Usage: "branch name of republic-go repo",
 		},
 	}
 
 	destroyFlags := []cli.Flag{
 		nameFlag,
 		cli.BoolFlag{
-			Name:  "force",
+			Name:  "force, f",
 			Usage: "Force the Darknode to be destroyed without interactive prompts",
 		},
 	}
