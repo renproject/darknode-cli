@@ -215,9 +215,9 @@ func listAllNodes() error {
 	if len(nodes) == 0 {
 		return fmt.Errorf("%scannot find any node%s", red, reset)
 	} else {
-		fmt.Printf("%20s | %30s | %15s | %20s \n", "name", "Address", "ip", "tags")
+		fmt.Printf("%-20s | %-30s | %-15s | %-20s \n", "name", "Address", "ip", "tags")
 		for i := range nodes {
-			fmt.Printf("%20s | %30s | %15s | %20s \n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3])
+			fmt.Printf("%-20s | %-30s | %-15s | %-20s \n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3])
 		}
 	}
 

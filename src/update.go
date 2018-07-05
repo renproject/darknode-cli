@@ -38,7 +38,7 @@ func updateNode(ctx *cli.Context) error {
 		}
 
 		for i := range nodeNames {
-			err := updateSingleNode(nodeNames[i], "master", updateConfig)
+			err := updateSingleNode(nodeNames[i], branch, updateConfig)
 			if err != nil {
 				return err
 			}
@@ -68,7 +68,6 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		if err := updateConfigCmd.Start(); err != nil {
 			return err
 		}
-
 		if err := updateConfigCmd.Wait(); err != nil {
 			return err
 		}
@@ -81,13 +80,14 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 cd ./go/src/github.com/republicprotocol/republic-go
 sudo git stash
 sudo git checkout %v
-sudo git fetch origin master
-sudo git reset --hard origin/master
+sudo git fetch origin %v
+sudo git reset --hard origin/%v
 cd cmd/darknode
 go install
 cd
 sudo service darknode restart
-`, branch)
+`, branch, branch, branch)
+
 	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateScript)
 	pipeToStd(updateCmd)
 	if err := updateCmd.Start(); err != nil {
