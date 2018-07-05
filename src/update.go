@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 
+	"github.com/republicprotocol/republic-go/dispatch"
 	"github.com/urfave/cli"
 )
 
@@ -36,12 +37,16 @@ func updateNode(ctx *cli.Context) error {
 		if len(nodeNames) == 0 {
 			return ErrNoNodesFound
 		}
-
-		for i := range nodeNames {
+		errs := make(chan error, len(nodeNames))
+		dispatch.CoForAll(nodeNames, func(i int) {
 			err := updateSingleNode(nodeNames[i], branch, updateConfig)
 			if err != nil {
-				return err
+				errs <- err
 			}
+		})
+
+		if len(errs) >= 1 {
+			return <-errs
 		}
 	}
 

@@ -156,8 +156,10 @@ func runTerraform(nodeDirectory string) error {
 func generateTerraformConfig(ctx *cli.Context, config config.Config, accessKey, secretKey, region, instance, pubKey, nodeDirectory string) error {
 	allocationID := ctx.String("aws-allocation-id")
 	allocationConfig := ""
+	tfFolder := "std"
 	if allocationID != "" {
 		allocationConfig = fmt.Sprintf(`allocation_id = "%v"`, allocationID)
+		tfFolder = "eip"
 	}
 
 	terraformConfig := fmt.Sprintf(`
@@ -181,7 +183,7 @@ variable "ssh_private_key_location" {
 	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
 	mode := fmt.Sprintf(`
 module "node-%v" {
-    source = "%v/instance"
+    source = "%v/instance/%v"
     ami = "%v"
     region = "%v"
     avz = "%v"
@@ -195,7 +197,7 @@ module "node-%v" {
     port = "%v"
     path = "%v"
     %v
-}`, config.Address, Directory, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory, allocationConfig)
+}`, config.Address, Directory, tfFolder, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory, allocationConfig)
 
 	log.Println(mode)
 	return ioutil.WriteFile(nodeDirectory+"/main.tf", []byte(terraformConfig+mode), 0600)
