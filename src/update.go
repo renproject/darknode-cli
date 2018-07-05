@@ -76,7 +76,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		if err := updateConfigCmd.Wait(); err != nil {
 			return err
 		}
-		fmt.Printf("%sDarknode config has been updated to the local version.%s", green, reset)
+		fmt.Printf("%sDarknode config has been updated to the local version.%s", GREEN, RESET)
 	}
 
 	updateScript := fmt.Sprintf(`
@@ -86,7 +86,7 @@ cd ./go/src/github.com/republicprotocol/republic-go
 sudo git stash
 sudo git checkout %v
 sudo git fetch origin %v
-sudo git reset --hard origin/%v
+sudo git RESET --hard origin/%v
 cd cmd/darknode
 go install
 cd
@@ -101,7 +101,7 @@ sudo service darknode restart
 	if err := updateCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%sDarknode has been updated to the latest version on %s branch.%s", green, branch, reset)
+	fmt.Printf("%sDarknode has been updated to the latest version on %s branch.%s", GREEN, branch, RESET)
 
 	return nil
 }

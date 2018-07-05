@@ -168,7 +168,7 @@ func main() {
 	// Show error message and display the help page for the app
 	app.CommandNotFound = func(c *cli.Context, command string) {
 		cli.ShowAppHelp(c)
-		fmt.Fprintf(c.App.Writer, "%scommand %q not found%s.\n", red, command, reset)
+		fmt.Fprintf(c.App.Writer, "%scommand %q not found%s.\n", RED, command, RESET)
 	}
 
 	// Start the app
@@ -217,7 +217,7 @@ func listAllNodes() error {
 	}
 
 	if len(nodes) == 0 {
-		return fmt.Errorf("%scannot find any node%s", red, reset)
+		return fmt.Errorf("%scannot find any node%s", RED, RESET)
 	} else {
 		fmt.Printf("%-20s | %-30s | %-15s | %-20s \n", "name", "Address", "ip", "tags")
 		for i := range nodes {
@@ -250,7 +250,7 @@ func startNode(ctx *cli.Context) error {
 	if err := startCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%sDarknode has been turned on.%s \n", green, reset)
+	fmt.Printf("%sDarknode has been turned on.%s \n", GREEN, RESET)
 
 	return nil
 }
@@ -278,7 +278,7 @@ func stopNode(ctx *cli.Context) error {
 	if err := stopCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%sDarknode has been turned off.%s \n", green, reset)
+	fmt.Printf("%sDarknode has been turned off.%s \n", GREEN, RESET)
 
 	return nil
 }

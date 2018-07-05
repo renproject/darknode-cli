@@ -115,9 +115,9 @@ func deployToAWS(ctx *cli.Context) error {
 		return err
 	}
 	fmt.Printf("\n")
-	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", green, reset)
-	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", green, reset)
-	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", green, ip, reset)
+	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", GREEN, RESET)
+	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
+	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
 	fmt.Printf("\n")
 	return nil
 }
@@ -133,7 +133,7 @@ func runTerraform(nodeDirectory string) error {
 	if err := init.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%sDeploying dark nodes to AWS%s...\n", green, reset)
+	fmt.Printf("%sDeploying dark nodes to AWS%s...\n", GREEN, RESET)
 	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
 	apply := exec.Command("bash", "-c", cmd)
 	pipeToStd(apply)

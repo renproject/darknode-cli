@@ -12,10 +12,10 @@ import (
 )
 
 // ErrNoDeploymentFound is returned when no node can be found for destroying
-var ErrNoDeploymentFound = fmt.Errorf("%scannot find any deployed node%s", red, reset)
+var ErrNoDeploymentFound = fmt.Errorf("%scannot find any deployed node%s", RED, RESET)
 
 // ErrEmptyNodeName is returned when user doesn't provide the node name.
-var ErrEmptyNodeName = fmt.Errorf("%snode name cannot be empty%s", red, reset)
+var ErrEmptyNodeName = fmt.Errorf("%snode name cannot be empty%s", RED, RESET)
 
 // destroyNode tears down the deployed darknode, but keep the config file.
 func destroyNode(ctx *cli.Context) error {
@@ -35,7 +35,7 @@ func destroyNode(ctx *cli.Context) error {
 		}
 
 		for {
-			fmt.Printf("You need to %sderegister your Darknode%s and %swithdraw all fees%s at\n", red, reset, red, reset)
+			fmt.Printf("You need to %sderegister your Darknode%s and %swithdraw all fees%s at\n", RED, RESET, RED, RESET)
 			fmt.Printf("https://darknode.republicprotocol.com/status/%v\n", ip)
 			fmt.Println("Have you deregistered your Darknode and withdrawn all fees? (Yes/No)")
 
