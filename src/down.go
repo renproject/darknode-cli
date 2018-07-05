@@ -11,24 +11,20 @@ import (
 	"github.com/urfave/cli"
 )
 
-// ErrNoDeploymentFound is returned when no node can be found for destroying
-var ErrNoDeploymentFound = fmt.Errorf("%scannot find any deployed node%s", RED, RESET)
-
-// ErrEmptyNodeName is returned when user doesn't provide the node name.
-var ErrEmptyNodeName = fmt.Errorf("%snode name cannot be empty%s", RED, RESET)
-
 // destroyNode tears down the deployed darknode, but keep the config file.
 func destroyNode(ctx *cli.Context) error {
 	// FIXME : currently it only supports tear down AWS deployment.
 	// Needs to figure out way which suits for all kinds of cloud service.
-	skip := ctx.Bool("force")
+	force := ctx.Bool("force")
 	name := ctx.String("name")
+
 	if name == "" {
 		cli.ShowCommandHelp(ctx, "down")
 		return ErrEmptyNodeName
 	}
+
 	nodeDirectory := Directory + "/darknodes/" + name
-	if !skip {
+	if !force {
 		ip, err := getIp(nodeDirectory)
 		if err != nil {
 			return ErrNoDeploymentFound

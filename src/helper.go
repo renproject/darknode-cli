@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -20,33 +19,7 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
-// Mkdir tries to create folder with the given name. If not success,
-// it will try appending number appended to the name.
-func Mkdir(name string) (string, error) {
-	// Try creating directory with the exact name we get
-	if _, err := os.Stat(name); os.IsNotExist(err) {
-		err = os.Mkdir(name, os.ModePerm)
-		if err == nil {
-			return name, nil
-		}
-	}
-
-	// Try creating directory with number appended to the name.
-	i := 1
-	for {
-		dirName := fmt.Sprintf("%v_%d", name, i)
-		if _, err := os.Stat(dirName); os.IsNotExist(err) {
-			err = os.Mkdir(dirName, os.ModePerm)
-			if err != nil {
-				return "", err
-			}
-			return dirName, nil
-		}
-		i++
-	}
-}
-
-// pipeToStd set the input and output stream of the command to os standard
+// pipeToStd sets the input and output stream of the command to os standard
 // input/output stream
 func pipeToStd(cmd *exec.Cmd) {
 	cmd.Stdin = os.Stdin
@@ -84,10 +57,19 @@ func getNodesByTag(tag string) ([]string, error) {
 		if err != nil {
 			continue
 		}
-		if strings.Contains(string(tags), strings.ToLower(tag)) {
+		if strings.Contains(string(tags), tag) {
 			nodes = append(nodes, f.Name())
 		}
 	}
 
 	return nodes, nil
+}
+
+// cleanUp removes the directory
+func cleanUp(nodeDirectory string) error {
+	cleanCmd := exec.Command("rm", "-rf", nodeDirectory)
+	if err := cleanCmd.Start(); err != nil {
+		return err
+	}
+	return cleanCmd.Wait()
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// updateNode update the Darknode to the latest release from master branch.
+// updateNode updates the Darknode to the latest release from master branch.
 // This will restart the Darknode.
 func updateNode(ctx *cli.Context) error {
 	name := ctx.String("name")
@@ -22,7 +22,7 @@ func updateNode(ctx *cli.Context) error {
 		return ErrEmptyNodeName
 	}
 
-	// update a single darknode
+	// update a single darknode by its name
 	if name != "" {
 		if err := updateSingleNode(name, branch, updateConfig); err != nil {
 			return err
@@ -76,7 +76,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		if err := updateConfigCmd.Wait(); err != nil {
 			return err
 		}
-		fmt.Printf("%sDarknode config has been updated to the local version.%s", GREEN, RESET)
+		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s", GREEN, name, RESET)
 	}
 
 	updateScript := fmt.Sprintf(`
@@ -101,7 +101,7 @@ sudo service darknode restart
 	if err := updateCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%sDarknode has been updated to the latest version on %s branch.%s", GREEN, branch, RESET)
+	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s", GREEN, name, branch, RESET)
 
 	return nil
 }

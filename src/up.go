@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -21,6 +20,7 @@ func deployNode(ctx *cli.Context) error {
 	aws := ctx.Bool("aws")
 	digitalOcean := ctx.Bool("digitalocean")
 
+	// Make sure only one provider is provided
 	counter, provider := 0, ""
 	for i, j := range []bool{aws, digitalOcean} {
 		if j {
@@ -52,10 +52,20 @@ func deployToAWS(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 
-	// Check input flags
-	var nodeDirectory string
+	// Check darknode name and make directory for the node
+	if name == "" {
+		return ErrEmptyNodeName
+	}
+	if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
+		return ErrNodeExist
+	}
+	nodeDirectory := Directory + "/darknodes/" + name
+	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
+		return err
+	}
+
+	// Try getting AWS credentials from the input or the default file.
 	if accessKey == "" || secretKey == "" {
-		// Try reading the credentials from the default file.
 		creds := credentials.NewSharedCredentials("", "default")
 		credValue, err := creds.Get()
 		if err != nil {
@@ -66,20 +76,9 @@ func deployToAWS(ctx *cli.Context) error {
 			return ErrKeyNotFound
 		}
 	}
-	// Check darknode name and make directory for the node
-	if name == "" {
-		return ErrEmptyNodeName
-	}
-	if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
-		return ErrNodeExist
-	}
-	nodeDirectory = Directory + "/darknodes/" + name
-	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
-		return err
-	}
 
 	// Store the tags
-	if err := ioutil.WriteFile(nodeDirectory+"/tags.out", []byte(strings.ToLower(strings.TrimSpace(tags))), 0666); err != nil {
+	if err := ioutil.WriteFile(nodeDirectory+"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
 		return err
 	}
 
@@ -133,23 +132,22 @@ func runTerraform(nodeDirectory string) error {
 	if err := init.Wait(); err != nil {
 		return err
 	}
+
 	fmt.Printf("%sDeploying dark nodes to AWS%s...\n", GREEN, RESET)
+
 	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
 	apply := exec.Command("bash", "-c", cmd)
 	pipeToStd(apply)
 	if err := apply.Start(); err != nil {
 		return err
 	}
-	if err := apply.Wait(); err != nil {
-		return err
-	}
-	return nil
+	return apply.Wait()
 }
 
 func generateTerraformConfig(ctx *cli.Context, config config.Config, accessKey, secretKey, region, instance, pubKey, nodeDirectory string) error {
 	allocationID := ctx.String("aws-allocation-id")
-	allocationConfig := ""
-	tfFolder := "std"
+
+	allocationConfig, tfFolder := "", "std"
 	if allocationID != "" {
 		allocationConfig = fmt.Sprintf(`allocation_id = "%v"`, allocationID)
 		tfFolder = "eip"
@@ -192,7 +190,6 @@ module "node-%v" {
     %v
 }`, config.Address, Directory, tfFolder, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory, allocationConfig)
 
-	log.Println(mode)
 	return ioutil.WriteFile(nodeDirectory+"/main.tf", []byte(terraformConfig+mode), 0600)
 }
 
@@ -200,13 +197,4 @@ module "node-%v" {
 // to deploy the node to digital ocean.
 func deployToDigitalOcean(ctx *cli.Context) error {
 	panic("unimplemented")
-}
-
-// cleanUp removes the directory
-func cleanUp(nodeDirectory string) error {
-	cleanCmd := exec.Command("rm", "-rf", nodeDirectory)
-	if err := cleanCmd.Start(); err != nil {
-		return err
-	}
-	return cleanCmd.Wait()
 }

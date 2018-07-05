@@ -31,7 +31,7 @@ func main() {
 	}
 	tagFlag := cli.StringFlag{
 		Name:  "tag",
-		Usage: "Tag of darknodes ",
+		Usage: "Tag of darknodes",
 	}
 	tagsFlag := cli.StringFlag{
 		Name:  "tags",
@@ -159,8 +159,9 @@ func main() {
 		{
 			Name:  "list",
 			Usage: "List all your deployed Darknodes",
+			Flags: []cli.Flag{tagFlag},
 			Action: func(c *cli.Context) error {
-				return listAllNodes()
+				return listAllNodes(c)
 			},
 		},
 	}
@@ -181,7 +182,9 @@ func main() {
 }
 
 // listAllNodes will ssh into the Darknode
-func listAllNodes() error {
+func listAllNodes(ctx *cli.Context) error {
+	tag := ctx.String("tag")
+
 	files, err := ioutil.ReadDir(Directory + "/darknodes")
 	if err != nil {
 		return err
@@ -189,6 +192,15 @@ func listAllNodes() error {
 	nodes := [][]string{}
 
 	for _, f := range files {
+		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tags, err := ioutil.ReadFile(tagFile)
+		if err != nil {
+			continue
+		}
+		if !strings.Contains(string(tags), tag) {
+			continue
+		}
+
 		addressFile := Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
 		data, err := ioutil.ReadFile(addressFile)
 		if err != nil {
@@ -203,12 +215,6 @@ func listAllNodes() error {
 			continue
 		}
 		ip, err := multi.ValueForProtocol(identity.IP4Code)
-		if err != nil {
-			continue
-		}
-
-		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
-		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
 		}

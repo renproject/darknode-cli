@@ -15,9 +15,9 @@ var ErrKeyNotFound = fmt.Errorf("%splease provide your AWS access key and secret
 
 // ErrNodeExist is returned when user tries to created a new node with name
 // already exists.
-var ErrNodeExist = fmt.Errorf("%snode with the name already exists%s", RED, RESET)
+var ErrNodeExist = fmt.Errorf("%snode with same name already exists%s", RED, RESET)
 
-// ErrMultipleProviders is returned when user has given more than one provider
+// ErrMultipleProviders is returned when user gives more than one provider.
 var ErrMultipleProviders = fmt.Errorf("%splease give only one provider%s", RED, RESET)
 
 // ErrUnknownProvider is returned when user wants to deploy darknode to an
@@ -36,3 +36,9 @@ var UnSupportedInstanceType = fmt.Errorf("%sinstance type is not supported in th
 
 // ErrNoNodesFound is returned when no nodes can be found with the given tag.
 var ErrNoNodesFound = fmt.Errorf("%sno nodes can be found with the given tag%s", RED, RESET)
+
+// ErrNoDeploymentFound is returned when no node can be found for destroying
+var ErrNoDeploymentFound = fmt.Errorf("%scannot find any deployed node%s", RED, RESET)
+
+// ErrEmptyNodeName is returned when user doesn't provide the node name.
+var ErrEmptyNodeName = fmt.Errorf("%snode name cannot be empty%s", RED, RESET)
