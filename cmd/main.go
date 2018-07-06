@@ -26,16 +26,15 @@ func main() {
 	// Define some of the flags
 	nameFlag := cli.StringFlag{
 		Name:  "name",
-		Value: "",
-		Usage: "Unique name of the Darknode",
+		Usage: "A unique human-readable `string` for identifying the Darknode",
 	}
 	tagFlag := cli.StringFlag{
 		Name:  "tag",
-		Usage: "Tag of darknodes",
+		Usage: "A human-readable `string` for identifying groups of Darknodes",
 	}
 	tagsFlag := cli.StringFlag{
 		Name:  "tags",
-		Usage: "Tags for the Darknode ",
+		Usage: "Multiple human-readable comma separated `strings` for identifying groups of Darknodes",
 	}
 
 	// Flag for each command
@@ -43,57 +42,61 @@ func main() {
 		nameFlag, tagsFlag,
 		cli.StringFlag{
 			Name:  "keystore",
-			Usage: "Name of the keystore `file` for the Darknode",
+			Usage: "An optional keystore `file` that will be used for the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "passphrase",
-			Usage: "Passphrase for decrypting the keystore file",
+			Usage: "An optional `secret` for decrypting the keystore file",
 		},
 		cli.StringFlag{
 			Name:  "config",
-			Usage: "Name of the configuration `file` for the Darknode",
+			Usage: "An optional configuration `file` for the Darknode",
 		},
+
+		// AWS flags
 		cli.BoolFlag{
 			Name:  "aws",
-			Usage: "Use AWS to provision the Darknode",
-		},
-		cli.BoolFlag{
-			Name:  "digitalocean",
-			Usage: "Use digital-ocean to provision the Darknode",
-		},
-		cli.StringFlag{
-			Name:  "aws-region",
-			Usage: "AWS region for the Darknode ",
-		},
-		cli.StringFlag{
-			Name:  "aws-instance",
-			Value: "t2.small",
-			Usage: "AWS EC2 instance type for the Darknode",
+			Usage: "AWS will be used to provision the Darknode",
 		},
 		cli.StringFlag{
 			Name:  "aws-access-key",
-			Usage: "AWS access `key` (defaults to $HOME/.aws/credential)",
+			Usage: "AWS access `key` for programmatic access",
 		},
 		cli.StringFlag{
 			Name:  "aws-secret-key",
-			Usage: "AWS secret `key` (defaults to $HOME/.aws/credential)",
+			Usage: "AWS secret `key` for programmatic access",
 		},
 		cli.StringFlag{
-			Name:  "aws-allocation-id",
-			Usage: "Allocation ID of the elastic IP you want to associate",
+			Name:  "aws-region",
+			Usage: "An optional AWS region (default: random)",
+		},
+		cli.StringFlag{
+			Name:  "aws-instance",
+			Value: "t2.medium",
+			Usage: "An optional AWS EC2 instance type",
+		},
+		cli.StringFlag{
+			Name:  "aws-elastic-ip",
+			Usage: "An optional allocation ID for an elastic IP address",
+		},
+
+		// Digital Ocean flags
+		cli.BoolFlag{
+			Name:  "digitalocean",
+			Usage: "Digital Ocean will be used to provision the Darknode",
 		},
 	}
 
 	updateFlags := []cli.Flag{
 		nameFlag, tagFlag,
-		cli.BoolFlag{
-			Name:  "config, c",
-			Usage: "update the node config to the local one",
-		},
 		cli.StringFlag{
 			Name:  "branch, b",
 			Value: "master",
-			Usage: "branch name of republic-go repo",
+			Usage: "Release `branch` used to update the software",
+		},
+		cli.BoolFlag{
+			Name:  "config, c",
+			Usage: "An optional configuration `file` used to update the configuration",
 		},
 	}
 
@@ -101,7 +104,7 @@ func main() {
 		nameFlag,
 		cli.BoolFlag{
 			Name:  "force, f",
-			Usage: "Force the Darknode to be destroyed without interactive prompts",
+			Usage: "Force destruction without interactive prompts",
 		},
 	}
 
@@ -117,7 +120,7 @@ func main() {
 		},
 		{
 			Name:    "destroy",
-			Usage:   "Tear down the Darknode and clean-up files",
+			Usage:   "Destroy one of your Darknode",
 			Aliases: []string{"down"},
 			Flags:   destroyFlags,
 			Action: func(c *cli.Context) error {
@@ -126,7 +129,7 @@ func main() {
 		},
 		{
 			Name:  "update",
-			Usage: "Update your Darknode to the latest release",
+			Usage: "Update your Darknodes to the latest software and configuration",
 			Flags: updateFlags,
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
@@ -135,7 +138,7 @@ func main() {
 		{
 			Name:  "ssh",
 			Flags: []cli.Flag{nameFlag},
-			Usage: "SSH into your Darknode",
+			Usage: "SSH into one of your Darknode",
 			Action: func(c *cli.Context) error {
 				return sshNode(c)
 			},
@@ -143,7 +146,7 @@ func main() {
 		{
 			Name:  "start",
 			Flags: []cli.Flag{nameFlag},
-			Usage: "Start a Darknode by its name",
+			Usage: "Start one of your Darknodes from a suspended state",
 			Action: func(c *cli.Context) error {
 				return startNode(c)
 			},
@@ -151,14 +154,14 @@ func main() {
 		{
 			Name:  "stop",
 			Flags: []cli.Flag{nameFlag},
-			Usage: "Stop a Darknode by its name",
+			Usage: "Stop one of your Darknodes by putting it into a suspended state",
 			Action: func(c *cli.Context) error {
 				return stopNode(c)
 			},
 		},
 		{
 			Name:  "list",
-			Usage: "List all your deployed Darknodes",
+			Usage: "List all of your Darknodes",
 			Flags: []cli.Flag{tagFlag},
 			Action: func(c *cli.Context) error {
 				return listAllNodes(c)
