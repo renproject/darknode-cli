@@ -29,7 +29,7 @@ This will download the required binaries and templates and install them to the `
 To deploy a Darknode on AWS, open a terminal and run:
 
 ```sh
-darknode up --name my-first-darknode --provider aws --access-key YOUR-AWS-ACCESS-KEY --secret-key YOUR-AWS-SECRET-KEY
+darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
 ``` 
 
 The Darknode CLI will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
@@ -37,11 +37,17 @@ The Darknode CLI will automatically use the credentials available at `$HOME/.aws
 You can also specify the region and instance type you want to use for the Darknode:
 
 ```sh
-darknode up --name my-first-darknode --provider aws --access-key YOUR-AWS-ACCESS-KEY --secret-key YOUR-AWS-SECRET-KEY --region eu-west-1 --instance t2.small
+darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
 ``` 
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
+You can also associate the darknode to an elastic IP by specifing the `allocation_id`. 
+Make sure you give the same region of the elastic to the darknode. 
+
+```sh
+darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP
+``` 
 
 #### Digital Ocean
 
@@ -60,10 +66,10 @@ darknode destroy --name my-first-darknode
 To avoid the command-line prompt reminding you to deregister your Darknode, use the `--skip` argument: 
 
 ```sh
-darknode destroy --name my-first-darknode --skip
+darknode destroy --name my-first-darknode --force
 ```
 
-We do not recommend using the `--skip` argument unless you are developing custom tools that manage your Darknodes automatically.
+We do not recommend using the `--force` argument unless you are developing custom tools that manage your Darknodes automatically.
 
 ### List all Darknodes
 
@@ -72,6 +78,26 @@ The Darknode CLI supports deploying multiple Darknodes. To list all available Da
 ```sh
 darknode list
 ```
+
+### Start Darknode
+
+To turn on your darknode, open a terminal and run: 
+
+```sh
+darknode start --name my-firt-darknode
+``` 
+
+If it's already on, `start` will do nothing.
+
+### Stop Darknode
+
+To turn off your darknode, open a terminal and run: 
+
+```sh
+darknode stop --name my-firt-darknode
+``` 
+
+If it's already off, `stop` will do nothing.
 
 ### SSH into Darknode
 
@@ -87,4 +113,16 @@ To update your Darknode to the latest stable version, open a terminal and run:
 
 ```sh
 darknode update --name my-first-darknode
+``` 
+
+To update the config of your darknode, first edit the local version of config, by running:
+
+```sh
+nano $HOME/.darknode/darknodes/YOUR-NODE-NAME/config.json
+``` 
+
+Then run 
+
+```sh
+darknode update --name my-first-darknode --config
 ``` 

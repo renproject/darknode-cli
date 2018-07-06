@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
-  revision = "06cfa1db77dae2425e143980408e642f7a9d5b09"
+  revision = "2c5933638c5ef1bc320b01486100788c81d57b99"
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
@@ -14,8 +14,8 @@
     "aws/credentials",
     "internal/shareddefaults"
   ]
-  revision = "e79e9fd4ec11ccc242a472f980be78830f9eba80"
-  version = "v1.14.13"
+  revision = "e4f914808a9655ef3220bb0082002239cc7f3561"
+  version = "v1.14.19"
 
 [[projects]]
   branch = "master"
@@ -134,6 +134,7 @@
     "contract",
     "contract/bindings",
     "crypto",
+    "dispatch",
     "identity",
     "logger",
     "order",
@@ -142,13 +143,13 @@
     "stackint",
     "stackint/asm"
   ]
-  revision = "88e37045b2a9262fe44dc9ac26258806084d13b2"
+  revision = "161b829559023591af564bda93b50d745c1bffc3"
 
 [[projects]]
-  branch = "master"
   name = "github.com/rjeczalik/notify"
   packages = ["."]
-  revision = "f7ce7f74cca0c606cd22c366f8ac3a09ded2aac0"
+  revision = "52ae50d8490436622a8941bd70c3dbe0acdd4bbf"
+  version = "v0.9.0"
 
 [[projects]]
   name = "github.com/rs/cors"
@@ -209,7 +210,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["websocket"]
-  revision = "afe8f62b1d6bbd81f31868121a50b06d8188e1f9"
+  revision = "ed29d75add3d7c4bf7ca65aac0c6df3d1420216f"
 
 [[projects]]
   branch = "master"
@@ -218,7 +219,7 @@
     "cpu",
     "unix"
   ]
-  revision = "63fc586f45fe72d95d5240a5d5eb95e6503907d3"
+  revision = "151529c776cdc58ddbe7963ba9af779f3577b419"
 
 [[projects]]
   branch = "master"
@@ -228,7 +229,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "25b95b48224cce18163c7d49dcfb89a2d5ecd209"
+  revision = "75d2ffb453d53bed20f95f0d563ee000dc4c0c83"
 
 [[projects]]
   name = "gopkg.in/fatih/set.v0"
@@ -251,6 +252,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bd0642d0d9a28e231ca98968f12428b4481c97c357c9f8bd98b4755b9931f910"
+  inputs-digest = "7218d9ea81926e07d3028994461eb7cff2d413b2e0e1139f04a792ba472fe590"
   solver-name = "gps-cdcl"
   solver-version = 1
