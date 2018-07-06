@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Print commands before executing
 set -x
 

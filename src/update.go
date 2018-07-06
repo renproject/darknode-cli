@@ -67,7 +67,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		if err != nil {
 			return err
 		}
-		updateConfigScript := fmt.Sprintf(`echo "%s" >> $HOME/.darknode/config`, string(data))
+		updateConfigScript := fmt.Sprintf(`echo "%s" >> $HOME/.darknode/config.json`, string(data))
 		updateConfigCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript)
 		pipeToStd(updateConfigCmd)
 		if err := updateConfigCmd.Start(); err != nil {
