@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -52,7 +51,7 @@ func destroyNode(ctx *cli.Context) error {
 
 // destroyAwsNode tears down the AWS instance.
 func destroyAwsNode(nodeDirectory string) error {
-	log.Println("Destroying your darknode ...")
+	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
 	cmd := fmt.Sprintf("cd %v && terraform destroy --force && rm -rf %v", nodeDirectory, nodeDirectory)
 	destroy := exec.Command("bash", "-c", cmd)
 	pipeToStd(destroy)

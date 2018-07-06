@@ -86,7 +86,7 @@ cd ./go/src/github.com/republicprotocol/republic-go
 sudo git stash
 sudo git checkout %v
 sudo git fetch origin %v
-sudo git RESET --hard origin/%v
+sudo git reset --hard origin/%v
 cd cmd/darknode
 go install
 cd

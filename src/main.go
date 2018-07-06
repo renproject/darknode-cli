@@ -256,7 +256,7 @@ func startNode(ctx *cli.Context) error {
 	if err := startCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%sDarknode has been turned on.%s \n", GREEN, RESET)
+	fmt.Printf("%s[%s] has been turned on.%s \n", GREEN, name, RESET)
 
 	return nil
 }
@@ -284,7 +284,7 @@ func stopNode(ctx *cli.Context) error {
 	if err := stopCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%sDarknode has been turned off.%s \n", GREEN, RESET)
+	fmt.Printf("%s[%s] has been turned off.%s \n", GREEN, name, RESET)
 
 	return nil
 }
