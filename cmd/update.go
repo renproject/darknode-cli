@@ -76,7 +76,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		if err := updateConfigCmd.Wait(); err != nil {
 			return err
 		}
-		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s", GREEN, name, RESET)
+		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
 	updateScript := fmt.Sprintf(`
@@ -101,7 +101,7 @@ sudo service darknode restart
 	if err := updateCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s", GREEN, name, branch, RESET)
+	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s \n", GREEN, name, branch, RESET)
 
 	return nil
 }
