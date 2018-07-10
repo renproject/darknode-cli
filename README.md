@@ -61,15 +61,7 @@ Destroying a Darknode will turn it off and tear down all resources allocated by 
 
 ```sh
 darknode destroy --name my-first-darknode
-``` 
-
-To avoid the command-line prompt reminding you to deregister your Darknode, use the `--skip` argument: 
-
-```sh
-darknode destroy --name my-first-darknode --force
 ```
-
-We do not recommend using the `--force` argument unless you are developing custom tools that manage your Darknodes automatically.
 
 ### List all Darknodes
 
