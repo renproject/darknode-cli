@@ -8,7 +8,7 @@ Before installing and using the Darknode CLI, make sure that you have created an
 
 It is not recommended to use your default account for managing your Darknodes. Instead, we recommend creating a custom user.
 
-Make sure you have created an account, and then go to the [AWS Console](/https://console.aws.amazon.com/). Enter _IAM_ into the search bar. You should see something like this
+Make sure you have created an account, and then go to the [AWS Console](https://console.aws.amazon.com/). Enter _IAM_ into the search bar. You should see something like this
 
 ![Go to IAM](./getting-started-on-aws-01.png "Go to IAM")
 
