@@ -51,11 +51,10 @@ func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, 
 	var cfg config.Config
 	if configFile == "" {
 		cfg = config.Config{
-			Keystore:                keystore,
-			Host:                    "0.0.0.0",
-			Port:                    "18514",
-			Address:                 identity.Address(keystore.Address()),
-			BootstrapMultiAddresses: BootstrapNodes,
+			Keystore: keystore,
+			Host:     "0.0.0.0",
+			Port:     "18514",
+			Address:  identity.Address(keystore.Address()),
 			Logs: logger.Options{
 				Plugins: []logger.PluginOptions{
 					{
