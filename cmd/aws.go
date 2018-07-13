@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/urfave/cli"
@@ -177,7 +178,9 @@ func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
 	region := strings.ToLower(ctx.String("aws-region"))
 	instance := strings.ToLower(ctx.String("aws-instance"))
 
+
 	// Parse the input region or pick one region randomly
+	rand.Seed(time.Now().UTC().UnixNano())
 	if region == "" {
 		region = AllAwsRegions[rand.Intn(len(AllAwsRegions))]
 	} else {
