@@ -11,7 +11,7 @@ cp scripts/install.sh build/install.sh
 
 # Generate binaries
 docker-machine create default
-docker-machine start
+eval $(docker-machine env default) # Setup the environment for the Docker client
 go get github.com/karalabe/xgo
 xgo --targets=darwin/amd64,linux/amd64 .
 mv darknode-cli-darwin-10.6-amd64 build/darknode_darwin_amd64
