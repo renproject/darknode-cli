@@ -50,6 +50,7 @@ func deployNode(ctx *cli.Context) error {
 func deployToAWS(ctx *cli.Context) error {
 	accessKey := ctx.String("aws-access-key")
 	secretKey := ctx.String("aws-secret-key")
+	network := ctx.String("network")
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 
@@ -128,12 +129,22 @@ func deployToAWS(ctx *cli.Context) error {
 		}
 		return err
 	}
+
+	// Update node to different branch according to the network.
+	switch network {
+	case "testnet":
+	case "falcon" :
+		err = updateSingleNode(name, "develop", false)
+	case "nightly":
+		err = updateSingleNode(name, "nightly", false)
+	}
+
 	fmt.Printf("\n")
 	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", GREEN, RESET)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
 	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
 	fmt.Printf("\n")
-	return nil
+	return err
 }
 
 // runTerraform initializes and applies terraform
