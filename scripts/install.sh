@@ -73,6 +73,8 @@ if ! [ -x "$(command -v darknode)" ]; then
     fi
   elif [ -f "$HOME/.profile" ] ; then
     echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+  else
+    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
   fi
 
   echo ''
