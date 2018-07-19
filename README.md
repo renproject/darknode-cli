@@ -20,6 +20,16 @@ curl https://darknode.republicprotocol.com/install.sh -sSf | sh
 
 This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode CLI.
 
+## Updating Darknode CLI
+
+To update your Darknode CLI, open a terminal and run:
+
+```sh
+curl https://darknode.republicprotocol.com/update.sh -sSf | sh
+```
+
+This will update your Darknode CLI to the latest version.  
+
 ## Usage 
 
 ### Deploy a Darknode
@@ -47,7 +57,7 @@ Make sure you give the same region of the elastic to the darknode.
 
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP
+darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP -aws-elastic-ip XXX.XXX.XXX.XXX
 ``` 
 
 #### Digital Ocean
@@ -64,7 +74,7 @@ Destroying a Darknode will turn it off and tear down all resources allocated by 
 darknode destroy --name my-first-darknode
 ``` 
 
-To avoid the command-line prompt reminding you to deregister your Darknode, use the `--skip` argument: 
+To avoid the command-line prompt reminding you to deregister your Darknode, use the `--force` argument: 
 
 ```sh
 darknode destroy --name my-first-darknode --force
