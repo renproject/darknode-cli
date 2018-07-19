@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Create directory for build files
+cd ..
 mkdir build
 
 # Compress darknode directory
