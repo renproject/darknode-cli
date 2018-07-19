@@ -42,13 +42,9 @@ darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY 
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
-<<<<<<< HEAD
 You can also associate the darknode to an elastic IP by specifing the `allocation_id`. 
 Make sure you give the same region of the elastic to the darknode. 
-=======
-You can also associate the darknode to an Elastic IP by specifing the `allocation_id`. 
-Make sure you give the same region of the Elastic to the darknode. 
->>>>>>> master
+
 
 ```sh
 darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP
@@ -66,7 +62,6 @@ Destroying a Darknode will turn it off and tear down all resources allocated by 
 
 ```sh
 darknode destroy --name my-first-darknode
-<<<<<<< HEAD
 ``` 
 
 To avoid the command-line prompt reminding you to deregister your Darknode, use the `--skip` argument: 
@@ -77,10 +72,7 @@ darknode destroy --name my-first-darknode --force
 
 We do not recommend using the `--force` argument unless you are developing custom tools that manage your Darknodes automatically.
 
-=======
-```
 
->>>>>>> master
 ### List all Darknodes
 
 The Darknode CLI supports deploying multiple Darknodes. To list all available Darknodes, open a terminal and run:
@@ -94,11 +86,7 @@ darknode list
 To turn on your darknode, open a terminal and run: 
 
 ```sh
-<<<<<<< HEAD
-darknode start --name my-firt-darknode
-=======
 darknode start --name my-first-darknode
->>>>>>> master
 ``` 
 
 If it's already on, `start` will do nothing.
