@@ -1,11 +1,10 @@
 #!/bin/bash
 
 # Create directory for build files
-cd ..
 mkdir -p build
 
 # Compress darknode directory
-zip -r build/darknode.zip darknode
+zip -r build/darknode.zip target/darknode
 
 # Copy install script to build folder
 cp scripts/install.sh build/install.sh
