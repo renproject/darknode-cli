@@ -1,12 +1,12 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 if [ -d "$HOME/.darknode" ] && [ -d "$HOME/.darknode/darknodes" ]; then
     cd $HOME/.darknode
     curl -s 'https://darknode.republicprotocol.com/darknode.zip' > darknode.zip
     unzip -o darknode.zip
 else
-    echo "cannot find the darknode folder"
-    echo "please install first"
+    echo "cannot find the darknode-cli"
+    echo "please install darknode-cli first"
     exit 1
 fi
 
@@ -28,8 +28,4 @@ chmod +x bin/darknode
 rm darknode.zip
 
 echo ''
-echo 'If you are using a custom shell, make sure you update your PATH.'
-echo '$ export PATH=$PATH:$HOME/.darknode/bin'
-
-echo ''
-echo 'Done! Your Darknode Deployer has been updated.'
+echo 'Done! Your Darknode-cli has been updated.'
