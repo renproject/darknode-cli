@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"io/ioutil"
+	"log"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
@@ -13,13 +13,14 @@ import (
 )
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, error) {
+func GetConfigOrGenerateNew(ctx *cli.Context) (config.Config, error) {
 	keystoreFile := ctx.String("keystore")
 	passphrase := ctx.String("passphrase")
 	configFile := ctx.String("config")
 	network := ctx.String("network")
 
 	if network != "testnet" && network != "falcon" && network != "nightly" {
+		log.Println("network", network)
 		return config.Config{}, ErrUnknownNetwork
 	}
 	// Parse the keystore or create a new random one.
@@ -67,14 +68,6 @@ func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, 
 		if err != nil {
 			return config.Config{}, nil
 		}
-	}
-
-	configData, err := json.MarshalIndent(cfg, "", "    ")
-	if err != nil {
-		return config.Config{}, err
-	}
-	if err := ioutil.WriteFile(directory+"/config.json", configData, 0600); err != nil {
-		return config.Config{}, err
 	}
 
 	return cfg, nil

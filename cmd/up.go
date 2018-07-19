@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -52,18 +53,6 @@ func deployToAWS(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 
-	// Check darknode name and make directory for the node
-	if name == "" {
-		return ErrEmptyNodeName
-	}
-	if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
-		return ErrNodeExist
-	}
-	nodeDirectory := Directory + "/darknodes/" + name
-	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
-		return err
-	}
-
 	// Try getting AWS credentials from the input or the default file.
 	if accessKey == "" || secretKey == "" {
 		creds := credentials.NewSharedCredentials("", "default")
@@ -77,26 +66,52 @@ func deployToAWS(ctx *cli.Context) error {
 		}
 	}
 
-	// Store the tags
-	if err := ioutil.WriteFile(nodeDirectory+"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
-		return err
-	}
-
 	// Parse region and instance type
 	region, instance, err := parseRegionAndInstance(ctx)
 	if err != nil {
 		return err
 	}
 	// Generate configs for the node
-	config, err := GetConfigOrGenerateNew(ctx, nodeDirectory)
+	config, err := GetConfigOrGenerateNew(ctx)
 	if err != nil {
 		return err
 	}
+
+	// Check darknode name and make directory for the node
+	if name == "" {
+		return ErrEmptyNodeName
+	}
+	if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
+		return ErrNodeExist
+	}
+	nodeDirectory := Directory + "/darknodes/" + name
+	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
+		return err
+	}
+	// Store the tags
+	if err := ioutil.WriteFile(nodeDirectory+"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
+		return err
+	}
+	// Write the config to file
+	configData, err := json.MarshalIndent(config, "", "    ")
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(nodeDirectory+"/config.json", configData, 0600); err != nil {
+		return err
+	}
+	// Generate new ssk key pair
 	pubKey, err := NewSshKeyPair(nodeDirectory)
 	if err != nil {
+		if err := cleanUp(nodeDirectory); err != nil {
+			return err
+		}
 		return err
 	}
 	if err := generateTerraformConfig(ctx, config, accessKey, secretKey, region, instance, pubKey, nodeDirectory); err != nil {
+		if err := cleanUp(nodeDirectory); err != nil {
+			return err
+		}
 		return err
 	}
 	if err := runTerraform(nodeDirectory); err != nil {
@@ -116,7 +131,7 @@ func deployToAWS(ctx *cli.Context) error {
 	fmt.Printf("\n")
 	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", GREEN, RESET)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
-	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
+	fmt.Printf("%s%shttps://darknode.republicprotocol.com/status/%v%s%s\n", GREEN, UNDERLINEStart, ip, UNDERLINEEnd, RESET)
 	fmt.Printf("\n")
 	return nil
 }
