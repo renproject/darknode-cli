@@ -2,7 +2,7 @@
 
 # Create directory for build files
 cd ..
-mkdir build
+mkdir -p build
 
 # Compress darknode directory
 zip -r build/darknode.zip darknode
