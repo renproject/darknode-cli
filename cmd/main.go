@@ -52,6 +52,10 @@ func main() {
 			Name:  "config",
 			Usage: "An optional configuration `file` for the Darknode",
 		},
+		cli.StringFlag{
+			Name:  "network",
+			Usage: "Darkpool network of your node",
+		},
 
 		// AWS flags
 		cli.BoolFlag{

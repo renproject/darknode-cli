@@ -42,3 +42,7 @@ var ErrNoDeploymentFound = fmt.Errorf("%scannot find any deployed node%s", RED, 
 
 // ErrEmptyNodeName is returned when user doesn't provide the node name.
 var ErrEmptyNodeName = fmt.Errorf("%snode name cannot be empty%s", RED, RESET)
+
+// ErrUnknownNetwork is returned when user wants to deploy darknode to an
+// unknown darkpool network
+var ErrUnknownNetwork = fmt.Errorf("%sunknown network%s", RED, RESET)
