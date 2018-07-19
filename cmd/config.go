@@ -20,7 +20,7 @@ func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, 
 	network := ctx.String("network")
 
 	if network != "testnet" && network != "falcon" && network != "nightly" {
-		return config.Config{}, ErrUnknownProvider
+		return config.Config{}, ErrUnknownNetwork
 	}
 	// Parse the keystore or create a new random one.
 	var keystore crypto.Keystore

@@ -54,6 +54,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "network",
+			Value: "tesetnet",
 			Usage: "Darkpool network of your node",
 		},
 
