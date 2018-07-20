@@ -58,5 +58,6 @@ func destroyAwsNode(nodeDirectory string) error {
 	if err := destroy.Start(); err != nil {
 		return err
 	}
+
 	return destroy.Wait()
 }

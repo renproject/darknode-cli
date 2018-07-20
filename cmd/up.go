@@ -133,7 +133,7 @@ func deployToAWS(ctx *cli.Context) error {
 	// Update node to different branch according to the network.
 	switch network {
 	case "testnet":
-	case "falcon" :
+	case "falcon":
 		err = updateSingleNode(name, "develop", false)
 	case "nightly":
 		err = updateSingleNode(name, "nightly", false)

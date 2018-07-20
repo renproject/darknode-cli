@@ -16,6 +16,7 @@ func StringInSlice(a string, list []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -71,5 +72,6 @@ func cleanUp(nodeDirectory string) error {
 	if err := cleanCmd.Start(); err != nil {
 		return err
 	}
+
 	return cleanCmd.Wait()
 }
