@@ -58,7 +58,7 @@ cd $HOME
 
 # Will fail if there are any files still in ./provisions/
 rmdir ./provisions/
-rmdir ./scripts/
+rmdir -rf ./scripts/
 
 # Start services
 sudo systemctl daemon-reload
