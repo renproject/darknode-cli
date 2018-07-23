@@ -171,7 +171,7 @@ func runTerraform(nodeDirectory string) error {
 }
 
 func generateTerraformConfig(ctx *cli.Context, config config.Config, accessKey, secretKey, region, instance, pubKey, nodeDirectory string) error {
-	allocationID := ctx.String("aws-allocation-id")
+	allocationID := ctx.String("aws-elastic-ip")
 
 	allocationConfig, tfFolder := "", "std"
 	if allocationID != "" {
