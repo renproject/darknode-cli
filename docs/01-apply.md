@@ -43,7 +43,7 @@ We’re currently experiencing a high number of applications, so it might take s
 
 To check the application status, type /start to the Republic Protocol Bot. You can also view your application by typing /view. 
 
-When your application is approved, the Republic Protocol Bot will send you instructions with what to do next. Not all applications will be accepted.
+When your application is approved, the Republic Protocol Bot will send you instructions with what to do next. Please note: not all applications will be accepted.
 
 
 

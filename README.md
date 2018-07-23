@@ -30,7 +30,11 @@ curl https://darknode.republicprotocol.com/update.sh -sSf | sh
 
 This will update your Darknode CLI to the latest version.  
 
-## Usage 
+## Usage
+
+_Here there be dragons!_
+
+These guidelines are for advanced users. If you just want to see what deploying a Testnet Darknode is like, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
 
 ### Deploy a Darknode
 
@@ -39,7 +43,7 @@ This will update your Darknode CLI to the latest version.
 To deploy a Darknode on AWS, open a terminal and run:
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
 ``` 
 
 The Darknode CLI will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
@@ -47,7 +51,7 @@ The Darknode CLI will automatically use the credentials available at `$HOME/.aws
 You can also specify the region and instance type you want to use for the Darknode:
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
 ``` 
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
@@ -57,7 +61,7 @@ Make sure you give the same region of the elastic to the darknode.
 
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP -aws-elastic-ip XXX.XXX.XXX.XXX
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP -aws-elastic-ip XXX.XXX.XXX.XXX
 ``` 
 
 #### Digital Ocean
@@ -91,16 +95,6 @@ The Darknode CLI supports deploying multiple Darknodes. To list all available Da
 darknode list
 ```
 
-### Start Darknode
-
-To turn on your darknode, open a terminal and run: 
-
-```sh
-darknode start --name my-first-darknode
-``` 
-
-If it's already on, `start` will do nothing.
-
 ### Stop Darknode
 
 To turn off your darknode, open a terminal and run: 
@@ -110,7 +104,17 @@ darknode stop --name my-first-darknode
 
 ``` 
 
-If it's already off, `stop` will do nothing.
+If it is already off, `stop` will do nothing.
+
+### Start Darknode
+
+To turn on your darknode, open a terminal and run: 
+
+```sh
+darknode start --name my-first-darknode
+``` 
+
+If it is already on, `start` will do nothing.
 
 ### SSH into Darknode
 
@@ -128,13 +132,13 @@ To update your Darknode to the latest stable version, open a terminal and run:
 darknode update --name my-first-darknode
 ``` 
 
-To update the config of your darknode, first edit the local version of config, by running:
+To update the configuration of your darknode, first edit the local version of config, by running:
 
 ```sh
-nano $HOME/.darknode/darknodes/YOUR-NODE-NAME/config.json
+nano $HOME/.darknode/darknodes/my-first-darknode/config.json
 ``` 
 
-Then run 
+and now run:
 
 ```sh
 darknode update --name my-first-darknode --config
