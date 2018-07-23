@@ -226,16 +226,20 @@ func listAllNodes(ctx *cli.Context) error {
 		if err != nil {
 			continue
 		}
+		ethAddress, err := republicAddressToEthAddress(address)
+		if err != nil {
+			continue
+		}
 
-		nodes = append(nodes, []string{f.Name(), address, ip, string(tags)})
+		nodes = append(nodes, []string{f.Name(), address, ip, string(tags) , ethAddress.Hex()})
 	}
 
 	if len(nodes) == 0 {
 		return fmt.Errorf("%scannot find any node%s", RED, RESET)
 	} else {
-		fmt.Printf("%-20s | %-30s | %-15s | %-20s \n", "name", "Address", "ip", "tags")
+		fmt.Printf("%-20s | %-30s | %-15s | %-20s | %-45s \n", "name", "Address", "ip", "tags", "Ethereum Address")
 		for i := range nodes {
-			fmt.Printf("%-20s | %-30s | %-15s | %-20s \n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3])
+			fmt.Printf("%-20s | %-30s | %-15s | %-20s | %-45s\n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3],  nodes[i][4])
 		}
 	}
 

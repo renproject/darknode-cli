@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/jbenet/go-base58"
 	"github.com/republicprotocol/republic-go/identity"
 )
 
@@ -74,4 +77,15 @@ func cleanUp(nodeDirectory string) error {
 	}
 
 	return cleanCmd.Wait()
+}
+
+// republicAddressToEthAddress converts republic address to ethereum address
+func republicAddressToEthAddress(repAddress string) (common.Address, error) {
+	addrByte := base58.DecodeAlphabet(repAddress, base58.BTCAlphabet)[2:]
+	if len(addrByte) == 0 {
+		return common.Address{}, errors.New("fail to decode the address")
+	}
+
+	address := common.BytesToAddress(addrByte)
+	return address, nil
 }
