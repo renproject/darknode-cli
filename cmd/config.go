@@ -79,12 +79,14 @@ func BootstrapNodes(network string) []identity.MultiAddress {
 
 	switch network {
 	case "testnet":
-		b1, _ := identity.NewMultiAddressFromString("/ip4/54.250.246.106/tcp/18514/republic/8MJY6fvSCBCi3ujBqzTNTUkfF7WhFN")
-		b2, _ := identity.NewMultiAddressFromString("/ip4/13.209.15.151/tcp/18514/republic/8MGLgu2wx8h5iiZDVLsgKLhTXqP7Uj")
-		b3, _ := identity.NewMultiAddressFromString("/ip4/34.203.9.146/tcp/18514/republic/8MJBssiB8aT6pGAM6MYj7YNUJTgxt7")
-		b4, _ := identity.NewMultiAddressFromString("/ip4/34.245.26.34/tcp/18514/republic/8MG9AZnq9s8UGqUcMMeq3r7azc58Mk")
-		b5, _ := identity.NewMultiAddressFromString("/ip4/54.233.183.222/tcp/18514/republic/8MJ4LffVe6hDAha7AfKRt8Hr12xrVR")
-		addresess = append(addresess, b1, b2, b3, b4, b5)
+		b1, _ := identity.NewMultiAddressFromString("/ip4/18.211.224.194/tcp/18514/republic/8MJ7iKwcDxjndpD9EcXPgzKL9QJo2A")
+		b2, _ := identity.NewMultiAddressFromString("/ip4/52.53.120.119/tcp/18514/republic/8MGdWRSn51Bc7ievAAkZ6x1hFAiJjf")
+		b3, _ := identity.NewMultiAddressFromString("/ip4/52.53.120.119/tcp/18514/republic/8MGdWRSn51Bc7ievAAkZ6x1hFAiJjf")
+		b4, _ := identity.NewMultiAddressFromString("/ip4/52.60.102.135/tcp/18514/republic/8MGATsfkjn1JtN9edB5C2kobUWtmJV")
+		b5, _ := identity.NewMultiAddressFromString("/ip4/52.59.176.141/tcp/18514/republic/8MHX3awj1hj1x3XbKxq5uUuE8uQ6mq")
+		b6, _ := identity.NewMultiAddressFromString("/ip4/18.228.50.197/tcp/18514/republic/8MJrKWdEmUFwZcKArzyABdYvovQQcP")
+
+		addresess = append(addresess, b1, b2, b3, b4, b5, b6)
 	case "falcon":
 		b1, _ := identity.NewMultiAddressFromString("/ip4/13.124.184.167/tcp/18514/republic/8MJw8s6TVKmQH3kdM5kJUYqPmh3JmF")
 		b2, _ := identity.NewMultiAddressFromString("/ip4/52.79.235.44/tcp/18514/republic/8MJEFcsQ5G8XMg5vka1XhswQotjbbj")
