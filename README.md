@@ -43,7 +43,7 @@ These guidelines are for technically competent advanced users. If you just want 
 To deploy a Darknode on AWS, open a terminal and run:
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
 ``` 
 
 The Darknode CLI will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
@@ -51,7 +51,7 @@ The Darknode CLI will automatically use the credentials available at `$HOME/.aws
 You can also specify the region and instance type you want to use for the Darknode:
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
 ``` 
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
@@ -61,7 +61,7 @@ Make sure you give the same region of the elastic to the darknode.
 
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP -aws-elastic-ip XXX.XXX.XXX.XXX
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP -aws-elastic-ip XXX.XXX.XXX.XXX
 ``` 
 
 #### Digital Ocean

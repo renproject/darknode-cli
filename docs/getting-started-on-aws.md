@@ -61,7 +61,7 @@ Once this has finished, close the terminal and open a new one.
 Now, you can deploy a Darknode. Think of a catchy name, and run:
 
 ```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
 ```
 
 Once this has finished, it will give you a link that you can use to register your Darknode and send it ETH.
