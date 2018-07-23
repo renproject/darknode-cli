@@ -115,6 +115,17 @@ resource "aws_instance" "falcon0" {
     }
   }
 
+  provisioner "file" {
+    source      = "${var.path}/scripts"
+    destination = "/home/ubuntu/scripts"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = "${file("${var.ssh_private_key_location}")}"
+    }
+  }
+
   provisioner "remote-exec" {
     script = "${var.path}/scripts/up.sh"
 

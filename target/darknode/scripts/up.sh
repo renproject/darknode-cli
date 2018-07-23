@@ -10,6 +10,7 @@ until sudo apt update; do sleep 2; done
 sudo mv ./provisions/darknode-updater.service /etc/systemd/system/darknode-updater.service
 sudo mv ./provisions/darknode.service /etc/systemd/system/darknode.service
 sudo mv ./provisions/logstash.service /etc/systemd/system/logstash.service
+sudo mv ./scripts/updater.sh
 
 # Install golang
 wget https://dl.google.com/go/go1.10.linux-amd64.tar.gz
@@ -57,6 +58,7 @@ cd $HOME
 
 # Will fail if there are any files still in ./provisions/
 rmdir ./provisions/
+rmdir ./scripts/
 
 # Start services
 sudo systemctl daemon-reload

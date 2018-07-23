@@ -18,8 +18,9 @@ do
     mkdir -p /home/ubuntu/go/src/github.com/republicprotocol &&
     cd /home/ubuntu/go/src/github.com/republicprotocol &&
     cd republic-go &&
-    git fetch origin master &&
-    git reset --hard origin/master &&
+    sudo git reset --hard HEAD &&
+    sudo git clean -f -d &&
+    sudo git pull &&
     cd cmd/darknode &&
     go install &&
     cd /home/ubuntu &&
