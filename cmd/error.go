@@ -47,5 +47,11 @@ var ErrEmptyNodeName = fmt.Errorf("%snode name cannot be empty%s", RED, RESET)
 // unknown darkpool network
 var ErrUnknownNetwork = fmt.Errorf("%sunknown network%s", RED, RESET)
 
-// ErrUnknownNetwork
+// ErrNameAndTags is returned when both name and tags are given.
 var ErrNameAndTags = fmt.Errorf("%stoo many arguments, cannot have both --name and --tasg%s", RED, RESET)
+
+// ErrEmptyNameAndTags is returned when both name and tags are not given.
+var ErrEmptyNameAndTags = fmt.Errorf("%splease provide name or tags of the node you want to operate%s", RED, RESET)
+
+// ErrFilePath is returned when user doesn't provide the file path.
+var ErrEmptyFilePath = fmt.Errorf("%sfile path cannot be empty%s", RED, RESET)

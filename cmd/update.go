@@ -19,7 +19,7 @@ func updateNode(ctx *cli.Context) error {
 
 	if name == "" && tags == "" {
 		cli.ShowCommandHelp(ctx, "update")
-		return ErrEmptyNodeName
+		return ErrEmptyNameAndTags
 	}
 
 	// update a single darknode by its name
@@ -36,18 +36,18 @@ func updateNode(ctx *cli.Context) error {
 			return ErrNoNodesFound
 		}
 
-		errs := make(chan error, len(nodeNames))
-
+		errs := make([]error, len(nodeNames))
 		co.ForAll(nodeNames, func(i int) {
-			err := updateSingleNode(nodeNames[i], branch, updateConfig)
-			if err != nil {
-				errs <- err
-			}
+			errs[i] = updateSingleNode(nodeNames[i], branch, updateConfig)
 		})
 
-		if len(errs) >= 1 {
-			return <-errs
+		for i := range errs{
+			if errs[i] != nil {
+				return err
+			}
 		}
+
+		return nil
 	}
 
 	return ErrNameAndTags

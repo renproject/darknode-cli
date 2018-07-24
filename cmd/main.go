@@ -28,13 +28,13 @@ func main() {
 		Name:  "name",
 		Usage: "A unique human-readable `string` for identifying the Darknode",
 	}
-	tagFlag := cli.StringFlag{
-		Name:  "tag",
-		Usage: "A human-readable `string` for identifying groups of Darknodes",
-	}
 	tagsFlag := cli.StringFlag{
 		Name:  "tags",
 		Usage: "Multiple human-readable comma separated `strings` for identifying groups of Darknodes",
+	}
+	scriptFlag := cli.StringFlag{
+		Name: "script",
+		Usage:"path of the script file you want to run",
 	}
 
 	// Flag for each command
@@ -93,7 +93,7 @@ func main() {
 	}
 
 	updateFlags := []cli.Flag{
-		nameFlag, tagFlag,
+		nameFlag, tagsFlag,
 		cli.StringFlag{
 			Name:  "branch, b",
 			Value: "master",
@@ -167,9 +167,17 @@ func main() {
 		{
 			Name:  "list",
 			Usage: "List all of your Darknodes",
-			Flags: []cli.Flag{tagFlag},
+			Flags: []cli.Flag{tagsFlag},
 			Action: func(c *cli.Context) error {
 				return listAllNodes(c)
+			},
+		},
+		{
+			Name:  "exec",
+			Usage: "Exec scripts on nodes",
+			Flags: []cli.Flag{nameFlag, tagsFlag, scriptFlag},
+			Action: func(c *cli.Context) error {
+				return execScript(c)
 			},
 		},
 	}
@@ -300,3 +308,4 @@ func stopNode(ctx *cli.Context) error {
 
 	return nil
 }
+
