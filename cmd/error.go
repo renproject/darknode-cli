@@ -46,3 +46,6 @@ var ErrEmptyNodeName = fmt.Errorf("%snode name cannot be empty%s", RED, RESET)
 // ErrUnknownNetwork is returned when user wants to deploy darknode to an
 // unknown darkpool network
 var ErrUnknownNetwork = fmt.Errorf("%sunknown network%s", RED, RESET)
+
+// ErrUnknownNetwork
+var ErrNameAndTags = fmt.Errorf("%stoo many arguments, cannot have both --name and --tasg%s", RED, RESET)

@@ -122,6 +122,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/republicprotocol/co-go"
+  packages = ["."]
+  revision = "4e299fdb0e808f64667498735da03fdc2e0e84c9"
+
+[[projects]]
+  branch = "master"
   name = "github.com/republicprotocol/go-do"
   packages = ["."]
   revision = "0dccf0d7d287e828155a3ea16f7b968fa9662020"
@@ -134,7 +140,6 @@
     "contract",
     "contract/bindings",
     "crypto",
-    "dispatch",
     "identity",
     "logger",
     "order",
@@ -252,6 +257,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7218d9ea81926e07d3028994461eb7cff2d413b2e0e1139f04a792ba472fe590"
+  inputs-digest = "727cd029d639b1bce279d25997639c59e946bb54cc85c9bdd095229c70dcc625"
   solver-name = "gps-cdcl"
   solver-version = 1

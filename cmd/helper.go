@@ -69,6 +69,34 @@ func getNodesByTag(tag string) ([]string, error) {
 	return nodes, nil
 }
 
+// getNodesByTags return the names of the nodes having the given tags.
+func getNodesByTags(tags string) ([]string, error) {
+	files, err := ioutil.ReadDir(Directory + "/darknodes")
+	if err != nil {
+		return nil, err
+	}
+	ts := strings.Split(strings.TrimSpace(tags), ",")
+	nodes := make([]string, 0)
+	for _, f := range files {
+		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tags, err := ioutil.ReadFile(tagFile)
+		if err != nil {
+			continue
+		}
+		haveAllTags := true
+		for i := range ts {
+			if !strings.Contains(string(tags), ts[i]) {
+				haveAllTags = false
+			}
+		}
+		if haveAllTags {
+			nodes = append(nodes, f.Name())
+		}
+	}
+
+	return nodes, nil
+}
+
 // cleanUp removes the directory
 func cleanUp(nodeDirectory string) error {
 	cleanCmd := exec.Command("rm", "-rf", nodeDirectory)

@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 
-	"github.com/republicprotocol/republic-go/dispatch"
+	"github.com/republicprotocol/co-go"
 	"github.com/urfave/cli"
 )
 
@@ -13,32 +13,32 @@ import (
 // This will restart the Darknode.
 func updateNode(ctx *cli.Context) error {
 	name := ctx.String("name")
-	tag := ctx.String("tag")
+	tags := ctx.String("tags")
 	branch := ctx.String("branch")
 	updateConfig := ctx.Bool("config")
 
-	if name == "" && tag == "" {
+	if name == "" && tags == "" {
 		cli.ShowCommandHelp(ctx, "update")
 		return ErrEmptyNodeName
 	}
 
 	// update a single darknode by its name
-	if name != "" {
+	if name != "" && tags == "" {
 		if err := updateSingleNode(name, branch, updateConfig); err != nil {
 			return err
 		}
-	}
-	// Update a set of nodes by the tag
-	if tag != "" {
-		nodeNames, err := getNodesByTag(tag)
+	} else if tags != "" && name == "" {
+		nodeNames, err := getNodesByTags(tags)
 		if err != nil {
 			return err
 		}
 		if len(nodeNames) == 0 {
 			return ErrNoNodesFound
 		}
+
 		errs := make(chan error, len(nodeNames))
-		dispatch.CoForAll(nodeNames, func(i int) {
+
+		co.ForAll(nodeNames, func(i int) {
 			err := updateSingleNode(nodeNames[i], branch, updateConfig)
 			if err != nil {
 				errs <- err
@@ -50,7 +50,7 @@ func updateNode(ctx *cli.Context) error {
 		}
 	}
 
-	return nil
+	return ErrNameAndTags
 }
 
 func updateSingleNode(name, branch string, updateConfig bool) error {
