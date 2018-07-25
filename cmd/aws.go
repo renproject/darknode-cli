@@ -1,14 +1,14 @@
 package main
 
 import (
-	"crypto/x509"
-	"encoding/pem"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/republicprotocol/republic-go/crypto"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
 )
@@ -171,10 +171,54 @@ var AllAwsInstancesInApNortheast1 = []string{
 	M416XLarge,
 }
 
-// parseRegionAndInstance parses the region and the instance type from the
+
+// deployToAWS parses the AWS credentials and use terraform to deploy the node
+// to AWS.
+func deployToAWS(ctx *cli.Context) error {
+	// Parse AWS related data.
+	accessKey, secretKey ,err := parseAwsCredentials(ctx)
+	if err !=nil {
+		return err
+	}
+	region, instance, err := parseAwsRegionAndInstance(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Create node directory
+	name , err := createNodeDirectory(ctx)
+	if err != nil {
+		return err
+	}
+	nodeDir := nodeDirectory(name)
+
+	// Generate config and ssh key for the node
+	config, err := GetConfigOrGenerateNew(ctx, nodeDir)
+	if err != nil {
+		return err
+	}
+	key, err := NewSshKeyPair(nodeDir)
+	if err != nil {
+		return err
+	}
+
+	// todo :
+	if err := generateAwsTFConfig(ctx, config, key, accessKey, secretKey,nodeDir, region, instance); err != nil {
+		return err
+	}
+	if err := runTerraform(nodeDir); err != nil {
+		return err
+	}
+
+
+	return outputUrl(ctx, name, nodeDir)
+}
+
+
+// parseAwsRegionAndInstance parses the region and the instance type from the
 // cli parameters. It will randomly pick a region for the user if it's not
 // specified. The default value for instance is `t2.small`.
-func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
+func parseAwsRegionAndInstance(ctx *cli.Context) (string, string, error) {
 	region := strings.ToLower(ctx.String("aws-region"))
 	instance := strings.ToLower(ctx.String("aws-instance"))
 
@@ -184,53 +228,93 @@ func parseRegionAndInstance(ctx *cli.Context) (string, string, error) {
 		region = AllAwsRegions[rand.Intn(len(AllAwsRegions))]
 	} else {
 		if !StringInSlice(region, AllAwsRegions) {
-			return "", "", UnknownRegion
+			return "", "", ErrUnknownRegion
 		}
 	}
 
 	// Parse the input instance type or use the default one.
 	if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
-		return "", "", UnSupportedInstanceType
+		return "", "", ErrUnSupportedInstanceType
 	}
 	if region == ApNorthEast1 && !StringInSlice(instance, AllAwsInstancesInApNortheast1) {
-		return "", "", UnSupportedInstanceType
+		return "", "", ErrUnSupportedInstanceType
 	}
 	if !StringInSlice(instance, AllAwsInstances) {
-		return "", "", UnSupportedInstanceType
+		return "", "", ErrUnSupportedInstanceType
 	}
 
 	return region, instance, nil
 }
 
-// NewSshKeyPair generate a new ssh key pair and writes the keys into files.
-// It returns the public ssh key and the path of the rsa key file.
-func NewSshKeyPair(directory string) (string, error) {
-	// Path to save the ssh keys
-	keyPairPath := directory + "/ssh_keypair"
-	pubKeyPath := directory + "/ssh_keypair.pub"
+// parseAwsCredentials tries to get the AWS credentials from the user input
+// or from the default aws credential file
+func parseAwsCredentials (ctx *cli.Context) (string ,string , error) {
+	accessKey := ctx.String("aws-access-key")
+	secretKey := ctx.String("aws-secret-key")
 
-	rsaKey, err := crypto.RandomRsaKey()
-	if err != nil {
-		return "", nil
+	// Try getting AWS credentials from the input or the default file.
+	if accessKey == "" || secretKey == "" {
+		creds := credentials.NewSharedCredentials("", "default")
+		credValue, err := creds.Get()
+		if err != nil {
+			return "", "", err
+		}
+		accessKey, secretKey = credValue.AccessKeyID, credValue.SecretAccessKey
+		if accessKey == "" || secretKey == "" {
+			return "", "", ErrKeyNotFound
+		}
 	}
 
-	// Write the private key to file
-	priKeyBytes := x509.MarshalPKCS1PrivateKey(rsaKey.PrivateKey)
-	privBlock := pem.Block{
-		Type:    "RSA PRIVATE KEY",
-		Headers: nil,
-		Bytes:   priKeyBytes,
-	}
-	privatePEM := pem.EncodeToMemory(&privBlock)
-	ioutil.WriteFile(keyPairPath, privatePEM, 0600)
+	return accessKey, secretKey, nil
+}
 
-	// Write the public key to file
-	publicRsaKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
-	if err != nil {
-		return "", err
-	}
-	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
-	ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
+// generateAwsTFConfig generates the terraform config file for deploying to AWS.
+func generateAwsTFConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey ,nodeDir, region, instance string,) error {
+	allocationID := ctx.String("aws-elastic-ip")
 
-	return string(pubKeyBytes), nil
+	allocationConfig, tfFolder := "", "std"
+	if allocationID != "" {
+		allocationConfig = fmt.Sprintf(`allocation_id = "%v"`, allocationID)
+		tfFolder = "eip"
+	}
+
+	terraformConfig := fmt.Sprintf(`
+variable "access_key" {
+	default = "%v"
+}
+
+variable "secret_key" {
+	default = "%v"	
+}
+
+variable "ssh_public_key" {
+	default = "%v"
+}
+
+variable "ssh_private_key_location" {
+	default = "%v"
+}
+	`, accessKey, secretKey, strings.TrimSpace(StringfySshPubkey(key)), nodeDir+"/ssh_keypair")
+
+
+	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
+	mode := fmt.Sprintf(`
+module "node-%v" {
+    source = "%v/instance/%v"
+    ami = "%v"
+    region = "%v"
+    avz = "%v"
+    id = "%v"
+    ec2_instance_type = "%v"
+    ssh_public_key = "${var.ssh_public_key}"
+    ssh_private_key_location = "${var.ssh_private_key_location}"
+    access_key = "${var.access_key}"
+    secret_key = "${var.secret_key}"
+    config = "%v/config.json"
+    port = "%v"
+    path = "%v"
+    %v
+}`, config.Address, Directory, tfFolder, AMIs[region], region, avz, config.Address, instance, nodeDir, config.Port, Directory, allocationConfig)
+
+	return ioutil.WriteFile(nodeDir+"/main.tf", []byte(terraformConfig+mode), 0600)
 }

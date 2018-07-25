@@ -27,12 +27,12 @@ var ErrUnknownProvider = fmt.Errorf("%sunknown service provider%s", RED, RESET)
 // ErrNilProvider is returned when the provider is nil.
 var ErrNilProvider = fmt.Errorf("%sprovider cannot be nil%s", RED, RESET)
 
-// UnknownRegion is returned when the provided region is not valid on AWS.
-var UnknownRegion = fmt.Errorf("%sthere is no such region on AWS%s", RED, RESET)
+// ErrUnknownRegion is returned when the provided region is not valid.
+var ErrUnknownRegion = fmt.Errorf("%sthere is no such region%s", RED, RESET)
 
-// UnSupportedInstanceType is returned when the provided instance is not
+// ErrUnSupportedInstanceType is returned when the provided instance is not
 // supported in the selected region.
-var UnSupportedInstanceType = fmt.Errorf("%sinstance type is not supported in the region%s", RED, RESET)
+var ErrUnSupportedInstanceType = fmt.Errorf("%sinstance type is not supported in the region%s", RED, RESET)
 
 // ErrNoNodesFound is returned when no nodes can be found with the given tag.
 var ErrNoNodesFound = fmt.Errorf("%sno nodes can be found with the given tag%s", RED, RESET)
@@ -55,3 +55,9 @@ var ErrEmptyNameAndTags = fmt.Errorf("%splease provide name or tags of the node 
 
 // ErrFilePath is returned when user doesn't provide the file path.
 var ErrEmptyFilePath = fmt.Errorf("%sfile path cannot be empty%s", RED, RESET)
+
+// ErrEmptyDoToken is returned when the digital ocean token is empty.
+var ErrEmptyDoToken = fmt.Errorf("%sdigital ocean token cannot be empty%s", RED, RESET)
+
+// ErrUnknownDropletSize is returned when the user gives an unknown droplet size
+var ErrUnknownDropletSize = fmt.Errorf("%sunknown droplet size%s", RED, RESET)

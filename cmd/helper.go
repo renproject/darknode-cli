@@ -5,12 +5,21 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jbenet/go-base58"
 	"github.com/republicprotocol/republic-go/identity"
 )
+
+// Directory is the directory address of the cli and all darknodes data.
+var Directory = path.Join(os.Getenv("HOME"), ".darknode")
+
+// nodeDirectory return the absolute directory of the node.
+func nodeDirectory(name string ) string {
+	return path.Join(Directory, "darknodes", name)
+}
 
 // StringInSlice checks whether the string is in the slice
 func StringInSlice(a string, list []string) bool {
