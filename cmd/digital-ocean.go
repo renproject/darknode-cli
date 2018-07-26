@@ -54,6 +54,29 @@ const (
 	Size32GB  = "32gb"
 	Size48GB  = "48gb"
 	Size64GB  = "64gb"
+
+	SizeS1V1GB    = "s-1vcpu-1gb"
+	SizeS1V2GB    = "s-1vcpu-2gb"
+	SizeS1V3GB    = "s-1vcpu-3gb"
+	SizeS2V2GB    = "s-2vcpu-2gb"
+	SizeS3V1GB    = "s-3vcpu-1gb"
+	SizeS2V4GB    = "s-2vcpu-4gb"
+	SizeS4V8GB    = "s-4vcpu-8gb"
+	SizeS6V16GB   = "s-6vcpu-16gb"
+	SizeS8V32GB   = "s-8vcpu-32gb"
+	SizeS12V48GB  = "s-12vcpu-48gb"
+	SizeS16V64GB  = "s-16vcpu-64gb"
+	SizeS20V96GB  = "s-20vcpu-96gb"
+	SizeS24V128GB = "s-24vcpu-128gb"
+	SizeS32V192GB = "s-32vcpu-192gb"
+
+	SizeC1V2GB = "c-1vcpu-2gb"
+	SizeC2     = "c-2"
+	SizeC4     = "c-4"
+	SizeC8     = "c-8"
+	SizeC16    = "c-16"
+	SizeC32    = "c-32"
+	SizeC64    = "c-64"
 )
 
 var AllDoDropletSize = []string{
@@ -66,6 +89,29 @@ var AllDoDropletSize = []string{
 	Size32GB,
 	Size48GB,
 	Size64GB,
+
+	SizeS1V1GB,
+	SizeS1V2GB,
+	SizeS1V3GB,
+	SizeS2V2GB,
+	SizeS3V1GB,
+	SizeS2V4GB,
+	SizeS4V8GB,
+	SizeS6V16GB,
+	SizeS8V32GB,
+	SizeS12V48GB,
+	SizeS16V64GB,
+	SizeS20V96GB,
+	SizeS24V128GB,
+	SizeS32V192GB,
+
+	SizeC1V2GB,
+	SizeC2,
+	SizeC4,
+	SizeC8,
+	SizeC16,
+	SizeC32,
+	SizeC64,
 }
 
 func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
