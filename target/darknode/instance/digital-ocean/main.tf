@@ -1,46 +1,65 @@
-variable "do_token" {}
-variable "ssh_fingerprint" {}
-variable "name" {}
-variable "region" {}
-variable "size" {}
-variable "id" {}
-variable "port" {}
-variable "path" {}
-
-
 provider "digitalocean" {
   token = "${var.do_token}"
 }
 
-resource "digitalocean_droplet" "${name}" {
+resource "digitalocean_ssh_key" "darknode" {
+  name       = "${var.name}"
+  public_key = "${file("${var.pub_key}")}"
+
+}
+
+resource "digitalocean_droplet" "darknode" {
   provider = "digitalocean"
   image = "ubuntu-18-04-x64"
-  name = "${name}"
-  region = "${region}"
-  size = "${size}"
+  name = "${var.name}"
+  region = "${var.region}"
+  size = "${var.size}"
   ssh_keys = [
-    "${var.ssh_fingerprint}"
+    "${digitalocean_ssh_key.darknode.id}"
   ]
 
   provisioner "file" {
-    source      = "${var.path}/provisions"
-    destination = "/home/ubuntu/provisions"
+    source = "${var.path}/darknodes/${var.name}/config.json"
+    destination = "$HOME/darknode-config.json"
 
     connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = "${file("${var.ssh_private_key_location}")}"
+      type = "ssh"
+      user = "root"
+      private_key = "${file("${var.pvt_key}")}"
+    }
+  }
+
+  //  provisioner "remote-exec" {
+  //    inline = [
+  //      "mkdir -p $HOME/provisions"
+  //    ]
+  //
+  //    connection {
+  //      type        = "ssh"
+  //      user        = "root"
+  //      private_key = "${file("${var.pvt_key}")}"
+  //    }
+  //  }
+
+  provisioner "file" {
+    source = "${var.path}/provisions/"
+    destination = "$HOME/provisions"
+
+    connection {
+      type = "ssh"
+      user = "root"
+      private_key = "${file("${var.pvt_key}")}"
     }
   }
 
   provisioner "file" {
-    source      = "${var.path}/scripts"
-    destination = "/home/ubuntu/scripts"
+    source = "${var.path}/scripts"
+    destination = "$HOME/scripts"
 
     connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = "${file("${var.ssh_private_key_location}")}"
+      type = "ssh"
+      user = "root"
+      private_key = "${file("${var.pvt_key}")}"
     }
   }
 
@@ -48,13 +67,17 @@ resource "digitalocean_droplet" "${name}" {
     script = "${var.path}/scripts/up.sh"
 
     connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = "${file("${var.ssh_private_key_location}")}"
+      type = "ssh"
+      user = "root"
+      private_key = "${file("${var.pvt_key}")}"
     }
   }
 
   provisioner "local-exec" {
-    command = "echo /ip4/${digitalocean_droplet.${name}.ipv4_address}/tcp/${var.port}/republic/${var.id} > multiAddress.out"
+    command = "echo /ip4/${digitalocean_droplet.darknode.ipv4_address}/tcp/18514/republic/${var.id} > multiAddress.out"
   }
+}
+
+output "multiaddress" {
+  value  = "/ip4/${digitalocean_droplet.darknode.ipv4_address}/tcp/18514/republic/${var.id}"
 }

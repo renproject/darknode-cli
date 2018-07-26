@@ -31,15 +31,15 @@ func NewSshKeyPair(directory string) (ssh.PublicKey, error) {
 		Bytes:   priKeyBytes,
 	}
 	privatePEM := pem.EncodeToMemory(&privBlock)
-	ioutil.WriteFile(keyPairPath, privatePEM, 0600)
+	ioutil.WriteFile(keyPairPath, privatePEM, 0644)
 
 	// Write the public key to file
 	publicRsaKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
 	if err != nil {
-		return nil , err
+		return nil, err
 	}
 	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
-	err = ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
+	err = ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0644)
 
 	return publicRsaKey, err
 

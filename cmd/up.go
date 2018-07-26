@@ -1,7 +1,7 @@
 package main
 
 import (
-"fmt"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -12,16 +12,16 @@ import (
 
 // deployNode deploys node to the given cloud provider.
 func deployNode(ctx *cli.Context) error {
-	provider, err := getProvider(ctx )
+	provider, err := getProvider(ctx)
 	if err != nil {
 		return err
 	}
 
 	switch provider {
 	case "aws":
-		return deployToAWS(ctx)
+		return deployToAws(ctx)
 	case "do":
-		return deployToDigitalOcean(ctx)
+		return deployToDo(ctx)
 	default:
 		return ErrUnknownProvider
 	}
@@ -29,7 +29,7 @@ func deployNode(ctx *cli.Context) error {
 
 // getProvider parses all provider flags and  make sure only
 // one provider is present.
-func getProvider(ctx *cli.Context) (string, error ) {
+func getProvider(ctx *cli.Context) (string, error) {
 	var providers = []string{"aws", "do"}
 	aws := ctx.Bool("aws")
 	digitalOcean := ctx.Bool("do")
@@ -53,7 +53,7 @@ func getProvider(ctx *cli.Context) (string, error ) {
 }
 
 // createNodeDirectory create the directory for the node.
-func createNodeDirectory(ctx *cli.Context) (string , error) {
+func createNodeDirectory(ctx *cli.Context) (string, error) {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 	nodeDir := nodeDirectory(name)
@@ -73,13 +73,12 @@ func createNodeDirectory(ctx *cli.Context) (string , error) {
 	}
 
 	// Store the tags
-	if err := ioutil.WriteFile(nodeDir +"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
+	if err := ioutil.WriteFile(nodeDir+"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
 		return "", err
 	}
 
-	return name , nil
+	return name, nil
 }
-
 
 // runTerraform initializes and applies terraform
 func runTerraform(nodeDirectory string) error {
@@ -93,7 +92,7 @@ func runTerraform(nodeDirectory string) error {
 		return err
 	}
 
-	fmt.Printf("%sDeploying dark nodes to AWS%s...\n", GREEN, RESET)
+	fmt.Printf("%sDeploying dark nodes ... %s\n", GREEN, RESET)
 
 	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
 	apply := exec.Command("bash", "-c", cmd)
@@ -106,7 +105,7 @@ func runTerraform(nodeDirectory string) error {
 
 // outputUrl writes success message and the URL for registering the node
 // to the terminal.
-func outputUrl (ctx *cli.Context, name, nodeDir string) error {
+func outputUrl(ctx *cli.Context, name, nodeDir string) error {
 	network := ctx.String("network")
 	ip, err := getIp(nodeDir)
 	if err != nil {

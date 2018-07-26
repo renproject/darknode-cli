@@ -12,12 +12,12 @@ func execScript(ctx *cli.Context) error {
 	tags := ctx.String("tags")
 	script := ctx.String("script")
 
-	if name == "" && tags == ""{
+	if name == "" && tags == "" {
 		cli.ShowCommandHelp(ctx, "update")
 		return ErrEmptyNameAndTags
-	} else if name != "" && tags == ""{
+	} else if name != "" && tags == "" {
 		return execSingleNode(name, script)
-	} else if name == "" && tags != ""{
+	} else if name == "" && tags != "" {
 		nodes, err := getNodesByTags(tags)
 		if err != nil {
 			return err
@@ -31,7 +31,7 @@ func execScript(ctx *cli.Context) error {
 			errs[i] = execSingleNode(name, script)
 		})
 
-		for i := range errs{
+		for i := range errs {
 			if errs[i] != nil {
 				return err
 			}
@@ -44,7 +44,7 @@ func execScript(ctx *cli.Context) error {
 }
 
 func execSingleNode(name, script string) error {
-	if script == ""{
+	if script == "" {
 		return ErrEmptyFilePath
 	}
 	nodeDirectory := Directory + "/darknodes/" + name

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -17,7 +18,7 @@ import (
 var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 
 // nodeDirectory return the absolute directory of the node.
-func nodeDirectory(name string ) string {
+func nodeDirectory(name string) string {
 	return path.Join(Directory, "darknodes", name)
 }
 
@@ -125,4 +126,26 @@ func republicAddressToEthAddress(repAddress string) (common.Address, error) {
 
 	address := common.BytesToAddress(addrByte)
 	return address, nil
+}
+
+// copyFile copies the src file to dst. Any existing file will be overwritten
+// and will not copy file attributes.
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+	return out.Close()
 }

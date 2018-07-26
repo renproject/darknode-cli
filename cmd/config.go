@@ -13,7 +13,7 @@ import (
 )
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew(ctx *cli.Context , directory string ) (config.Config, error) {
+func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, error) {
 	keystoreFile := ctx.String("keystore")
 	passphrase := ctx.String("passphrase")
 	configFile := ctx.String("config")
@@ -52,7 +52,7 @@ func GetConfigOrGenerateNew(ctx *cli.Context , directory string ) (config.Config
 				Plugins: []logger.PluginOptions{
 					{
 						File: &logger.FilePluginOptions{
-							Path: "/home/ubuntu/.darknode/darknode.out",
+							Path: "$HOME/.darknode/darknode.out",
 						},
 					},
 				},
@@ -74,7 +74,7 @@ func GetConfigOrGenerateNew(ctx *cli.Context , directory string ) (config.Config
 	if err != nil {
 		return config.Config{}, err
 	}
-	if err := ioutil.WriteFile(directory +"/config.json", configData, 0600); err != nil {
+	if err := ioutil.WriteFile(directory+"/config.json", configData, 0644); err != nil {
 		return config.Config{}, err
 	}
 

@@ -3,7 +3,8 @@
 maxdelay=$((3*60*60))  # 3 hours
 mindelay=$((1*60*60))  # 1 hour
 
-# mkdir /home/ubuntu/.darknode/ui
+
+# mkdir $HOME/.darknode/ui
 
 while true
 do
@@ -13,19 +14,16 @@ do
     echo "Checking for darknode updates..."
     timestamp=$(date +%Y-%m-%d-%H-%M-%S) &&
     # Install darknode
-    export GOBIN=/home/ubuntu/go/bin &&
-    export GOPATH=/home/ubuntu/go &&
-    mkdir -p /home/ubuntu/go/src/github.com/republicprotocol &&
-    cd /home/ubuntu/go/src/github.com/republicprotocol &&
-    cd republic-go &&
+    export GOBIN=$HOME/go/bin &&
+    export GOPATH=$HOME/go &&
+    cd $HOME/go/src/github.com/republicprotocol/republic-go &&
     sudo git reset --hard HEAD &&
     sudo git clean -f -d &&
     sudo git pull &&
     cd cmd/darknode &&
     go install &&
-    cd /home/ubuntu &&
     sudo systemctl restart darknode.service &&
-    echo $timestamp >> .darknode/update.log &&
+    echo $timestamp >> $HOME/.darknode/update.log &&
     echo "Finish updating"
 done
 

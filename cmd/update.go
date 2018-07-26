@@ -41,7 +41,7 @@ func updateNode(ctx *cli.Context) error {
 			errs[i] = updateSingleNode(nodeNames[i], branch, updateConfig)
 		})
 
-		for i := range errs{
+		for i := range errs {
 			if errs[i] != nil {
 				return err
 			}

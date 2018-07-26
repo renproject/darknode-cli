@@ -171,13 +171,12 @@ var AllAwsInstancesInApNortheast1 = []string{
 	M416XLarge,
 }
 
-
-// deployToAWS parses the AWS credentials and use terraform to deploy the node
+// deployToAws parses the AWS credentials and use terraform to deploy the node
 // to AWS.
-func deployToAWS(ctx *cli.Context) error {
+func deployToAws(ctx *cli.Context) error {
 	// Parse AWS related data.
-	accessKey, secretKey ,err := parseAwsCredentials(ctx)
-	if err !=nil {
+	accessKey, secretKey, err := parseAwsCredentials(ctx)
+	if err != nil {
 		return err
 	}
 	region, instance, err := parseAwsRegionAndInstance(ctx)
@@ -186,7 +185,7 @@ func deployToAWS(ctx *cli.Context) error {
 	}
 
 	// Create node directory
-	name , err := createNodeDirectory(ctx)
+	name, err := createNodeDirectory(ctx)
 	if err != nil {
 		return err
 	}
@@ -202,18 +201,16 @@ func deployToAWS(ctx *cli.Context) error {
 		return err
 	}
 
-	// todo :
-	if err := generateAwsTFConfig(ctx, config, key, accessKey, secretKey,nodeDir, region, instance); err != nil {
+	// Generate terraform config and start deploying
+	if err := generateAwsTFConfig(ctx, config, key, accessKey, secretKey, nodeDir, region, instance); err != nil {
 		return err
 	}
 	if err := runTerraform(nodeDir); err != nil {
 		return err
 	}
 
-
 	return outputUrl(ctx, name, nodeDir)
 }
-
 
 // parseAwsRegionAndInstance parses the region and the instance type from the
 // cli parameters. It will randomly pick a region for the user if it's not
@@ -248,7 +245,7 @@ func parseAwsRegionAndInstance(ctx *cli.Context) (string, string, error) {
 
 // parseAwsCredentials tries to get the AWS credentials from the user input
 // or from the default aws credential file
-func parseAwsCredentials (ctx *cli.Context) (string ,string , error) {
+func parseAwsCredentials(ctx *cli.Context) (string, string, error) {
 	accessKey := ctx.String("aws-access-key")
 	secretKey := ctx.String("aws-secret-key")
 
@@ -269,7 +266,7 @@ func parseAwsCredentials (ctx *cli.Context) (string ,string , error) {
 }
 
 // generateAwsTFConfig generates the terraform config file for deploying to AWS.
-func generateAwsTFConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey ,nodeDir, region, instance string,) error {
+func generateAwsTFConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, nodeDir, region, instance string) error {
 	allocationID := ctx.String("aws-elastic-ip")
 
 	allocationConfig, tfFolder := "", "std"
@@ -296,7 +293,6 @@ variable "ssh_private_key_location" {
 }
 	`, accessKey, secretKey, strings.TrimSpace(StringfySshPubkey(key)), nodeDir+"/ssh_keypair")
 
-
 	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
 	mode := fmt.Sprintf(`
 module "node-%v" {
@@ -316,5 +312,5 @@ module "node-%v" {
     %v
 }`, config.Address, Directory, tfFolder, AMIs[region], region, avz, config.Address, instance, nodeDir, config.Port, Directory, allocationConfig)
 
-	return ioutil.WriteFile(nodeDir+"/main.tf", []byte(terraformConfig+mode), 0600)
+	return ioutil.WriteFile(nodeDir+"/main.tf", []byte(terraformConfig+mode), 0644)
 }

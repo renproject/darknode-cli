@@ -21,7 +21,7 @@ func main() {
 			Name:  "up",
 			Usage: "Deploy a new Darknode",
 			Flags: []cli.Flag{
-				KeystoreFlag, PassphraseFlag, NetworkFlag, ConfigFlag,
+				NameFlag, TagsFlag, KeystoreFlag, PassphraseFlag, NetworkFlag, ConfigFlag,
 				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag,
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 			},

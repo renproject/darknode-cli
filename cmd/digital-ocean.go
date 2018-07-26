@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
@@ -49,29 +46,29 @@ var AllDoRegions = []string{
 // All available droplet size on digital ocean
 const (
 	Size512MB = "512mb"
-	Size1GB = "1gb"
-	Size2GB = "2gb"
-	Size4GB = "4gb"
-	Size8GB = "8gb"
-	Size16GB = "16gb"
-	Size32GB = "32gb"
-	Size48GB = "48gb"
-	Size64GB = "64gb"
+	Size1GB   = "1gb"
+	Size2GB   = "2gb"
+	Size4GB   = "4gb"
+	Size8GB   = "8gb"
+	Size16GB  = "16gb"
+	Size32GB  = "32gb"
+	Size48GB  = "48gb"
+	Size64GB  = "64gb"
 )
 
 var AllDoDropletSize = []string{
 	Size512MB,
-	Size1GB ,
-	Size2GB ,
+	Size1GB,
+	Size2GB,
 	Size4GB,
-	Size8GB ,
+	Size8GB,
 	Size16GB,
-	Size32GB ,
-	Size48GB ,
-	Size64GB ,
+	Size32GB,
+	Size48GB,
+	Size64GB,
 }
 
-func doParseRegionAndInstance(ctx *cli.Context)( string ,string ,error ){
+func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 	region := ctx.String("do-region")
 	size := ctx.String("do-size")
 
@@ -87,135 +84,92 @@ func doParseRegionAndInstance(ctx *cli.Context)( string ,string ,error ){
 
 	// Validate the droplet size
 	if !StringInSlice(size, AllDoDropletSize) {
-		// todo : oupput available droplet sizes.
+		// todo : output available droplet sizes.
 		return "", "", ErrUnSupportedInstanceType
 	}
 
 	return region, size, nil
 }
 
+// deployToDo parses the digital ocean credentials and use terraform to
+// deploy the node to digital ocean.
+func deployToDo(ctx *cli.Context) error {
+	token := ctx.String("do-token")
 
-func generateTerraformConfigForDo(ctx *cli.Context, config config.Config, token string) error {
+	// Parse DO related data.
+	region, size, err := parseDoRegionAndSize(ctx)
+	if err != nil {
+		return err
+	}
 
+	// Create node directory
+	name, err := createNodeDirectory(ctx)
+	if err != nil {
+		return err
+	}
+	nodeDir := nodeDirectory(name)
+
+	// Generate config and ssh key for the node
+	config, err := GetConfigOrGenerateNew(ctx, nodeDir)
+	if err != nil {
+		return err
+	}
+	_, err = NewSshKeyPair(nodeDir)
+	if err != nil {
+		return err
+	}
+
+	// Generate terraform config and start deploying
+	if err := generateDoTFConfig(config, token, name, nodeDir, region, size); err != nil {
+		return err
+	}
+	if err := runTerraform(nodeDir); err != nil {
+		return err
+	}
+
+	return outputUrl(ctx, name, nodeDir)
+}
+
+// generateDoTFConfig generates the terraform config file for deploying to DO.
+func generateDoTFConfig( config config.Config, token, name, nodeDir, region, size string) error {
 	terraformConfig := fmt.Sprintf(`
 variable "do_token" {
 	default = "%v"
 }
 
-variable "secret_key" {
-	default = "%v"	
-}
-
-variable "ssh_public_key" {
+variable "name" {
 	default = "%v"
 }
 
-variable "ssh_private_key_location" {
+variable "region" {
 	default = "%v"
 }
-	`, accessKey, secretKey, strings.TrimSpace(pubKey), nodeDirectory+"/ssh_keypair")
 
-	avz := region + AvailableZones[region][rand.Intn(len(AvailableZones[region]))]
-	mode := fmt.Sprintf(`
-module "node-%v" {
-    source = "%v/instance/%v"
-    ami = "%v"
-    region = "%v"
-    avz = "%v"
-    id = "%v"
-    ec2_instance_type = "%v"
-    ssh_public_key = "${var.ssh_public_key}"
-    ssh_private_key_location = "${var.ssh_private_key_location}"
-    access_key = "${var.access_key}"
-    secret_key = "${var.secret_key}"
-    config = "%v/config.json"
-    port = "%v"
-    path = "%v"
-    %v
-}`, config.Address, Directory, tfFolder, AMIs[region], region, avz, config.Address, instance, nodeDirectory, config.Port, Directory, allocationConfig)
-
-	return ioutil.WriteFile(nodeDirectory+"/main.tf", []byte(terraformConfig+mode), 0600)
+variable "size" {
+	default = "%v"
 }
 
-
-
-// deployToDigitalOcean parses the digital ocean credentials and use terraform
-// to deploy the node to digital ocean.
-func deployToDigitalOcean(ctx *cli.Context) error {
-	name := ctx.String("name")
-	tags := ctx.String("tags")
-	network := ctx.String("network")
-	token := ctx.String("do-token")
-
-
-	// Check digital ocean token
-	if token == "" {
-		return ErrEmptyDoToken
-	}
-
-	// Check region and droplet size
-	region, size, err := doParseRegionAndInstance(ctx)
-	if err != nil {
-		return err
-	}
-	// Generate configs for the node
-	config, err := GetConfigOrGenerateNew(ctx)
-	if err != nil {
-		return err
-	}
-	// Check darknode name and make directory for the node
-	if name == "" {
-		return ErrEmptyNodeName
-	}
-	if _, err := os.Stat(Directory + "/darknodes/" + name); !os.IsNotExist(err) {
-		return ErrNodeExist
-	}
-	nodeDirectory := Directory + "/darknodes/" + name
-	if err := os.Mkdir(nodeDirectory, 0777); err != nil {
-		return err
-	}
-	// Store the tags
-	if err := ioutil.WriteFile(nodeDirectory+"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
-		return err
-	}
-	// Write the config to file
-	configData, err := json.MarshalIndent(config, "", "    ")
-	if err != nil {
-		return err
-	}
-	if err := ioutil.WriteFile(nodeDirectory+"/config.json", configData, 0600); err != nil {
-		return err
-	}
-	// Generate new ssk key pair
-	pubKey, err := NewSshKeyPair(nodeDirectory)
-	if err != nil {
-		if err := cleanUp(nodeDirectory); err != nil {
-			return err
-		}
-		return err
-	}
-	if err := generateTerraformConfigForAws(ctx, config, accessKey, secretKey, region, instance, pubKey, nodeDirectory); err != nil {
-		if err := cleanUp(nodeDirectory); err != nil {
-			return err
-		}
-		return err
-	}
-	if err := runTerraform(nodeDirectory); err != nil {
-		if err := cleanUp(nodeDirectory); err != nil {
-			return err
-		}
-		return err
-	}
-
-	ip, err := getIp(nodeDirectory)
-	if err != nil {
-		if err := cleanUp(nodeDirectory); err != nil {
-			return err
-		}
-		return err
-	}
-
-
+variable "path" {
+  default = "%v"
 }
 
+variable "id" {
+  default = "%v"
+}
 
+variable "pub_key" {
+  default = "%v/darknodes/%v/ssh_keypair.pub"
+}
+
+variable "pvt_key" {
+  default = "%v/darknodes/%v/ssh_keypair"
+}
+	`, token, name, region, size, Directory, config.Address, Directory, name,Directory, name)
+
+	err := ioutil.WriteFile(nodeDir+"/variables.tf", []byte(terraformConfig), 0644)
+	if err != nil {
+		return err
+	}
+
+	return copyFile(Directory+ "/instance/digital-ocean/main.tf", nodeDir+"/main.tf")
+}
