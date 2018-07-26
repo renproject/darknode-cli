@@ -31,7 +31,7 @@ func NewSshKeyPair(directory string) (ssh.PublicKey, error) {
 		Bytes:   priKeyBytes,
 	}
 	privatePEM := pem.EncodeToMemory(&privBlock)
-	ioutil.WriteFile(keyPairPath, privatePEM, 0644)
+	ioutil.WriteFile(keyPairPath, privatePEM, 0600)
 
 	// Write the public key to file
 	publicRsaKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
@@ -39,7 +39,7 @@ func NewSshKeyPair(directory string) (ssh.PublicKey, error) {
 		return nil, err
 	}
 	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
-	err = ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0644)
+	err = ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
 
 	return publicRsaKey, err
 

@@ -18,6 +18,18 @@ resource "digitalocean_droplet" "darknode" {
     "${digitalocean_ssh_key.darknode.id}"
   ]
 
+  provisioner "remote-exec" {
+    inline = [
+      ""
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      private_key = "${file("${var.pvt_key}")}"
+    }
+  }
+
   provisioner "file" {
     source = "${var.path}/darknodes/${var.name}/config.json"
     destination = "$HOME/darknode-config.json"
@@ -28,18 +40,6 @@ resource "digitalocean_droplet" "darknode" {
       private_key = "${file("${var.pvt_key}")}"
     }
   }
-
-  //  provisioner "remote-exec" {
-  //    inline = [
-  //      "mkdir -p $HOME/provisions"
-  //    ]
-  //
-  //    connection {
-  //      type        = "ssh"
-  //      user        = "root"
-  //      private_key = "${file("${var.pvt_key}")}"
-  //    }
-  //  }
 
   provisioner "file" {
     source = "${var.path}/provisions/"
