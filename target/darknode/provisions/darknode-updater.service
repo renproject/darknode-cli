@@ -3,7 +3,7 @@ Description=Republic Protocol's Darknode Automatic Updater
 After=network.target
 
 [Service]
-ExecStart=/bin/bash $HOME/.darknode/updater.sh
+ExecStart=/bin/bash /home/ubuntu/.darknode/updater.sh
 Restart=on-failure
 StartLimitBurst=0
 

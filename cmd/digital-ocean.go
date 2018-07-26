@@ -21,8 +21,8 @@ const (
 	NYC1   = "nyc1"
 	NYC2   = "nyc2"
 	NYC3   = "nyc3"
-	SF01   = "sf01"
-	SF02   = "sf02"
+	SF01   = "sfo1"
+	SF02   = "sfo2"
 	SGP1   = "sgp1"
 	TOR1   = "tor1"
 )
@@ -131,7 +131,7 @@ func deployToDo(ctx *cli.Context) error {
 }
 
 // generateDoTFConfig generates the terraform config file for deploying to DO.
-func generateDoTFConfig( config config.Config, token, name, nodeDir, region, size string) error {
+func generateDoTFConfig(config config.Config, token, name, nodeDir, region, size string) error {
 	terraformConfig := fmt.Sprintf(`
 variable "do_token" {
 	default = "%v"
@@ -164,12 +164,12 @@ variable "pub_key" {
 variable "pvt_key" {
   default = "%v/darknodes/%v/ssh_keypair"
 }
-	`, token, name, region, size, Directory, config.Address, Directory, name,Directory, name)
+	`, token, name, region, size, Directory, config.Address, Directory, name, Directory, name)
 
 	err := ioutil.WriteFile(nodeDir+"/variables.tf", []byte(terraformConfig), 0644)
 	if err != nil {
 		return err
 	}
 
-	return copyFile(Directory+ "/instance/digital-ocean/main.tf", nodeDir+"/main.tf")
+	return copyFile(Directory+"/instance/digital-ocean/main.tf", nodeDir+"/main.tf")
 }

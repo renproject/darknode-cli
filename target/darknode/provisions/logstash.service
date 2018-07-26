@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 # run as root, set base_path in config.toml
-ExecStart= $HOME/logstash-6.2.2/bin/logstash -f $HOME/logstash-6.2.2/darknode.conf
+ExecStart= /home/ubuntu/logstash-6.2.2/bin/logstash -f /home/ubuntu/logstash-6.2.2/darknode.conf
 Restart=on-failure
 
 # Specifies which signal to use when killing a service. Defaults to SIGTERM.

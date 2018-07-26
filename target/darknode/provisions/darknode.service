@@ -3,7 +3,7 @@ Description=Republic Protocol's Darknode Daemon
 After=network.target
 
 [Service]
-ExecStart=$HOME/go/bin/darknode --config $HOME/.darknode/config.json
+ExecStart=/home/ubuntu/go/bin/darknode --config /home/ubuntu/.darknode/config.json
 Restart=on-failure
 StartLimitBurst=0
 

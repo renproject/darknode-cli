@@ -20,7 +20,10 @@ resource "digitalocean_droplet" "darknode" {
 
   provisioner "remote-exec" {
     inline = [
-      ""
+      "adduser ubuntu --gecos \",,,\" --disabled-password",
+      "usermod -aG sudo ubuntu",
+      "echo \"ubuntu ALL=(ALL) NOPASSWD: ALL\" >> /etc/sudoers",
+      "rsync --archive --chown=ubuntu:ubuntu ~/.ssh /home/ubuntu"
     ]
 
     connection {
@@ -36,18 +39,18 @@ resource "digitalocean_droplet" "darknode" {
 
     connection {
       type = "ssh"
-      user = "root"
+      user = "ubuntu"
       private_key = "${file("${var.pvt_key}")}"
     }
   }
 
   provisioner "file" {
-    source = "${var.path}/provisions/"
+    source = "${var.path}/provisions"
     destination = "$HOME/provisions"
 
     connection {
       type = "ssh"
-      user = "root"
+      user = "ubuntu"
       private_key = "${file("${var.pvt_key}")}"
     }
   }
@@ -58,7 +61,7 @@ resource "digitalocean_droplet" "darknode" {
 
     connection {
       type = "ssh"
-      user = "root"
+      user = "ubuntu"
       private_key = "${file("${var.pvt_key}")}"
     }
   }
@@ -68,7 +71,7 @@ resource "digitalocean_droplet" "darknode" {
 
     connection {
       type = "ssh"
-      user = "root"
+      user = "ubuntu"
       private_key = "${file("${var.pvt_key}")}"
     }
   }
