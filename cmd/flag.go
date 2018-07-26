@@ -42,7 +42,7 @@ var (
 		Name:  "config, c",
 		Usage: "An optional configuration `file` used to update the configuration",
 	}
-	ForceFlag = cli.BoolFlag{
+	ForceFlag = cli.GenericFlag{
 		Name:  "force, f",
 		Usage: "Force destruction without interactive prompts",
 	}

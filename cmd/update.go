@@ -12,58 +12,42 @@ import (
 // updateNode updates the Darknode to the latest release from master branch.
 // This will restart the Darknode.
 func updateNode(ctx *cli.Context) error {
-	name := ctx.String("name")
+	name := ctx.Args().First()
 	tags := ctx.String("tags")
 	branch := ctx.String("branch")
 	updateConfig := ctx.Bool("config")
+	// FIXME: BOOLFLAG DOESN'T WORK VERY WELL WITH THE ARGUMENTS
 
-	if name == "" && tags == "" {
-		cli.ShowCommandHelp(ctx, "update")
-		return ErrEmptyNameAndTags
-	}
-
-	// update a single darknode by its name
-	if name != "" && tags == "" {
-		if err := updateSingleNode(name, branch, updateConfig); err != nil {
-			return err
-		}
+	if tags == "" && name == "" {
+		return ErrEmptyNodeName
+	} else if tags == "" && name != "" {
+		return updateSingleNode(name, branch, updateConfig)
 	} else if tags != "" && name == "" {
-		nodeNames, err := getNodesByTags(tags)
+		nodes, err := getNodesByTags(tags)
 		if err != nil {
 			return err
 		}
-		if len(nodeNames) == 0 {
-			return ErrNoNodesFound
-		}
-
-		errs := make([]error, len(nodeNames))
-		co.ForAll(nodeNames, func(i int) {
-			errs[i] = updateSingleNode(nodeNames[i], branch, updateConfig)
+		errs := make([]error, len(nodes))
+		co.ForAll(nodes, func(i int) {
+			errs[i] = updateSingleNode(nodes[i], branch, updateConfig)
 		})
-
-		for i := range errs {
-			if errs[i] != nil {
-				return err
-			}
-		}
-
-		return nil
+		return handleErrs(errs)
 	}
 
 	return ErrNameAndTags
 }
 
 func updateSingleNode(name, branch string, updateConfig bool) error {
-	nodeDirectory := Directory + "/darknodes/" + name
-	keyPairPath := nodeDirectory + "/ssh_keypair"
-	ip, err := getIp(nodeDirectory)
+	nodeDir := nodeDirectory(name)
+	keyPairPath := nodeDir + "/ssh_keypair"
+	ip, err := getIp(nodeDir)
 	if err != nil {
 		return err
 	}
 
 	// Check if we need to update the node config
 	if updateConfig {
-		data, err := ioutil.ReadFile(nodeDirectory + "/config.json")
+		data, err := ioutil.ReadFile(nodeDir + "/config.json")
 		if err != nil {
 			return err
 		}
@@ -83,7 +67,8 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 #!/usr/bin/env bash
 
 cd ./go/src/github.com/republicprotocol/republic-go
-sudo git stash
+sudo git reset --hard HEAD
+sudo git clean -f -d
 sudo git checkout %v
 sudo git fetch origin %v
 sudo git reset --hard origin/%v
@@ -101,19 +86,19 @@ sudo service darknode restart
 	if err := updateCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s \n", GREEN, name, branch, RESET)
 
+	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s \n", GREEN, name, branch, RESET)
 	return nil
 }
 
 // sshNode will ssh into the Darknode
 func sshNode(ctx *cli.Context) error {
-	name := ctx.String("name")
+	name := ctx.Args().First()
 	if name == "" {
 		cli.ShowCommandHelp(ctx, "ssh")
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := Directory + "/darknodes/" + name
+	nodeDirectory := nodeDirectory(name)
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err

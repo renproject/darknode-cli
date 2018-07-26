@@ -149,3 +149,15 @@ func copyFile(src, dst string) error {
 	}
 	return out.Close()
 }
+
+// handleErrs checks a list of errors, return the first error encountered,
+// nil otherwise.
+func handleErrs(errs []error) error {
+	for _, err := range errs {
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

@@ -13,7 +13,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "1.1.0"
+	app.Version = "1.2.0"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
@@ -33,7 +33,7 @@ func main() {
 			Name:    "destroy",
 			Usage:   "Destroy one of your Darknode",
 			Aliases: []string{"down"},
-			Flags:   []cli.Flag{NameFlag, TagsFlag, ForceFlag},
+			Flags:   []cli.Flag{TagsFlag, ForceFlag},
 			Action: func(c *cli.Context) error {
 				return destroyNode(c)
 			},
@@ -41,14 +41,14 @@ func main() {
 		{
 			Name:  "update",
 			Usage: "Update your Darknodes to the latest software and configuration",
-			Flags: []cli.Flag{NameFlag, TagsFlag, BranchFlag, ConfigFlag},
+			Flags: []cli.Flag{TagsFlag, BranchFlag, ConfigFlag},
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
 			},
 		},
 		{
 			Name:  "ssh",
-			Flags: []cli.Flag{NameFlag},
+			Flags: []cli.Flag{},
 			Usage: "SSH into one of your Darknode",
 			Action: func(c *cli.Context) error {
 				return sshNode(c)
@@ -56,7 +56,7 @@ func main() {
 		},
 		{
 			Name:  "start",
-			Flags: []cli.Flag{NameFlag, TagsFlag},
+			Flags: []cli.Flag{TagsFlag},
 			Usage: "Start one of your Darknodes from a suspended state",
 			Action: func(c *cli.Context) error {
 				return startNode(c)
@@ -64,7 +64,7 @@ func main() {
 		},
 		{
 			Name:  "stop",
-			Flags: []cli.Flag{NameFlag, TagsFlag},
+			Flags: []cli.Flag{TagsFlag},
 			Usage: "Stop one of your Darknodes by putting it into a suspended state",
 			Action: func(c *cli.Context) error {
 				return stopNode(c)
@@ -81,7 +81,7 @@ func main() {
 		{
 			Name:  "exec",
 			Usage: "Exec scripts on nodes",
-			Flags: []cli.Flag{NameFlag, TagsFlag, ScriptFlag},
+			Flags: []cli.Flag{TagsFlag, ScriptFlag},
 			Action: func(c *cli.Context) error {
 				return execScript(c)
 			},

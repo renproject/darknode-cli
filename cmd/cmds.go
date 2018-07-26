@@ -6,31 +6,28 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/republicprotocol/co-go"
 	"github.com/republicprotocol/republic-go/identity"
 	"github.com/urfave/cli"
 )
 
-// listAllNodes will ssh into the Darknode
+// listAllNodes will list basic info of all the deployed darknodes.
+// You can filter the results by the tags.
 func listAllNodes(ctx *cli.Context) error {
-	tag := ctx.String("tag")
-
-	files, err := ioutil.ReadDir(Directory + "/darknodes")
+	tags := ctx.String("tags")
+	nodesNames, err := getNodesByTags(tags)
 	if err != nil {
 		return err
 	}
-	nodes := [][]string{}
 
-	for _, f := range files {
-		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+	nodes := make([][]string, 0)
+	for i := range nodesNames {
+		tagFile := fmt.Sprintf("%v/darknodes/%v/tags.out", Directory, nodesNames[i])
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
 		}
-		if !strings.Contains(string(tags), tag) {
-			continue
-		}
-
-		addressFile := Directory + "/darknodes/" + f.Name() + "/multiAddress.out"
+		addressFile := fmt.Sprintf("%v/darknodes/%v/multiAddress.out", Directory, nodesNames[i])
 		data, err := ioutil.ReadFile(addressFile)
 		if err != nil {
 			continue
@@ -52,35 +49,53 @@ func listAllNodes(ctx *cli.Context) error {
 			continue
 		}
 
-		nodes = append(nodes, []string{f.Name(), address, ip, string(tags), ethAddress.Hex()})
+		nodes = append(nodes, []string{nodesNames[i], address, ip, string(tags), ethAddress.Hex()})
 	}
 
-	if len(nodes) == 0 {
-		return fmt.Errorf("%scannot find any node%s", RED, RESET)
-	} else {
+	if len(nodes) > 0 {
 		fmt.Printf("%-20s | %-30s | %-15s | %-20s | %-45s \n", "name", "Address", "ip", "tags", "Ethereum Address")
 		for i := range nodes {
 			fmt.Printf("%-20s | %-30s | %-15s | %-20s | %-45s\n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3], nodes[i][4])
 		}
+		return nil
 	}
 
-	return nil
+	return fmt.Errorf("%scannot find any node%s", RED, RESET)
 }
 
-// startNode starts a node by its name
+// startNode starts a single node or a set of nodes by its tags.
 func startNode(ctx *cli.Context) error {
-	name := ctx.String("name")
-	if name == "" {
-		cli.ShowCommandHelp(ctx, "start")
+	tags := ctx.String("tags")
+	name := ctx.Args().First()
+
+	if tags == "" && name == "" {
 		return ErrEmptyNodeName
+	} else if tags == "" && name != "" {
+		return startSingleNode(name)
+	} else if tags != "" && name == "" {
+		nodes, err := getNodesByTags(tags)
+		if err != nil {
+			return err
+		}
+		errs := make([]error, len(nodes))
+		co.ForAll(nodes, func(i int) {
+			errs[i] = startSingleNode(nodes[i])
+		})
+		return handleErrs(errs)
 	}
-	nodeDirectory := Directory + "/darknodes/" + name
-	ip, err := getIp(nodeDirectory)
+
+	return ErrNameAndTags
+}
+
+// startSingleNode starts a single node by its name
+func startSingleNode(name string) error {
+	nodeDir := nodeDirectory(name)
+	ip, err := getIp(nodeDir)
 	if err != nil {
 		return err
 	}
 	startScript := "sudo systemctl start darknode"
-	keyPairPath := nodeDirectory + "/ssh_keypair"
+	keyPairPath := nodeDir + "/ssh_keypair"
 	startCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", startScript)
 	pipeToStd(startCmd)
 	if err := startCmd.Start(); err != nil {
@@ -94,15 +109,36 @@ func startNode(ctx *cli.Context) error {
 	return nil
 }
 
-// stopNode stops a node by its name
+// stopNode stops a single node or a set of nodes by its tags.
 func stopNode(ctx *cli.Context) error {
+	tags := ctx.String("tags")
+	name := ctx.Args().First()
 
-	name := ctx.String("name")
+	if tags == "" && name == "" {
+		return ErrEmptyNodeName
+	} else if tags == "" && name != "" {
+		return stopSingleNode(name)
+	} else if tags != "" && name == "" {
+		nodes, err := getNodesByTags(tags)
+		if err != nil {
+			return err
+		}
+		errs := make([]error, len(nodes))
+		co.ForAll(nodes, func(i int) {
+			errs[i] = stopSingleNode(nodes[i])
+		})
+		return handleErrs(errs)
+	}
+
+	return ErrNameAndTags
+}
+
+// stopSingleNode stops a single node by its name
+func stopSingleNode(name string) error {
 	if name == "" {
-		cli.ShowCommandHelp(ctx, "stop")
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := Directory + "/darknodes/" + name
+	nodeDirectory := nodeDirectory(name)
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
@@ -117,7 +153,7 @@ func stopNode(ctx *cli.Context) error {
 	if err := stopCmd.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("%s[%s] has been turned off.%s \n", GREEN, name, RESET)
 
+	fmt.Printf("%s[%s] has been turned off.%s \n", GREEN, name, RESET)
 	return nil
 }

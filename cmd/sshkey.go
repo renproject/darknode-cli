@@ -1,10 +1,8 @@
 package main
 
 import (
-	"crypto/md5"
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/republicprotocol/republic-go/crypto"
@@ -50,17 +48,4 @@ func StringfySshPubkey(key ssh.PublicKey) string {
 	pubKeyBytes := ssh.MarshalAuthorizedKey(key)
 
 	return string(pubKeyBytes)
-}
-
-// hexadecimal md5 hash grouped by 2 characters separated by colons
-func FingerprintMD5(key ssh.PublicKey) string {
-	hash := md5.Sum(key.Marshal())
-	out := ""
-	for i := 0; i < 16; i++ {
-		if i > 0 {
-			out += ":"
-		}
-		out += fmt.Sprintf("%02x", hash[i]) // don't forget the leading zeroes
-	}
-	return out
 }
