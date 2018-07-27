@@ -93,7 +93,7 @@ var (
 		Usage: "An optional digital ocean region (default: random)",
 	}
 	DoSizeFlag = cli.StringFlag{
-		Name:  "do-size",
+		Name:  "do-droplet",
 		Value: "8gb",
 		Usage: "An optional digital ocean droplet size (default: 8gb)",
 	}

@@ -116,7 +116,7 @@ var AllDoDropletSize = []string{
 
 func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 	region := ctx.String("do-region")
-	size := ctx.String("do-size")
+	size := ctx.String("do-droplet")
 
 	// Parse the input region or pick one region randomly
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -142,6 +142,9 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 func deployToDo(ctx *cli.Context) error {
 	token := ctx.String("do-token")
 
+	if token == ""{
+		return ErrEmptyDoToken
+	}
 	// Parse DO related data.
 	region, size, err := parseDoRegionAndSize(ctx)
 	if err != nil {
