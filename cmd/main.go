@@ -13,7 +13,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "1.2.0"
+	app.Version = "2.0.0"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
@@ -78,14 +78,14 @@ func main() {
 				return listAllNodes(c)
 			},
 		},
-		{
-			Name:  "exec",
-			Usage: "Exec scripts on nodes",
-			Flags: []cli.Flag{TagsFlag, ScriptFlag},
-			Action: func(c *cli.Context) error {
-				return execScript(c)
-			},
-		},
+		// {
+		// 	Name:  "exec",
+		// 	Usage: "Execute script on nodes",
+		// 	Flags: []cli.Flag{TagsFlag, ScriptFlag},
+		// 	Action: func(c *cli.Context) error {
+		// 		return execScript(c)
+		// 	},
+		// },
 	}
 
 	// Show error message and display the help page for the app
