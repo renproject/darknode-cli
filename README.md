@@ -89,13 +89,13 @@ _WARNING: Before destroying a Darknode make sure you have deregistered it, and w
 Destroying a Darknode will turn it off and tear down all resources allocated by the cloud provider. To destroy a Darknode, open a terminal and run:
 
 ```sh
-darknode destroy --name my-first-darknode
+darknode destroy my-first-darknode
 ``` 
 
 To avoid the command-line prompt reminding you to deregister your Darknode, use the `--force` argument: 
 
 ```sh
-darknode destroy --name my-first-darknode --force
+darknode destroy my-first-darknode --force
 ```
 
 We do not recommend using the `--force` argument unless you are developing custom tools that manage your Darknodes automatically.
@@ -114,7 +114,7 @@ darknode list
 To turn off your darknode, open a terminal and run: 
 
 ```sh
-darknode stop --name my-first-darknode
+darknode stop my-first-darknode
 
 ``` 
 
@@ -125,7 +125,7 @@ If it is already off, `stop` will do nothing.
 To turn on your darknode, open a terminal and run: 
 
 ```sh
-darknode start --name my-first-darknode
+darknode start my-first-darknode
 ``` 
 
 If it is already on, `start` will do nothing.
@@ -135,7 +135,7 @@ If it is already on, `start` will do nothing.
 To access your Darknode using SSH, open a terminal and run:
 
 ```sh
-darknode ssh --name my-first-darknode
+darknode ssh my-first-darknode
 ``` 
 
 ### Update a Darknode
@@ -143,7 +143,7 @@ darknode ssh --name my-first-darknode
 To update your Darknode to the latest stable version, open a terminal and run:
 
 ```sh
-darknode update --name my-first-darknode
+darknode update my-first-darknode
 ``` 
 
 To update the configuration of your darknode, first edit the local version of config, by running:
@@ -155,5 +155,5 @@ nano $HOME/.darknode/darknodes/my-first-darknode/config.json
 and now run:
 
 ```sh
-darknode update --name my-first-darknode --config
+darknode update my-first-darknode --config
 ``` 
