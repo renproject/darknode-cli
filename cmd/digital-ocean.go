@@ -142,7 +142,7 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 func deployToDo(ctx *cli.Context) error {
 	token := ctx.String("do-token")
 
-	if token == ""{
+	if token == "" {
 		return ErrEmptyDoToken
 	}
 	// Parse DO related data.

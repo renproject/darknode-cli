@@ -64,9 +64,15 @@ func createNodeDirectory(ctx *cli.Context) (string, error) {
 	}
 
 	// Check if the directory exists or not.
-	// todo : rm fail deployment if exists
-	if _, err := os.Stat(nodeDir); !os.IsNotExist(err) {
-		return "", ErrNodeExist
+	if _, err := os.Stat(nodeDir); err == nil {
+		if _, err := os.Stat(nodeDir + "/multiAddress.out"); os.IsNotExist(err) {
+			err := cleanUp(nodeDir)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			return "", ErrNodeExist
+		}
 	}
 	if err := os.Mkdir(nodeDir, 0777); err != nil {
 		return "", err
