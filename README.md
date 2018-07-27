@@ -66,7 +66,21 @@ darknode up --network testnet --name my-first-darknode --aws --aws-access-key YO
 
 #### Digital Ocean
 
-> Coming soon!
+Follow the steps in the [tutorial](https://www.digitalocean.com/docs/api/create-personal-access-token/) to create a API token. 
+To deploy a Darknode on Digital Ocean, open a terminal and run:
+
+```sh
+darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-TOKEN
+``` 
+
+You can also specify the region and droplet size you want to use for the Darknode:
+
+```sh
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
+``` 
+
+You can find all available regions from [status page](https://status.digitalocean.com).
+You can find available droplet size slug from the [post](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) or using digital ocean API.
 
 ### Destroy a Darknode
 
