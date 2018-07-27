@@ -10,6 +10,7 @@ cd ../..
 
 # Copy install script to build folder
 cp scripts/install.sh build/install.sh
+cp scripts/update.sh build/update.sh
 
 # Generate binaries
 docker-machine create default

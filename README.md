@@ -32,9 +32,9 @@ This will update your Darknode CLI to the latest version.
 
 ## Usage
 
-> Here there be dragons!
+_Here there be dragons!_
 
-These guidelines are for technically competent advanced users. If you just want to see what deploying a Testnet Darknode is like, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
+These guidelines are for advanced users. If you just want to see what deploying a Testnet Darknode is like, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
 
 ### Deploy a Darknode
 
