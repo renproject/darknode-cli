@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/republicprotocol/republic-go/order"
+	"github.com/republicprotocol/republic-go/registry"
 )
 
 // ErrComputationNotFound is returned when the Storer cannot find a Computation
@@ -46,12 +47,31 @@ type ComputationIterator interface {
 
 // OrderFragmentStorer for the order.Fragments that are received.
 type OrderFragmentStorer interface {
-	OrderFragment(id order.ID) (order.Fragment, error)
+	PutBuyOrderFragment(epoch registry.Epoch, orderFragment order.Fragment, trader string) error
+	DeleteBuyOrderFragment(epoch registry.Epoch, id order.ID) error
+	BuyOrderFragment(epoch registry.Epoch, id order.ID) (order.Fragment, string, error)
+	BuyOrderFragments(epoch registry.Epoch) (OrderFragmentIterator, error)
+
+	PutSellOrderFragment(epoch registry.Epoch, orderFragment order.Fragment, trader string) error
+	DeleteSellOrderFragment(epoch registry.Epoch, id order.ID) error
+	SellOrderFragment(epoch registry.Epoch, id order.ID) (order.Fragment, string, error)
+	SellOrderFragments(epoch registry.Epoch) (OrderFragmentIterator, error)
 }
 
-// Storer combines the ComputationStorer interface and the
-// OrderFragmentStorer interface into a unified set of storage functions.
-type Storer interface {
-	ComputationStorer
-	OrderFragmentStorer
+// OrderFragmentIterator is used to iterate over an order.Fragment collection.
+type OrderFragmentIterator interface {
+
+	// Next progresses the cursor. Returns true if the new cursor is still in
+	// the range of the order.Fragment collection, otherwise false.
+	Next() bool
+
+	// Cursor returns the order.Fragment at the current cursor location.
+	// Returns an error if the cursor is out of range.
+	Cursor() (order.Fragment, string, error)
+
+	// Collect all order.Fragments in the iterator into a slice.
+	Collect() ([]order.Fragment, []string, error)
+
+	// Release the resources allocated by the iterator.
+	Release()
 }

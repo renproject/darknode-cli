@@ -13,10 +13,9 @@ import (
 // This will restart the Darknode.
 func updateNode(ctx *cli.Context) error {
 	name := ctx.Args().First()
+	updateConfig := ctx.Bool("config")
 	tags := ctx.String("tags")
 	branch := ctx.String("branch")
-	updateConfig := ctx.Bool("config")
-	// FIXME: BOOLFLAG DOESN'T WORK VERY WELL WITH THE ARGUMENTS
 
 	if tags == "" && name == "" {
 		return ErrEmptyNodeName

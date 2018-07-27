@@ -22,6 +22,7 @@ resource "digitalocean_droplet" "darknode" {
     inline = [
       "adduser ubuntu --gecos \",,,\" --disabled-password",
       "usermod -aG sudo ubuntu",
+      "usermod -aG adm ubuntu",
       "echo \"ubuntu ALL=(ALL) NOPASSWD: ALL\" >> /etc/sudoers",
       "rsync --archive --chown=ubuntu:ubuntu ~/.ssh /home/ubuntu"
     ]
