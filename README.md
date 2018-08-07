@@ -56,7 +56,7 @@ darknode up --network testnet --name my-first-darknode --aws --aws-access-key YO
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
-You can also associate the darknode to an elastic IP by specifing the `allocation_id`. 
+You can also associate the darknode to an elastic IP by providing the `allocation_id` of the elastic IP. 
 Make sure you give the same region of the elastic to the darknode. 
 
 
@@ -76,15 +76,17 @@ darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-
 You can also specify the region and droplet size you want to use for the Darknode:
 
 ```sh
-darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
+darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
 ``` 
 
+Be aware some region and droplet size are not available to all users.
+
 You can find all available regions from [status page](https://status.digitalocean.com).
-You can find available droplet size slug from the [post](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) or using digital ocean API.
+You can find available droplet size slug from [post](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) or using digital ocean API.
 
 ### Destroy a Darknode
 
-_WARNING: Before destroying a Darknode make sure you have deregistered it, and withdrawn all fees earned!_
+_WARNING: Before destroying a Darknode make sure you have de-registered it, and withdrawn all fees earned!_
 
 Destroying a Darknode will turn it off and tear down all resources allocated by the cloud provider. To destroy a Darknode, open a terminal and run:
 
