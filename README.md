@@ -8,7 +8,7 @@ To jump straight into running your first Darknode on AWS, checkout our [Getting 
 
 ## Getting Started on Digital Ocean
 
-> Coming soon!
+Checkout the instructions for using [Digial Ocean](https://github.com/republicprotocol/darknode-cli#digital-ocean).
 
 ## Installation
 
