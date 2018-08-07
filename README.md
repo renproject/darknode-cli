@@ -56,7 +56,7 @@ darknode up --network testnet --name my-first-darknode --aws --aws-access-key YO
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
-You can also associate the darknode to an elastic IP by providing the `ALLOCATION-ID` of the elastic IP. 
+You can also associate the darknode to an elastic IP by providing the `EIP-ALLOCATION-ID` of the elastic IP. 
 Make sure you give the same region of the elastic to the darknode. 
 
 
