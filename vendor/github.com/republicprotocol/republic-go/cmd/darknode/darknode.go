@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	netHttp "net/http"
 	"os"
@@ -17,7 +18,6 @@ import (
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/crypto"
-	"github.com/republicprotocol/republic-go/dht"
 	"github.com/republicprotocol/republic-go/dispatch"
 	"github.com/republicprotocol/republic-go/grpc"
 	"github.com/republicprotocol/republic-go/http"
@@ -26,6 +26,7 @@ import (
 	"github.com/republicprotocol/republic-go/leveldb"
 	"github.com/republicprotocol/republic-go/logger"
 	"github.com/republicprotocol/republic-go/ome"
+	"github.com/republicprotocol/republic-go/oracle"
 	"github.com/republicprotocol/republic-go/orderbook"
 	"github.com/republicprotocol/republic-go/registry"
 	"github.com/republicprotocol/republic-go/smpc"
@@ -77,6 +78,27 @@ func main() {
 		log.Fatalf("cannot get ethereum bindings: %v", err)
 	}
 
+	// New database for persistent storage
+	store, err := leveldb.NewStore(*dataParam, 72*time.Hour)
+	if err != nil {
+		log.Fatalf("cannot open leveldb: %v", err)
+	}
+	defer store.Release()
+
+	midpointPriceStorer := leveldb.NewMidpointPriceStorer()
+
+	// Get own nonce from leveldb, if present and store multiaddress.
+	multi, err := store.SwarmMultiAddressStore().MultiAddress(multiAddr.Address())
+	if err != nil {
+		if err != swarm.ErrMultiAddressNotFound {
+			logger.Network(logger.LevelError, fmt.Sprintf("error retrieving own nonce details from store: %v", err))
+		} else {
+			multi.Nonce = 0
+		}
+	}
+
+	multiAddr.Nonce = multi.Nonce + 1
+
 	// New crypter for signing and verification
 	crypter := registry.NewCrypter(config.Keystore, &contractBinder, 256, time.Minute)
 	multiAddrSignature, err := crypter.Sign(multiAddr.Hash())
@@ -84,41 +106,49 @@ func main() {
 		log.Fatalf("cannot sign own multiaddress: %v", err)
 	}
 	multiAddr.Signature = multiAddrSignature
-
-	// New database for persistent storage
-	store, err := leveldb.NewStore(*dataParam)
-	if err != nil {
-		log.Fatalf("cannot open leveldb: %v", err)
+	if err := store.SwarmMultiAddressStore().InsertMultiAddress(multiAddr); err != nil {
+		log.Fatalf("cannot store own multiaddress in leveldb: %v", err)
 	}
-	defer store.Close()
-
-	// New DHT
-	dht := dht.NewDHT(config.Address, 64)
+	log.Printf("current nonce %v, length of signature: %v", multiAddr.Nonce, len(multiAddr.Signature))
 
 	// New gRPC components
 	server := grpc.NewServer()
 
-	statusService := grpc.NewStatusService(&dht)
-	statusService.Register(server)
-
-	swarmClient := grpc.NewSwarmClient(multiAddr)
-	swarmService := grpc.NewSwarmService(swarm.NewServer(&crypter, swarmClient, &dht))
-	swarmer := swarm.NewSwarmer(swarmClient, &dht)
+	swarmClient := grpc.NewSwarmClient(store.SwarmMultiAddressStore(), multiAddr.Address())
+	swarmer := swarm.NewSwarmer(swarmClient, store.SwarmMultiAddressStore(), config.Alpha, &crypter)
+	swarmService := grpc.NewSwarmService(swarm.NewServer(swarmer, store.SwarmMultiAddressStore(), config.Alpha, &crypter), time.Millisecond)
 	swarmService.Register(server)
 
-	orderbook := orderbook.NewOrderbook(config.Keystore.RsaKey, orderbook.NewSyncer(store, &contractBinder, 1024), store)
+	oracleClient := grpc.NewOracleClient(multiAddr.Address(), store.SwarmMultiAddressStore())
+	oracler := oracle.NewOracler(oracleClient, &config.Keystore.EcdsaKey, store.SwarmMultiAddressStore(), config.Alpha)
+	oracleService := grpc.NewOracleService(oracle.NewServer(oracler, config.OracleAddress, store.SwarmMultiAddressStore(), midpointPriceStorer, config.Alpha), time.Millisecond)
+	oracleService.Register(server)
+
+	orderbook := orderbook.NewOrderbook(config.Address, config.Keystore.RsaKey, store.OrderbookPointerStore(), store.OrderbookOrderStore(), store.OrderbookOrderFragmentStore(), &contractBinder, 5*time.Second, 32)
 	orderbookService := grpc.NewOrderbookService(orderbook)
 	orderbookService.Register(server)
 
-	streamer := grpc.NewStreamer(&crypter, config.Address)
-	streamerService := grpc.NewStreamerService(&crypter, streamer)
+	connectorListener := grpc.NewConnectorListener(config.Address, &crypter, &crypter)
+	streamerService := grpc.NewStreamerService(config.Address, &crypter, &crypter, connectorListener.Listener)
 	streamerService.Register(server)
 
+	var ethNetwork string
+	if config.Ethereum.Network == "mainnet" {
+		ethNetwork = "mainnet"
+	} else {
+		ethNetwork = "kovan"
+	}
+
 	// Populate status information
-	statusProvider := status.NewProvider(&dht)
-	statusProvider.WriteNetwork(string(config.Ethereum.Network))
+	statusProvider := status.NewProvider(swarmer)
+	statusProvider.WriteNetwork(string(conn.Config.Network))
 	statusProvider.WriteMultiAddress(multiAddr)
+	statusProvider.WriteEthereumNetwork(ethNetwork)
 	statusProvider.WriteEthereumAddress(auth.From.Hex())
+	statusProvider.WriteDarknodeRegistryAddress(conn.Config.DarknodeRegistryAddress)
+	statusProvider.WriteRewardVaultAddress(conn.Config.RewardVaultAddress)
+	statusProvider.WriteInfuraURL(conn.Config.URI)
+	statusProvider.WriteTokens(contract.TokenAddresses(conn.Config.Network))
 
 	pk, err := crypto.BytesFromRsaPublicKey(&config.Keystore.RsaKey.PublicKey)
 	if err != nil {
@@ -142,6 +172,7 @@ func main() {
 	go func() {
 		// Wait for the gRPC server to boot
 		time.Sleep(time.Second)
+		rand.Seed(time.Now().UnixNano())
 
 		// Wait until registration
 		isRegistered, err := contractBinder.IsRegistered(config.Address)
@@ -149,7 +180,7 @@ func main() {
 			logger.Network(logger.LevelError, fmt.Sprintf("cannot get registration status: %v", err))
 		}
 		for !isRegistered {
-			time.Sleep(14 * time.Second)
+			time.Sleep(10 * time.Second)
 			isRegistered, err = contractBinder.IsRegistered(config.Address)
 			if err != nil {
 				logger.Network(logger.LevelError, fmt.Sprintf("cannot get registration status: %v", err))
@@ -158,31 +189,39 @@ func main() {
 
 		// Bootstrap into the network
 		fmtStr := "bootstrapping\n"
-		for _, multiAddr := range config.BootstrapMultiAddresses {
-			fmtStr += "  " + multiAddr.String() + "\n"
+		for _, bootstrapMulti := range config.BootstrapMultiAddresses {
+			if bootstrapMulti.Address() == multiAddr.Address() {
+				continue
+			}
+			multi, err := store.SwarmMultiAddressStore().MultiAddress(bootstrapMulti.Address())
+			if err != nil && err != swarm.ErrMultiAddressNotFound {
+				logger.Network(logger.LevelError, fmt.Sprintf("cannot get bootstrap multi-address from store: %v", err))
+				continue
+			}
+			if err == nil {
+				bootstrapMulti.Nonce = multi.Nonce
+			}
+			if err := store.SwarmMultiAddressStore().InsertMultiAddress(bootstrapMulti); err != nil {
+				logger.Network(logger.LevelError, fmt.Sprintf("cannot store bootstrap multiaddress in store: %v", err))
+			}
+			fmtStr += "  " + bootstrapMulti.String() + "\n"
 		}
 		log.Printf(fmtStr)
-		if err := swarmer.Bootstrap(context.Background(), config.BootstrapMultiAddresses); err != nil {
-			log.Printf("bootstrap: %v", err)
-		}
-		log.Printf("connected to %v peers", len(dht.MultiAddresses()))
+		pingNetwork(swarmer)
 
 		// New secure multi-party computer
-		smpcer := smpc.NewSmpcer(swarmer, streamer)
+		smpcer := smpc.NewSmpcer(connectorListener, swarmer)
 
 		// New OME
-		epoch, err := contractBinder.Epoch()
+		epoch, err := contractBinder.PreviousEpoch()
 		if err != nil {
-			log.Fatalf("cannot get current epoch: %v", err)
+			logger.Error(fmt.Sprintf("cannot get previous epoch: %v", err))
 		}
-		ranker, err := ome.NewRanker(done, config.Address, store, store, epoch)
-		if err != nil {
-			log.Fatalf("cannot create new ranker: %v", err)
-		}
-		matcher := ome.NewMatcher(store, smpcer)
-		confirmer := ome.NewConfirmer(store, &contractBinder, 14*time.Second, 1)
-		settler := ome.NewSettler(store, smpcer, &contractBinder)
-		ome := ome.NewOme(config.Address, ranker, matcher, confirmer, settler, store, orderbook, smpcer, epoch)
+		gen := ome.NewComputationGenerator(config.Address, store.SomerOrderFragmentStore())
+		matcher := ome.NewMatcher(store.SomerComputationStore(), smpcer)
+		confirmer := ome.NewConfirmer(store.SomerComputationStore(), &contractBinder, 5*time.Second, 2)
+		settler := ome.NewSettler(store.SomerComputationStore(), smpcer, &contractBinder)
+		ome := ome.NewOme(config.Address, gen, matcher, confirmer, settler, store.SomerComputationStore(), orderbook, smpcer, epoch)
 
 		dispatch.CoBegin(func() {
 			// Synchronizing the OME
@@ -191,10 +230,10 @@ func main() {
 				logger.Error(fmt.Sprintf("error in running the ome: %v", err))
 			}
 		}, func() {
-
 			// Periodically sync the next ξ
 			for {
-				time.Sleep(14 * time.Second)
+				time.Sleep(5 * time.Second)
+				rand.Seed(time.Now().UnixNano())
 
 				// Get the epoch
 				nextEpoch, err := contractBinder.Epoch()
@@ -204,7 +243,7 @@ func main() {
 				}
 
 				// Check whether or not ξ has changed
-				if epoch.Equal(&nextEpoch) {
+				if nextEpoch.Equal(&epoch) {
 					continue
 				}
 				epoch = nextEpoch
@@ -212,6 +251,14 @@ func main() {
 
 				// Notify the Ome
 				ome.OnChangeEpoch(epoch)
+			}
+		}, func() {
+			// Prune the database every hour and update the network with the
+			// darknode address
+			for {
+				time.Sleep(time.Hour)
+				pingNetwork(swarmer)
+				store.Prune()
 			}
 		})
 	}()
@@ -239,4 +286,15 @@ func getIPAddress() (string, error) {
 	}
 
 	return string(out), nil
+}
+
+func pingNetwork(swarmer swarm.Swarmer) {
+	if err := swarmer.Ping(context.Background()); err != nil {
+		log.Printf("cannot bootstrap: %v", err)
+	}
+	peers, err := swarmer.Peers()
+	if err != nil {
+		logger.Error(fmt.Sprintf("cannot get connected peers: %v", err))
+	}
+	log.Printf("connected to %v peers", len(peers)-1)
 }

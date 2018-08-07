@@ -2,15 +2,25 @@ package main
 
 import (
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jbenet/go-base58"
 	"github.com/republicprotocol/republic-go/identity"
 )
+
+// Directory is the directory address of the cli and all darknodes data.
+var Directory = path.Join(os.Getenv("HOME"), ".darknode")
+
+// nodeDirectory return the absolute directory of the node.
+func nodeDirectory(name string) string {
+	return path.Join(Directory, "darknodes", name)
+}
 
 // StringInSlice checks whether the string is in the slice
 func StringInSlice(a string, list []string) bool {
@@ -69,6 +79,34 @@ func getNodesByTag(tag string) ([]string, error) {
 	return nodes, nil
 }
 
+// getNodesByTags return the names of the nodes having the given tags.
+func getNodesByTags(tags string) ([]string, error) {
+	files, err := ioutil.ReadDir(Directory + "/darknodes")
+	if err != nil {
+		return nil, err
+	}
+	ts := strings.Split(strings.TrimSpace(tags), ",")
+	nodes := make([]string, 0)
+	for _, f := range files {
+		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tags, err := ioutil.ReadFile(tagFile)
+		if err != nil {
+			continue
+		}
+		haveAllTags := true
+		for i := range ts {
+			if !strings.Contains(string(tags), ts[i]) {
+				haveAllTags = false
+			}
+		}
+		if haveAllTags {
+			nodes = append(nodes, f.Name())
+		}
+	}
+
+	return nodes, nil
+}
+
 // cleanUp removes the directory
 func cleanUp(nodeDirectory string) error {
 	cleanCmd := exec.Command("rm", "-rf", nodeDirectory)
@@ -88,4 +126,38 @@ func republicAddressToEthAddress(repAddress string) (common.Address, error) {
 
 	address := common.BytesToAddress(addrByte)
 	return address, nil
+}
+
+// copyFile copies the src file to dst. Any existing file will be overwritten
+// and will not copy file attributes.
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+	return out.Close()
+}
+
+// handleErrs checks a list of errors, return the first error encountered,
+// nil otherwise.
+func handleErrs(errs []error) error {
+	for _, err := range errs {
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

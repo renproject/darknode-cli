@@ -1,14 +1,18 @@
 package grpc
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/republicprotocol/republic-go/crypto"
+	"github.com/republicprotocol/republic-go/dispatch"
 	"github.com/republicprotocol/republic-go/identity"
-	"github.com/republicprotocol/republic-go/stream"
+	"github.com/republicprotocol/republic-go/smpc"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -18,117 +22,192 @@ import (
 // StreamServer.
 var ErrUnverifiedConnection = errors.New("unverified connection")
 
-// ErrNilAuthentication is returned when no authentication message is provided
-// for a connection.
-var ErrNilAuthentication = errors.New("nil authentication")
+// ErrMalformedSignature is returned when a malformed signature, or address, is
+// provided when  authenticating a connection.
+var ErrMalformedSignature = errors.New("malformed signature")
+
+// ErrMalformedEncryptionSecret is returned when a malformed encryption secret
+// is provided when authenticating a connection.
+var ErrMalformedEncryptionSecret = errors.New("malformed encryption secret")
 
 // ErrStreamDisconnected is returned when a stream.Stream is disconnected and
 // a connection cannot be re-established.
 var ErrStreamDisconnected = errors.New("stream disconnected")
 
-// concurrentStream is a grpc.Stream that is safe for concurrent reading and
-// writing and implements the stream.Stream interface.
-type concurrentStream struct {
-	done   chan struct{}
-	closed bool
+// ErrCannotGenerateSecret is returned when a random secret cannot be created
+// for encrypting a connection.
+var ErrCannotGenerateSecret = errors.New("cannot generate secret")
 
-	grpcSendMu *sync.Mutex
-	grpcRecvMu *sync.Mutex
-	grpcStream grpc.Stream
+// ErrCannotEncryptSecret is returned when a secret cannot be encrypted for
+// secure transfer.
+var ErrCannotEncryptSecret = errors.New("cannot encrypt secret")
+
+type Sender struct {
+	cipher crypto.AESCipher
+
+	streamMu *sync.Mutex
+	stream   grpc.Stream
 }
 
-func newConcurrentStream(grpcStream grpc.Stream) *concurrentStream {
-	return &concurrentStream{
-		done:   make(chan struct{}),
-		closed: false,
+func NewSender(secret []byte, stream grpc.Stream) *Sender {
+	return &Sender{
+		cipher: crypto.NewAESCipher(secret),
 
-		grpcSendMu: new(sync.Mutex),
-		grpcRecvMu: new(sync.Mutex),
-		grpcStream: grpcStream,
+		streamMu: new(sync.Mutex),
+		stream:   stream,
 	}
 }
 
-// Send implements the stream.Stream interface.
-func (concurrentStream *concurrentStream) Send(message stream.Message) error {
-	concurrentStream.grpcSendMu.Lock()
-	defer concurrentStream.grpcSendMu.Unlock()
+func (sender *Sender) Send(message smpc.Message) error {
+	sender.streamMu.Lock()
+	defer sender.streamMu.Unlock()
 
-	if concurrentStream.closed {
-		return stream.ErrSendOnClosedStream
+	if sender.stream == nil {
+		return ErrStreamDisconnected
 	}
 
 	data, err := message.MarshalBinary()
 	if err != nil {
 		return err
 	}
-	return concurrentStream.grpcStream.SendMsg(&StreamMessage{
+	data, err = sender.cipher.Encrypt(data)
+	if err != nil {
+		return err
+	}
+
+	return sender.stream.SendMsg(&StreamMessage{
 		Data: data,
 	})
 }
 
-// Recv implements the stream.Stream interface.
-func (concurrentStream *concurrentStream) Recv(message stream.Message) error {
-	concurrentStream.grpcRecvMu.Lock()
-	defer concurrentStream.grpcRecvMu.Unlock()
+func (sender *Sender) inject(secret []byte, stream grpc.Stream) {
+	sender.streamMu.Lock()
+	defer sender.streamMu.Unlock()
 
-	if concurrentStream.closed {
-		return stream.ErrRecvOnClosedStream
-	}
-
-	data := StreamMessage{}
-	if err := concurrentStream.grpcStream.RecvMsg(&data); err != nil {
-		return err
-	}
-	return message.UnmarshalBinary(data.Data)
+	sender.cipher = crypto.NewAESCipher(secret)
+	sender.stream = stream
 }
 
-// Close the stream. This will close the done channel, and prevents future
-// sending and receiving on this stream.
-func (concurrentStream *concurrentStream) Close() error {
-	concurrentStream.grpcSendMu.Lock()
-	concurrentStream.grpcRecvMu.Lock()
-	defer concurrentStream.grpcSendMu.Unlock()
-	defer concurrentStream.grpcRecvMu.Unlock()
+func (sender *Sender) release() {
+	sender.streamMu.Lock()
+	defer sender.streamMu.Unlock()
 
-	if concurrentStream.closed {
+	if sender.stream == nil {
+		return
+	}
+	if stream, ok := sender.stream.(grpc.ClientStream); ok {
+		if err := stream.CloseSend(); err != nil {
+			log.Printf("[error] cannot release stream: %v", err)
+		}
+	}
+	sender.stream = nil
+}
+
+type Connector struct {
+	addr      identity.Address
+	signer    crypto.Signer
+	encrypter crypto.Encrypter
+}
+
+func NewConnector(addr identity.Address, signer crypto.Signer, encrypter crypto.Encrypter) *Connector {
+	return &Connector{
+		addr:      addr,
+		signer:    signer,
+		encrypter: encrypter,
+	}
+}
+
+func (connector *Connector) Connect(ctx context.Context, networkID smpc.NetworkID, to identity.MultiAddress, receiver smpc.Receiver) (smpc.Sender, error) {
+	secret, stream, err := connector.connect(ctx, networkID, to)
+	if err != nil {
+		return nil, err
+	}
+	sender := NewSender(secret, stream)
+
+	// This function is used to read a message from the sender defined above
+	addr := to.Address()
+	recv := func() error {
+		// Block until a message is received or an error occurs
+		rawMessage, err := stream.Recv()
+		if err != nil {
+			log.Printf("[error] cannot receive message from %v on network %v: %v", addr, networkID, err)
+			return err
+		}
+		// Decrypt the message
+		data, err := sender.cipher.Decrypt(rawMessage.Data)
+		if err != nil {
+			log.Printf("[error] received malformed encryption from %v on network %v: %v", addr, networkID, err)
+			return err
+		}
+		// Unmarshal the message
+		message := smpc.Message{}
+		if err := message.UnmarshalBinary(data); err != nil {
+			log.Printf("[error] received malformed message from %v on network %v: %v", addr, networkID, err)
+			return err
+		}
+		// Notify the receiver of the message
+		receiver.Receive(addr, message)
 		return nil
 	}
-	concurrentStream.closed = true
-	close(concurrentStream.done)
 
-	if grpcClientStream, ok := concurrentStream.grpcStream.(grpc.ClientStream); ok {
-		return grpcClientStream.CloseSend()
-	}
-	return nil
+	go dispatch.CoBegin(
+		func() {
+			for {
+				// Backoff receiving / reconnecting using the stream
+				backoffErr := BackoffMax(ctx, func() error {
+					// Check the context for termination conditions
+					select {
+					case <-ctx.Done():
+						return nil
+					default:
+					}
+
+					if err := recv(); err != nil {
+						// Reconnect when an error occurs
+						secret, stream, err = connector.connect(ctx, networkID, to)
+						if err != nil {
+							return err
+						}
+						sender.inject(secret, stream)
+						time.Sleep(time.Second)
+
+						// The reconnection is not considered successful until
+						// we have successfully received a message
+						return recv()
+					}
+					return nil
+				}, 30000)
+
+				// Check the context for termination conditions
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+
+				// Backoff error indicates that the stream is dead and there is
+				// no hope of reconnecting
+				if backoffErr != nil {
+					log.Printf("[error] cannot reconnect to %v on network %v: %v", to.Address(), networkID, backoffErr)
+					return
+				}
+			}
+		},
+		func() {
+			defer sender.release()
+			<-ctx.Done()
+		})
+
+	return sender, nil
 }
 
-// Done returns a read-only channel that can be used to wait for the stream to
-// be closed.
-func (concurrentStream *concurrentStream) Done() <-chan struct{} {
-	return concurrentStream.done
-}
-
-// streamClient implements the stream.Client by using gRPC to create
-// concurrentConnStreams.
-type streamClient struct {
-	signer crypto.Signer
-	addr   identity.Address
-}
-
-func newStreamClient(signer crypto.Signer, addr identity.Address) *streamClient {
-	return &streamClient{
-		signer: signer,
-		addr:   addr,
-	}
-}
-
-// Connect implements the stream.Client interface.
-func (client *streamClient) Connect(ctx context.Context, multiAddr identity.MultiAddress) (stream.Stream, error) {
+func (connector *Connector) connect(ctx context.Context, networkID smpc.NetworkID, to identity.MultiAddress) ([]byte, StreamService_ConnectClient, error) {
 	// Establish a connection to the identity.MultiAddress and clean the
 	// connection once the context.Context is done
-	conn, err := Dial(ctx, multiAddr)
+	log.Printf("[debug] (stream) dialing...")
+	conn, err := Dial(ctx, to)
 	if err != nil {
-		return nil, fmt.Errorf("cannot dial %v: %v", multiAddr, err)
+		return nil, nil, fmt.Errorf("cannot dial %v: %v", to, err)
 	}
 	go func() {
 		defer conn.Close()
@@ -136,338 +215,124 @@ func (client *streamClient) Connect(ctx context.Context, multiAddr identity.Mult
 	}()
 
 	// Open a bidirectional stream
-	var grpcStream StreamService_ConnectClient
+	var stream StreamService_ConnectClient
 	if err := BackoffMax(ctx, func() error {
 		// On an error backoff and retry until the context.Context is done
-		grpcStream, err = NewStreamServiceClient(conn).Connect(ctx)
-		return err
+		stream, err = NewStreamServiceClient(conn).Connect(ctx)
+		if err != nil {
+			return err
+		}
+		return nil
 	}, 30000 /* 30s max backoff */); err != nil {
-		return nil, fmt.Errorf("cannot open stream: %v", err)
+		return nil, nil, fmt.Errorf("cannot open stream: %v", err)
+	}
+
+	// Generate a secret
+	log.Printf("[debug] (stream) authorising...")
+	secret := make([]byte, 16)
+	if _, err := rand.Read(secret); err != nil {
+		return secret, nil, ErrCannotGenerateSecret
+	}
+	encryptedSecret, err := connector.encrypter.Encrypt(to.Address().String(), secret[:])
+	if err != nil {
+		return secret, nil, ErrCannotEncryptSecret
 	}
 
 	// Sign an authentication message so that the StreamService can verify the
 	// identity.Address of the client
-	data := []byte(fmt.Sprintf("Republic Protocol: connect: from %v to %v", client.addr, multiAddr.Address()))
-	data = crypto.Keccak256(data)
-	dataSignature, err := client.signer.Sign(data)
+	signature := append([]byte(fmt.Sprintf("Republic Protocol: connect: from %v to %v on ", connector.addr, to.Address())), networkID[:]...)
+	signature = crypto.Keccak256(signature)
+	signature, err = connector.signer.Sign(signature)
 	if err != nil {
-		return nil, fmt.Errorf("cannot sign stream authentication: %v", err)
+		return secret, nil, fmt.Errorf("cannot sign stream authentication: %v", err)
 	}
+
 	// Send the authentication message
-	if err := grpcStream.Send(&StreamMessage{
-		Authentication: &StreamAuthentication{
-			Signature: dataSignature,
-			Address:   client.addr.String(),
-		},
-		Data: []byte{},
+	if err := stream.Send(&StreamMessage{
+		Signature: signature,
+		Address:   connector.addr.String(),
+		Network:   networkID[:],
+		Data:      encryptedSecret,
 	}); err != nil {
-		return nil, fmt.Errorf("cannot send stream address: %v", err)
+		return secret, nil, fmt.Errorf("cannot send stream address: %v", err)
 	}
 
-	return newConcurrentStream(grpcStream), err
+	return secret, stream, err
 }
 
-// concurrentStreamConnector connects and reconnects concurrentStreams.
-type concurrentStreamConnector struct {
-	client *streamClient
-
-	mu            *sync.Mutex
-	streamsMu     map[identity.Address]*sync.Mutex
-	streams       map[identity.Address]*concurrentStream
-	streamsCtx    map[identity.Address]context.Context
-	streamsCancel map[identity.Address]context.CancelFunc
-	streamsRc     map[identity.Address]int
+type Listener struct {
+	mu        *sync.Mutex
+	contexts  map[smpc.NetworkID]map[identity.Address]context.Context
+	receivers map[smpc.NetworkID]map[identity.Address]smpc.Receiver
+	senders   map[smpc.NetworkID]map[identity.Address]*Sender
 }
 
-func newConcurrentStreamConnector(client *streamClient) *concurrentStreamConnector {
-	return &concurrentStreamConnector{
-		client: client,
-
-		mu:            new(sync.Mutex),
-		streamsMu:     map[identity.Address]*sync.Mutex{},
-		streams:       map[identity.Address]*concurrentStream{},
-		streamsCtx:    map[identity.Address]context.Context{},
-		streamsCancel: map[identity.Address]context.CancelFunc{},
-		streamsRc:     map[identity.Address]int{},
+func NewListener() *Listener {
+	return &Listener{
+		mu:        new(sync.Mutex),
+		contexts:  map[smpc.NetworkID]map[identity.Address]context.Context{},
+		receivers: map[smpc.NetworkID]map[identity.Address]smpc.Receiver{},
+		senders:   map[smpc.NetworkID]map[identity.Address]*Sender{},
 	}
 }
 
-func (connector *concurrentStreamConnector) connect(ctx context.Context, multiAddr identity.MultiAddress) (*concurrentStream, error) {
-	addr := multiAddr.Address()
+func (lis *Listener) Listen(ctx context.Context, networkID smpc.NetworkID, to identity.Address, receiver smpc.Receiver) (smpc.Sender, error) {
+	lis.mu.Lock()
+	defer lis.mu.Unlock()
 
-	connector.mu.Lock()
-	defer connector.mu.Unlock()
-	if connector.streamsMu[addr] == nil {
-		connector.streamsMu[addr] = new(sync.Mutex)
+	if _, ok := lis.contexts[networkID]; !ok {
+		lis.contexts[networkID] = map[identity.Address]context.Context{}
 	}
-	connector.streamsMu[addr].Lock()
-	defer connector.streamsMu[addr].Unlock()
-
-	if connector.streamsRc[addr] == 0 {
-
-		connector.mu.Unlock()
-		ctx, cancel := context.WithCancel(context.Background())
-		stream, err := connector.client.Connect(ctx, multiAddr)
-		connector.mu.Lock()
-
-		if err != nil {
-			cancel()
-			return nil, err
-		}
-
-		connector.streams[addr] = stream.(*concurrentStream)
-		connector.streamsCtx[addr] = ctx
-		connector.streamsCancel[addr] = cancel
+	if _, ok := lis.receivers[networkID]; !ok {
+		lis.receivers[networkID] = map[identity.Address]smpc.Receiver{}
+	}
+	if _, ok := lis.senders[networkID]; !ok {
+		lis.senders[networkID] = map[identity.Address]*Sender{}
 	}
 
-	go func() {
-		<-ctx.Done()
+	lis.contexts[networkID][to] = ctx
+	lis.senders[networkID][to] = NewSender(nil, nil)
+	lis.receivers[networkID][to] = receiver
 
-		connector.mu.Lock()
-		defer connector.mu.Unlock()
-
-		connector.streamsRc[addr]--
-		if connector.streamsRc[addr] == 0 {
-
-			connector.streams[addr].Close()
-			connector.streamsCancel[addr]()
-
-			delete(connector.streamsMu, addr)
-			delete(connector.streams, addr)
-			delete(connector.streamsCtx, addr)
-			delete(connector.streamsCancel, addr)
-			delete(connector.streamsRc, addr)
-		}
-	}()
-
-	connector.streamsRc[addr]++
-	return connector.streams[addr], nil
+	return lis.senders[networkID][to], nil
 }
 
-func (connector *concurrentStreamConnector) listen(ctx context.Context, multiAddr identity.MultiAddress) (*concurrentStream, error) {
-	addr := multiAddr.Address()
-	stream := func() *concurrentStream {
-
-		connector.mu.Lock()
-		defer connector.mu.Unlock()
-		if connector.streamsMu[addr] == nil {
-			connector.streamsMu[addr] = new(sync.Mutex)
-		}
-		connector.streamsMu[addr].Lock()
-		defer connector.streamsMu[addr].Unlock()
-
-		if connector.streamsRc[addr] == 0 {
-			ctx, cancel := context.WithCancel(context.Background())
-			connector.streamsCtx[addr] = ctx
-			connector.streamsCancel[addr] = cancel
-		}
-
-		go func() {
-			<-ctx.Done()
-
-			connector.mu.Lock()
-			defer connector.mu.Unlock()
-
-			connector.streamsRc[addr]--
-			if connector.streamsRc[addr] == 0 {
-
-				if connector.streams[addr] != nil {
-					connector.streams[addr].Close()
-				}
-				connector.streamsCancel[addr]()
-
-				delete(connector.streamsMu, addr)
-				delete(connector.streams, addr)
-				delete(connector.streamsCtx, addr)
-				delete(connector.streamsCancel, addr)
-				delete(connector.streamsRc, addr)
-			}
-		}()
-
-		connector.streamsRc[addr]++
-		return connector.streams[addr]
-	}()
-
-	if stream == nil {
-		err := BackoffMax(ctx, func() error {
-			if stream = connector.connection(addr); stream == nil {
-				return ErrStreamDisconnected
-			}
-			return nil
-		}, 30000 /* Maximum backoff 30s */)
-		return stream, err
-	}
-	return stream, nil
+type ConnectorListener struct {
+	*Connector
+	*Listener
 }
 
-func (connector *concurrentStreamConnector) reconnect(multiAddr identity.MultiAddress) (*concurrentStream, error) {
-	addr := multiAddr.Address()
-
-	connector.mu.Lock()
-	defer connector.mu.Unlock()
-	if connector.streamsMu[addr] == nil {
-		connector.streamsMu[addr] = new(sync.Mutex)
+func NewConnectorListener(addr identity.Address, signer crypto.Signer, encrypter crypto.Encrypter) ConnectorListener {
+	return ConnectorListener{
+		Connector: NewConnector(addr, signer, encrypter),
+		Listener:  NewListener(),
 	}
-	connector.streamsMu[addr].Lock()
-	defer connector.streamsMu[addr].Unlock()
-
-	if connector.streams[addr] != nil {
-		connector.streams[addr].Close()
-		ctx := connector.streamsCtx[addr]
-		connector.mu.Unlock()
-		stream, err := connector.client.Connect(ctx, multiAddr)
-		connector.mu.Lock()
-		if err != nil {
-			return nil, err
-		}
-		connector.streams[addr] = stream.(*concurrentStream)
-	}
-
-	return connector.streams[addr], nil
-}
-
-func (connector *concurrentStreamConnector) accept(addr identity.Address, stream *concurrentStream) {
-	connector.mu.Lock()
-	defer connector.mu.Unlock()
-	if connector.streamsMu[addr] == nil {
-		connector.streamsMu[addr] = new(sync.Mutex)
-	}
-	connector.streamsMu[addr].Lock()
-	defer connector.streamsMu[addr].Unlock()
-
-	if connector.streams[addr] != nil {
-		connector.streams[addr].Close()
-	}
-	connector.streams[addr] = stream
-}
-
-func (connector *concurrentStreamConnector) connection(addr identity.Address) *concurrentStream {
-	connector.mu.Lock()
-	defer connector.mu.Unlock()
-	if connector.streamsMu[addr] == nil {
-		connector.streamsMu[addr] = new(sync.Mutex)
-	}
-	connector.streamsMu[addr].Lock()
-	defer connector.streamsMu[addr].Unlock()
-
-	return connector.streams[addr]
-}
-
-// Streamer implements the stream.Streamer interface by using gRPC to create
-// stream.Streams. Internally, it uses the concurrentStreamConnector to keep
-// stream.Streams alive until the opening context.Context is done. If a
-// bidirectional stream closes prematurely, the streamer will attempt to
-// reconnect without disruption.
-type Streamer struct {
-	addr      identity.Address
-	connector *concurrentStreamConnector
-}
-
-// NewStreamer returns an implementation of stream.Streamer that uses gRPC to
-// create bidirectional streams and keeps its stream.Streams alive until the
-// opening context.Context is done. The user does not need to explicitly
-// attempt to reconnect in the event of a fault.
-func NewStreamer(signer crypto.Signer, addr identity.Address) *Streamer {
-	return &Streamer{
-		addr:      addr,
-		connector: newConcurrentStreamConnector(newStreamClient(signer, addr)),
-	}
-}
-
-// Open implements the stream.Streamer interface. The stream.Stream returned is
-// valid when an error is returned and can be used to send and receive
-// stream.Messages.
-func (streamer *Streamer) Open(ctx context.Context, multiAddr identity.MultiAddress) (stream.Stream, error) {
-	var err error
-	if streamer.addr < multiAddr.Address() {
-		_, err = streamer.connector.connect(ctx, multiAddr)
-	} else {
-		_, err = streamer.connector.listen(ctx, multiAddr)
-	}
-	return newCtxStreamer(ctx, multiAddr, streamer), err
-}
-
-type ctxStreamer struct {
-	*Streamer
-
-	ctx             context.Context
-	remoteMultiAddr identity.MultiAddress
-}
-
-func newCtxStreamer(ctx context.Context, remoteMultiAddr identity.MultiAddress, streamer *Streamer) *ctxStreamer {
-	return &ctxStreamer{
-		Streamer: streamer,
-
-		ctx:             ctx,
-		remoteMultiAddr: remoteMultiAddr,
-	}
-}
-
-// Send implements the stream.Stream interface.
-func (streamer *ctxStreamer) Send(message stream.Message) error {
-	return streamer.message(message, func(stream *concurrentStream, message stream.Message) error { return stream.Send(message) })
-}
-
-// Recv implements the stream.Stream interface.
-func (streamer *ctxStreamer) Recv(message stream.Message) error {
-	return streamer.message(message, func(stream *concurrentStream, message stream.Message) error { return stream.Recv(message) })
-}
-
-func (streamer *ctxStreamer) message(message stream.Message, f func(stream *concurrentStream, message stream.Message) error) error {
-	var stream *concurrentStream
-	var err error
-
-	remoteAddr := streamer.remoteMultiAddr.Address()
-	if stream = streamer.connector.connection(remoteAddr); stream == nil {
-		if streamer.addr < remoteAddr {
-			stream, err = streamer.connector.connect(streamer.ctx, streamer.remoteMultiAddr)
-		} else {
-			stream, err = streamer.connector.listen(streamer.ctx, streamer.remoteMultiAddr)
-		}
-		if err != nil {
-			return err
-		}
-		if stream == nil {
-			return ErrStreamDisconnected
-		}
-	}
-
-	if err := f(stream, message); err != nil {
-		if streamer.addr < remoteAddr {
-			stream, err = streamer.connector.reconnect(streamer.remoteMultiAddr)
-		} else {
-			// There is no such this as "relistening" so if the connection dies
-			// all we can do is hope that the client will eventually attempt to
-			// reconnect and until then, we simply let the errors happen
-			log.Println("cannot relisten")
-		}
-		if err != nil {
-			return err
-		}
-		if stream == nil {
-			return ErrStreamDisconnected
-		}
-		return f(stream, message)
-	}
-	return nil
 }
 
 // StreamerService implements the gRPC StreamService. After being registered to
 // a gRPC Server it will listen for requests to the StreamService.Connect RPC
 // and pass the connections to a Streamer.
 type StreamerService struct {
-	verifier  crypto.Verifier
 	addr      identity.Address
-	connector *concurrentStreamConnector
+	verifier  crypto.Verifier
+	decrypter crypto.Decrypter
+	lis       *Listener
+
+	donesMu *sync.Mutex
+	dones   map[smpc.NetworkID]map[identity.Address](chan struct{})
 }
 
 // NewStreamerService returns an implementation of the gRPC StreamService that
 // connects stream.Streams from clients to a Streamer.
-func NewStreamerService(verifier crypto.Verifier, streamer *Streamer) StreamerService {
+func NewStreamerService(addr identity.Address, verifier crypto.Verifier, decrypter crypto.Decrypter, lis *Listener) StreamerService {
 	return StreamerService{
+		addr:      addr,
 		verifier:  verifier,
-		addr:      streamer.addr,
-		connector: streamer.connector,
+		decrypter: decrypter,
+		lis:       lis,
+
+		donesMu: new(sync.Mutex),
+		dones:   map[smpc.NetworkID]map[identity.Address](chan struct{}){},
 	}
 }
 
@@ -476,39 +341,161 @@ func (service *StreamerService) Register(server *Server) {
 	RegisterStreamServiceServer(server.Server, service)
 }
 
-func (service *StreamerService) Connect(grpcStream StreamService_ConnectServer) error {
+func (service *StreamerService) Connect(stream StreamService_ConnectServer) error {
 	// Verify the address of this connection
-	message, err := grpcStream.Recv()
+	message, err := stream.Recv()
 	if err != nil {
+		log.Printf("[error] cannot receive authorisation message on network: %v", err)
 		return err
 	}
-	addr, err := service.verifyAuthentication(message.GetAuthentication())
+	addr, networkID, secret, err := service.verifyAuthentication(message.GetSignature(), message.GetAddress(), message.GetNetwork(), message.GetData())
 	if err != nil {
+		log.Printf("[error] cannot authorise stream on network: %v", err)
 		return err
 	}
+	ctx, receiver, sender := func() (context.Context, smpc.Receiver, *Sender) {
+		service.lis.mu.Lock()
+		defer service.lis.mu.Unlock()
+		if _, ok := service.lis.contexts[networkID]; !ok {
+			return nil, nil, nil
+		}
+		if _, ok := service.lis.receivers[networkID]; !ok {
+			return nil, nil, nil
+		}
+		if _, ok := service.lis.senders[networkID]; !ok {
+			return nil, nil, nil
+		}
+		if _, ok := service.lis.contexts[networkID][addr]; !ok {
+			return nil, nil, nil
+		}
+		if _, ok := service.lis.receivers[networkID][addr]; !ok {
+			return nil, nil, nil
+		}
+		if _, ok := service.lis.senders[networkID][addr]; !ok {
+			return nil, nil, nil
+		}
+		return service.lis.contexts[networkID][addr], service.lis.receivers[networkID][addr], service.lis.senders[networkID][addr]
+	}()
+	if ctx == nil || receiver == nil || sender == nil {
+		// TODO: Return a more appropriate error
+		return fmt.Errorf("not ready to accept connection")
+	}
+	sender.inject(secret[:], stream)
+	log.Printf("[debug] (stream) accepted connection from %v", addr)
 
-	// Establish a connection with the recycler so that the stream can be used
-	// outside of this service
-	concurrentStream := newConcurrentStream(grpcStream)
-	service.connector.accept(addr, concurrentStream)
+	done := func() chan struct{} {
+		service.donesMu.Lock()
+		defer service.donesMu.Unlock()
+		if _, ok := service.dones[networkID]; !ok {
+			service.dones[networkID] = map[identity.Address](chan struct{}){}
+		}
+		if _, ok := service.dones[networkID][addr]; ok {
+			close(service.dones[networkID][addr])
+		}
+		service.dones[networkID][addr] = make(chan struct{})
+		return service.dones[networkID][addr]
+	}()
+
+	go func() {
+		for {
+			var rawMessage *StreamMessage
+			var recvErr error
+
+			backoffErr := BackoffMax(stream.Context(), func() error {
+				// Receive a message
+				rawMessage, recvErr = stream.Recv()
+				if recvErr != nil {
+					// Check for termination conditions
+					select {
+					case <-done:
+						return nil
+					case <-ctx.Done():
+						return nil
+					case <-stream.Context().Done():
+						return nil
+					default:
+						if recvErr == io.EOF {
+							return nil
+						}
+					}
+					log.Printf("[error] cannot receive message from %v on network %v: %v", addr, networkID, recvErr)
+					return recvErr
+				}
+				// Decrypt the message
+				data, err := sender.cipher.Decrypt(rawMessage.Data)
+				if err != nil {
+					log.Printf("[error] received malformed encryption from %v on network %v: %v", addr, networkID, err)
+					return err
+				}
+				message := smpc.Message{}
+				if err := message.UnmarshalBinary(data); err != nil {
+					log.Printf("[error] received malformed message from %v on network %v: %v", addr, networkID, err)
+					return err
+				}
+				receiver.Receive(addr, message)
+				return nil
+			}, 30000)
+
+			// Check for termination conditions
+			select {
+			case <-done:
+				return
+			case <-ctx.Done():
+				return
+			case <-stream.Context().Done():
+				return
+			default:
+			}
+
+			if backoffErr != nil {
+				log.Printf("[error] cannot relisten to %v on network %v: %v", addr, networkID, backoffErr)
+				return
+			}
+		}
+	}()
 
 	// Wait until the client closes the connection or the stream itself is
 	// closed
 	select {
-	case <-grpcStream.Context().Done():
-		return grpcStream.Context().Err()
-	case <-concurrentStream.Done():
+	case <-done:
+		// TODO: Return better error.
+		log.Printf("[debug] (stream) client reconnected to an accepted connection")
+		return nil
+	case <-ctx.Done():
+		log.Printf("[debug] (stream) server closed accepted connection")
+		return nil
+	case <-stream.Context().Done():
+		log.Printf("[debug] (stream) client closed accepted connection")
 		return nil
 	}
 }
 
-func (service *StreamerService) verifyAuthentication(auth *StreamAuthentication) (identity.Address, error) {
-	if auth == nil || auth.Address == "" || auth.Signature == nil || len(auth.Signature) != 65 {
-		return identity.Address(""), ErrNilAuthentication
+func (service *StreamerService) verifyAuthentication(signature []byte, addr string, networkID []byte, encryptedSecret []byte) (identity.Address, smpc.NetworkID, [16]byte, error) {
+
+	if signature == nil || len(signature) != 65 || networkID == nil || len(networkID) != 32 || addr == "" {
+		return identity.Address(""), smpc.NetworkID{}, [16]byte{}, ErrMalformedSignature
+	}
+	if encryptedSecret == nil {
+		return identity.Address(""), smpc.NetworkID{}, [16]byte{}, ErrMalformedEncryptionSecret
 	}
 
-	data := []byte(fmt.Sprintf("Republic Protocol: connect: from %v to %v", auth.Address, service.addr))
-	data = crypto.Keccak256(data)
+	message := append([]byte(fmt.Sprintf("Republic Protocol: connect: from %v to %v on ", addr, service.addr)), networkID...)
+	message = crypto.Keccak256(message)
+	if err := service.verifier.Verify(message, signature); err != nil {
+		return identity.Address(""), smpc.NetworkID{}, [16]byte{}, err
+	}
 
-	return identity.Address(auth.Address), service.verifier.Verify(data, auth.Signature)
+	secret, err := service.decrypter.Decrypt(encryptedSecret)
+	if err != nil {
+		return identity.Address(""), smpc.NetworkID{}, [16]byte{}, err
+	}
+	if len(secret) != 16 {
+		return identity.Address(""), smpc.NetworkID{}, [16]byte{}, ErrMalformedEncryptionSecret
+	}
+	secret16 := [16]byte{}
+	copy(secret16[:], secret)
+	networkID32 := [32]byte{}
+	copy(networkID32[:], networkID)
+
+	return identity.Address(addr), smpc.NetworkID(networkID32), secret16, nil
 }

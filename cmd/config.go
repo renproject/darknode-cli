@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
-	"log"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
@@ -13,14 +13,13 @@ import (
 )
 
 // GetConfigOrGenerateNew will generate a new config for the darknode.
-func GetConfigOrGenerateNew(ctx *cli.Context) (config.Config, error) {
+func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, error) {
 	keystoreFile := ctx.String("keystore")
 	passphrase := ctx.String("passphrase")
 	configFile := ctx.String("config")
 	network := ctx.String("network")
 
 	if network != "testnet" && network != "falcon" && network != "nightly" {
-		log.Println("network", network)
 		return config.Config{}, ErrUnknownNetwork
 	}
 	// Parse the keystore or create a new random one.
@@ -53,7 +52,7 @@ func GetConfigOrGenerateNew(ctx *cli.Context) (config.Config, error) {
 				Plugins: []logger.PluginOptions{
 					{
 						File: &logger.FilePluginOptions{
-							Path: "/home/ubuntu/.darknode/darknode.out",
+							Path: "$HOME/.darknode/darknode.out",
 						},
 					},
 				},
@@ -68,6 +67,15 @@ func GetConfigOrGenerateNew(ctx *cli.Context) (config.Config, error) {
 		if err != nil {
 			return config.Config{}, nil
 		}
+	}
+
+	// Write the config to file
+	configData, err := json.MarshalIndent(cfg, "", "    ")
+	if err != nil {
+		return config.Config{}, err
+	}
+	if err := ioutil.WriteFile(directory+"/config.json", configData, 0644); err != nil {
+		return config.Config{}, err
 	}
 
 	return cfg, nil

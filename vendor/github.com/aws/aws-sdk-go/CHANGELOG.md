@@ -1,3 +1,184 @@
+Release v1.15.0 (2018-07-26)
+===
+
+### Service Client Updates
+* `service/codebuild`: Updates service API and documentation
+  * Add artifacts encryptionDisabled and build encryptionKey.
+* `service/ec2`: Updates service API and documentation
+  * This change provides the EC2/Spot customers with two new allocation strategies -- LowestN for Spot instances, and OD priority for on-demand instances.
+* `service/greengrass`: Updates service documentation
+  * Documentation updates for Greengrass Local Resource Access feature
+* `service/inspector`: Updates service API and documentation
+  * inspector will return ServiceTemporarilyUnavailableException when service is under stress
+* `service/redshift`: Updates service API and documentation
+  * When we make a new version of Amazon Redshift available, we update your cluster during its maintenance window. By selecting a maintenance track, you control whether we update your cluster with the most recent approved release, or with the previous release. The two values for maintenance track are current and trailing. If you choose the current track, your cluster is updated with the latest approved release. If you choose the trailing track, your cluster is updated with the release that was approved previously.The new API operation for managing maintenance tracks for a cluster is DescribeClusterTracks. In addition, the following API operations have new MaintenanceTrackName parameters:  Cluster,  PendingModifiedValues,  ModifyCluster,  RestoreFromClusterSnapshot,  CreateCluster,  Snapshot
+* `service/ssm`: Updates service API and documentation
+  * This release updates AWS Systems Manager APIs to allow customers to attach labels to history parameter records and reference history parameter records via labels.  It also adds Parameter Store integration with AWS Secrets Manager to allow referencing and retrieving AWS Secrets Manager's secrets from Parameter Store.
+
+### SDK Features
+* `private/model/api`: SDK APIs input/output are not consistently generated ([#2073](https://github.com/aws/aws-sdk-go/pull/2073))
+  * Updates the SDK's API code generation to generate the API input and output types consistently. This ensures that the SDK will no longer rename input/output types unexpectedly as in [#2070](https://github.com/aws/aws-sdk-go/issues/2070). SDK API input and output parameter types will always be the API name with a suffix of Input and Output.
+  * Existing service APIs which were incorrectly modeled have been preserved to ensure they do not break.
+  * Fixes [#2070](https://github.com/aws/aws-sdk-go/issues/2070)
+
+### SDK Enhancements
+* `service/s3/s3manager`: Document default behavior for Upload's MaxNumParts ([#2077](https://github.com/aws/aws-sdk-go/issues/2077))
+  * Updates the S3 Upload Manager's default behavior for MaxNumParts, and ensures that the Uploader.MaxNumPart's member value is initialized properly if the type was created via struct initialization instead of using the NewUploader function.
+  * Fixes [#2015](https://github.com/aws/aws-sdk-go/issues/2015)
+
+### SDK Bugs
+* `private/model/api`: SDK APIs input/output are not consistently generated ([#2073](https://github.com/aws/aws-sdk-go/pull/2073))
+  * Fixes EFS service breaking change in v1.14.26 where `FileSystemDescription` was incorrectly renamed to `UpdateFileSystemOutput.
+  * Fixes [#2070](https://github.com/aws/aws-sdk-go/issues/2070)
+Release v1.14.33 (2018-07-25)
+===
+
+### Service Client Updates
+* `service/ec2`: Updates service API
+  * R5 is the successor to R4 in EC2's memory-optimized instance family. R5d is a variant of R5 that has local NVMe SSD. Z1d instances deliver both high compute and high memory. Z1d instances use custom Intel Xeon Scalable Processors running at up to 4.0 GHz, powered by sustained all-core Turbo Boost. They are available in 6 sizes, with up to 48 vCPUs, 384 GiB of memory, and 1.8 TB of local NVMe storage.
+* `service/ecs`: Updates service API and documentation
+  * This release of Amazon Elastic Container Service (Amazon ECS) introduces support for private registry authentication using AWS Secrets Manager. With private registry authentication, private Docker images can be used in a task definition.
+* `service/elasticloadbalancingv2`: Updates service API and documentation
+
+Release v1.14.32 (2018-07-24)
+===
+
+### Service Client Updates
+* `service/dynamodb`: Updates service API and documentation
+  * With this SDK update, APIs UpdateGlobalTableSettings and DescribeGlobalTableSettings now allow consistently configuring AutoScaling settings for a DynamoDB global table. Previously, they would only allow consistently setting IOPS. Now new APIs are being released, existing APIs are being extended.
+
+Release v1.14.31 (2018-07-20)
+===
+
+### Service Client Updates
+* `service/config`: Updates service API
+* `service/dlm`: Updates service documentation
+
+### SDK Enhancements
+* `service/s3/s3manager`: Add documentation for sequential download [#2065](https://github.com/aws/aws-sdk-go/pull/2065)
+  * Adds documentation for downloading object sequentially with the S3 download manager.
+
+Release v1.14.30 (2018-07-19)
+===
+
+### Service Client Updates
+* `service/mediapackage`: Updates service API and documentation
+  * Adds support for DASH OriginEnpoints with multiple media presentation description periods triggered by presence of SCTE-35 ad markers in Channel input streams.
+
+### SDK Enhancements
+* `aws/default`: Add helper to get default provider chain list of credential providers ([#2059](https://github.com/aws/aws-sdk-go/issues/2051))
+  * Exports the default provider chain list of providers so it can be used to compose custom chains of credential providers.
+  * Fixes [#2051](https://github.com/aws/aws-sdk-go/issues/2051)
+
+Release v1.14.29 (2018-07-18)
+===
+
+### Service Client Updates
+* `service/iotanalytics`: Updates service API and documentation
+
+Release v1.14.28 (2018-07-17)
+===
+
+### Service Client Updates
+* `service/comprehend`: Updates service API and documentation
+* `service/polly`: Updates service API, documentation, and paginators
+  * Amazon Polly adds new API for asynchronous synthesis to S3
+* `service/sagemaker`: Updates service API, documentation, and paginators
+  * Amazon SageMaker has added the capability for customers to run fully-managed, high-throughput batch transform machine learning models with a simple API call. Batch Transform is ideal for high-throughput workloads and predictions in non-real-time scenarios where data is accumulated over a period of time for offline processing.
+* `service/snowball`: Updates service API and documentation
+  * AWS Snowball Edge announces the availability of Amazon EC2 compute instances that run on the device. AWS Snowball Edge is a 100-TB ruggedized device built to transfer data into and out of AWS with optional support for local Lambda-based compute functions. With this feature, developers and administrators can run their EC2-based applications on the device providing them with an end to end vertically integrated AWS experience. Designed for data pre-processing, compression, machine learning, and data collection applications, these new instances, called SBE1 instances, feature 1.8 GHz Intel Xeon D processors up to 16 vCPUs, and 32 GB of memory. The SBE1 instance type is available in four sizes and multiple instances can be run on the device at the same time. Customers can now run compute instances using the same Amazon Machine Images (AMIs) that are used in Amazon EC2.
+
+Release v1.14.27 (2018-07-13)
+===
+
+### Service Client Updates
+* `service/appstream`: Updates service API, documentation, and paginators
+  * This API update adds support for sharing AppStream images across AWS accounts within the same region.
+* `service/kinesis-video-archived-media`: Updates service API and documentation
+* `service/kinesisvideo`: Updates service API and documentation
+  * Adds support for HLS video playback of Kinesis Video streams using the KinesisVideo client by including "GET_HLS_STREAMING_SESSION_URL" as an additional APIName parameter in the GetDataEndpoint input.
+
+Release v1.14.26 (2018-07-12)
+===
+
+### Service Client Updates
+* `service/appsync`: Updates service API and documentation
+* `service/codebuild`: Updates service API
+  * Update CodeBuild CreateProject API - serviceRole is a required input
+* `service/dlm`: Adds new service
+* `service/elasticfilesystem`: Updates service API and documentation
+  * Amazon EFS now allows you to instantly provision the throughput required for your applications independent of the amount of data stored in your file system, allowing you to optimize throughput for your applications performance needs. Starting today, you can provision the throughput your applications require quickly with a few simple steps using AWS Console, AWS CLI or AWS API to achieve consistent performance.
+* `service/elasticmapreduce`: Updates service API and documentation
+  * Documentation updates for EMR.
+* `service/iam`: Updates service API and documentation
+  * SDK release to support IAM delegated administrator feature. The feature lets customers attach permissions boundary to IAM principals. The IAM principals cannot operate exceeding the permission specified in permissions boundary.
+
+### SDK Enhancements
+* `aws/credentials/ec2rolecreds`: Avoid unnecessary redirect [#2037](https://github.com/aws/aws-sdk-go/pull/2037)
+  * This removes the unnecessary redirect for /latest/meta-data/iam/security-credentials/
+
+Release v1.14.25 (2018-07-11)
+===
+
+### Service Client Updates
+* `service/apigateway`: Updates service API and documentation
+  * Support for fine grain throttling for API gateway.
+* `service/ce`: Updates service API and documentation
+* `service/s3`: Updates service API and documentation
+  * S3 Select support for BZIP2 compressed input files
+* `service/ssm`: Updates service API and documentation
+  * Support Conditional Branching OnFailure for SSM Automation
+
+Release v1.14.24 (2018-07-10)
+===
+
+### Service Client Updates
+* `service/appstream`: Updates service API, documentation, paginators, and examples
+  * This API update adds pagination to the DescribeImages API to support future features and enhancements.
+* `service/codebuild`: Updates service API and documentation
+  * API changes to CodeBuild service, support report build status for Github sources
+* `service/ec2`: Updates service API and documentation
+  * Support CpuOptions field in Launch Template data and allow Launch Template name to contain hyphen.
+* `service/glue`: Updates service API and documentation
+  * AWS Glue adds the ability to crawl DynamoDB tables.
+* `service/opsworks`: Updates service documentation
+  * Documentation updates for AWS OpsWorks Stacks.
+
+Release v1.14.23 (2018-07-10)
+===
+
+### Service Client Updates
+* `service/application-autoscaling`: Updates service documentation
+
+Release v1.14.22 (2018-07-09)
+===
+
+### Service Client Updates
+* `service/application-autoscaling`: Updates service API
+* `service/ce`: Updates service API and documentation
+* `service/dms`: Updates service API and documentation
+  * Added support for DmsTransfer endpoint type and support for re-validate option in table reload API.
+* `service/lambda`: Updates service API
+  * Add support for .NET Core 2.1 to Lambda.
+* `service/transcribe`: Updates service API and documentation
+
+Release v1.14.21 (2018-07-06)
+===
+
+### Service Client Updates
+* `service/mediaconvert`: Updates service API and documentation
+  * This release adds support for the following 1) users can specify tags to be attached to queues, presets, and templates during creation of those resources on MediaConvert. 2) users can now view the count of jobs in submitted state and in progressing state on a per queue basis.
+* `service/serverlessrepo`: Updates service API and documentation
+
+Release v1.14.20 (2018-07-05)
+===
+
+### Service Client Updates
+* `service/pinpoint`: Updates service API and documentation
+  * This release of the Amazon Pinpoint SDK adds the ability to create complex segments and validate phone numbers for SMS messages. It also adds the ability to get or delete endpoints based on user IDs, remove attributes from endpoints, and list the defined channels for an app.
+* `service/sagemaker`: Updates service API and documentation
+  * Amazon SageMaker NotebookInstances supports 'Updating' as a NotebookInstanceStatus.  In addition, DescribeEndpointOutput now includes Docker repository digest of deployed Model images.
+
 Release v1.14.19 (2018-07-03)
 ===
 
@@ -873,6 +1054,12 @@ Release v1.12.77 (2018-02-14)
 * `service/appsync`: Updates service API and documentation
 * `aws/endpoints`: Updated Regions and Endpoints metadata.
 * `service/lex-models`: Updates service API and documentation
+
+### Bug Fixes
+* `aws/request`: Fix support for streamed payloads for unsigned body request ([#1778](https://github.com/aws/aws-sdk-go/pull/1778))
+  * Fixes the SDK's handling of the SDK's `ReaderSeekerCloser` helper type to not allow erroneous request retries, and request signature generation. This Fix allows you to use the `aws.ReaderSeekerCloser` to wrap an arbitrary `io.Reader` for request `io.ReadSeeker` input parameters. APIs such as lex-runtime's PostContent can now make use of the
+ReaderSeekerCloser type without causing unexpected failures.
+  * Fixes [#1776](https://github.com/aws/aws-sdk-go/issues/1776)
 
 Release v1.12.76 (2018-02-13)
 ===

@@ -7,22 +7,39 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/republicprotocol/co-go"
 	"github.com/urfave/cli"
 )
 
-// destroyNode tears down the deployed darknode, but keep the config file.
+// destroyNode tears down the deployed darknode(s).
 func destroyNode(ctx *cli.Context) error {
-	// FIXME : currently it only supports tear down AWS deployment.
-	// Needs to figure out way which suits for all kinds of cloud service.
+	name := ctx.Args().First()
 	force := ctx.Bool("force")
-	name := ctx.String("name")
+	tags := ctx.String("tags")
 
-	if name == "" {
+	if tags == "" && name == "" {
 		cli.ShowCommandHelp(ctx, "down")
 		return ErrEmptyNodeName
+	} else if tags == "" && name != "" {
+		return destroySingleNode(name, force)
+	} else if tags != "" && name == "" {
+		nodes, err := getNodesByTags(tags)
+		if err != nil {
+			return err
+		}
+		errs := make([]error, len(nodes))
+		co.ForAll(nodes, func(i int) {
+			errs[i] = destroySingleNode(nodes[i], force)
+		})
+		return handleErrs(errs)
 	}
 
-	nodeDirectory := Directory + "/darknodes/" + name
+	return ErrNameAndTags
+}
+
+// destroySingleNode tears down a single darknode by its name.
+func destroySingleNode(name string, force bool) error {
+	nodeDirectory := nodeDirectory(name)
 	if !force {
 		ip, err := getIp(nodeDirectory)
 		if err != nil {
@@ -46,11 +63,6 @@ func destroyNode(ctx *cli.Context) error {
 		}
 	}
 
-	return destroyAwsNode(nodeDirectory)
-}
-
-// destroyAwsNode tears down the AWS instance.
-func destroyAwsNode(nodeDirectory string) error {
 	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
 	cmd := fmt.Sprintf("cd %v && terraform destroy --force && rm -rf %v", nodeDirectory, nodeDirectory)
 	destroy := exec.Command("bash", "-c", cmd)
