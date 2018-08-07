@@ -56,12 +56,12 @@ darknode up --network testnet --name my-first-darknode --aws --aws-access-key YO
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
-You can also associate the darknode to an elastic IP by providing the `allocation_id` of the elastic IP. 
+You can also associate the darknode to an elastic IP by providing the `ALLOCATION-ID` of the elastic IP. 
 Make sure you give the same region of the elastic to the darknode. 
 
 
 ```sh
-darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region same-region-as-EIP -aws-elastic-ip XXX.XXX.XXX.XXX
+darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region SAME-REGION-AS-EIP -aws-elastic-ip ALLOCATION-ID
 ``` 
 
 #### Digital Ocean
