@@ -66,7 +66,6 @@ import (
 	"go/build"
 	exact "go/constant"
 	"go/format"
-	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
@@ -284,7 +283,7 @@ func (pkg *Package) typeCheck(fs *token.FileSet, astFiles []*ast.File) {
 	pkg.defs = make(map[*ast.Ident]types.Object)
 	config := types.Config{
 		IgnoreFuncBodies: true, // We only need to evaluate constants.
-		Importer:         importer.Default(),
+		Importer:         defaultImporter(),
 		FakeImportC:      true,
 	}
 	info := &types.Info{

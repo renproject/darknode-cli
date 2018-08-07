@@ -28,7 +28,7 @@ type Confirmer interface {
 }
 
 type confirmer struct {
-	storer Storer
+	computationStore ComputationStorer
 
 	contract              ContractBinder
 	orderbookPollInterval time.Duration
@@ -37,6 +37,7 @@ type confirmer struct {
 	confirmingMu         *sync.Mutex
 	confirmingBuyOrders  map[order.ID]struct{}
 	confirmingSellOrders map[order.ID]struct{}
+	confirmed            map[order.ID]time.Time
 }
 
 // NewConfirmer returns a Confirmer that submits Computations to the
@@ -44,9 +45,9 @@ type confirmer struct {
 // and checks for consensus on confirmations by waiting until a submitted
 // Computation has been confirmed has the confirmation has passed the block
 // depth limit.
-func NewConfirmer(storer Storer, contract ContractBinder, orderbookPollInterval time.Duration, orderbookBlockDepth uint) Confirmer {
+func NewConfirmer(computationStore ComputationStorer, contract ContractBinder, orderbookPollInterval time.Duration, orderbookBlockDepth uint) Confirmer {
 	return &confirmer{
-		storer: storer,
+		computationStore: computationStore,
 
 		contract:              contract,
 		orderbookPollInterval: orderbookPollInterval,
@@ -55,6 +56,7 @@ func NewConfirmer(storer Storer, contract ContractBinder, orderbookPollInterval 
 		confirmingMu:         new(sync.Mutex),
 		confirmingBuyOrders:  map[order.ID]struct{}{},
 		confirmingSellOrders: map[order.ID]struct{}{},
+		confirmed:            map[order.ID]time.Time{},
 	}
 }
 
@@ -79,6 +81,15 @@ func (confirmer *confirmer) Confirm(done <-chan struct{}, coms <-chan Computatio
 				if !ok {
 					return
 				}
+
+				// Check that these orders have not already been confirmed
+				if _, ok := confirmer.confirmed[com.Buy.OrderID]; ok {
+					continue
+				}
+				if _, ok := confirmer.confirmed[com.Sell.OrderID]; ok {
+					continue
+				}
+
 				// Confirm Computations on the blockchain and register them for
 				// observation (we need to wait for finality)
 				if err := confirmer.beginConfirmation(com); err != nil {
@@ -92,8 +103,8 @@ func (confirmer *confirmer) Confirm(done <-chan struct{}, coms <-chan Computatio
 				// Wait for the confirmation of these orders to pass the depth
 				// limit
 				confirmer.confirmingMu.Lock()
-				confirmer.confirmingBuyOrders[com.Buy] = struct{}{}
-				confirmer.confirmingSellOrders[com.Sell] = struct{}{}
+				confirmer.confirmingBuyOrders[com.Buy.OrderID] = struct{}{}
+				confirmer.confirmingSellOrders[com.Sell.OrderID] = struct{}{}
 				confirmer.confirmingMu.Unlock()
 			}
 		}
@@ -118,6 +129,12 @@ func (confirmer *confirmer) Confirm(done <-chan struct{}, coms <-chan Computatio
 				confirmer.confirmingMu.Lock()
 				confirmer.checkOrdersForConfirmationFinality(order.ParityBuy, done, confirmations, errs)
 				confirmer.checkOrdersForConfirmationFinality(order.ParitySell, done, confirmations, errs)
+				// Clean up confirmed orders that are old enough to forget about
+				for key, t := range confirmer.confirmed {
+					if time.Since(t) > time.Hour {
+						delete(confirmer.confirmed, key)
+					}
+				}
 				confirmer.confirmingMu.Unlock()
 			}
 		}
@@ -134,8 +151,8 @@ func (confirmer *confirmer) Confirm(done <-chan struct{}, coms <-chan Computatio
 }
 
 func (confirmer *confirmer) beginConfirmation(orderMatch Computation) error {
-	if err := confirmer.contract.ConfirmOrder(orderMatch.Buy, orderMatch.Sell); err != nil {
-		return fmt.Errorf("cannot confirm computation buy = %v, sell = %v: %v", orderMatch.Buy, orderMatch.Sell, err)
+	if err := confirmer.contract.ConfirmOrder(orderMatch.Buy.OrderID, orderMatch.Sell.OrderID); err != nil {
+		return fmt.Errorf("cannot confirm computation buy = %v, sell = %v: %v", orderMatch.Buy.OrderID, orderMatch.Sell.OrderID, err)
 	}
 	return nil
 }
@@ -177,7 +194,7 @@ func (confirmer *confirmer) checkOrdersForConfirmationFinality(orderParity order
 				continue
 			}
 		}
-		if err := confirmer.storer.PutComputation(com); err != nil {
+		if err := confirmer.computationStore.PutComputation(com); err != nil {
 			select {
 			case <-done:
 				return
@@ -185,12 +202,21 @@ func (confirmer *confirmer) checkOrdersForConfirmationFinality(orderParity order
 			}
 		}
 
+		// Check that these orders have not already been output
+		if _, ok := confirmer.confirmed[com.Buy.OrderID]; ok {
+			continue
+		}
+		if _, ok := confirmer.confirmed[com.Sell.OrderID]; ok {
+			continue
+		}
 		select {
 		case <-done:
 			return
 		case confirmations <- com:
-			delete(confirmer.confirmingBuyOrders, com.Buy)
-			delete(confirmer.confirmingSellOrders, com.Sell)
+			delete(confirmer.confirmingBuyOrders, com.Buy.OrderID)
+			delete(confirmer.confirmingSellOrders, com.Sell.OrderID)
+			confirmer.confirmed[com.Buy.OrderID] = time.Now()
+			confirmer.confirmed[com.Sell.OrderID] = time.Now()
 		}
 	}
 }
@@ -227,16 +253,24 @@ func (confirmer *confirmer) checkOrderForConfirmationFinality(ord order.ID, orde
 }
 
 func (confirmer *confirmer) computationFromOrders(orderParity order.Parity, ord, ordMatch order.ID) (Computation, error) {
-	var comID ComputationID
+	var comIDDepth0 ComputationID
+	var comIDDepth1 ComputationID
 	if orderParity == order.ParityBuy {
-		comID = NewComputationID(ord, ordMatch)
+		comIDDepth0 = NewComputationID(ord, ordMatch, 0)
+		comIDDepth1 = NewComputationID(ord, ordMatch, 1)
 	} else {
-		comID = NewComputationID(ordMatch, ord)
+		comIDDepth0 = NewComputationID(ordMatch, ord, 0)
+		comIDDepth1 = NewComputationID(ordMatch, ord, 1)
 	}
-	com, err := confirmer.storer.Computation(comID)
+
+	com, err := confirmer.computationStore.Computation(comIDDepth0)
+	if err != nil {
+		com, err = confirmer.computationStore.Computation(comIDDepth1)
+	}
 	if err != nil {
 		return com, err
 	}
+
 	com.State = ComputationStateAccepted
 	com.Timestamp = time.Now()
 	return com, nil

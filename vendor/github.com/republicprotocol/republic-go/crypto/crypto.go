@@ -12,7 +12,7 @@ import (
 // ErrNilData is returned when a Verifier encounters a nil, or empty, data.
 // Signing nil data is not in itself erroneous but it is rarely a reasonable
 // action to take.
-var ErrNilData = errors.New("nil signature")
+var ErrNilData = errors.New("nil data")
 
 // ErrNilSignature is returned when a Verifier encounters a nil, or empty,
 // signature.
@@ -38,7 +38,7 @@ type Verifier interface {
 // An Encrypter can consume a plain text, and produce a cipher text for that
 // can only be decrypted by a specific recipient.
 type Encrypter interface {
-	Encrypt(plainText []byte, recipient []byte) ([]byte, error)
+	Encrypt(recipient string, plainText []byte) ([]byte, error)
 }
 
 // A Decrypter can consume a cipher text and produce a plain text.

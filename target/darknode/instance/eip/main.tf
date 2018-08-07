@@ -95,7 +95,7 @@ resource "aws_instance" "falcon0" {
 
   provisioner "file" {
     source      = "${var.config}"
-    destination = "/home/ubuntu/darknode-config.json"
+    destination = "$HOME/darknode-config.json"
 
     connection {
       type        = "ssh"
@@ -106,7 +106,7 @@ resource "aws_instance" "falcon0" {
 
   provisioner "file" {
     source      = "${var.path}/provisions"
-    destination = "/home/ubuntu/provisions"
+    destination = "$HOME/provisions"
 
     connection {
       type        = "ssh"
@@ -117,7 +117,7 @@ resource "aws_instance" "falcon0" {
 
   provisioner "file" {
     source      = "${var.path}/scripts"
-    destination = "/home/ubuntu/scripts"
+    destination = "$HOME/scripts"
 
     connection {
       type        = "ssh"

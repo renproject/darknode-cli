@@ -26,8 +26,12 @@
 
 
 [[constraint]]
-  branch = "master"
+  branch = "nightly"
   name = "github.com/republicprotocol/republic-go"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/republicprotocol/co-go"
 
 [[constraint]]
   name = "github.com/urfave/cli"

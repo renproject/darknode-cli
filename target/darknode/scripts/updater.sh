@@ -20,8 +20,7 @@ do
     sudo git pull &&
     cd cmd/darknode &&
     go install &&
-    cd /home/ubuntu &&
     sudo systemctl restart darknode.service &&
-    echo $timestamp >> .darknode/update.log &&
+    echo $timestamp >> $HOME/.darknode/update.log &&
     echo "Finish updating"
 done
