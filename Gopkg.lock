@@ -145,7 +145,7 @@
   revision = "4e299fdb0e808f64667498735da03fdc2e0e84c9"
 
 [[projects]]
-  branch = "master"
+  branch = "nightly"
   name = "github.com/republicprotocol/republic-go"
   packages = [
     "cmd/darknode/config",
@@ -160,7 +160,7 @@
     "stackint",
     "stackint/asm"
   ]
-  revision = "0d33cd3a9ccd570a5d9fb47690d682aa57a1bc5e"
+  revision = "12f053b04c27d5aaaeb79c9cc60dac2922b964c0"
 
 [[projects]]
   name = "github.com/rjeczalik/notify"
@@ -270,6 +270,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "727cd029d639b1bce279d25997639c59e946bb54cc85c9bdd095229c70dcc625"
+  inputs-digest = "26c749885dc4a5f8be36a69edd9c7c892fd387aec3494b81bc69d934072c5f84"
   solver-name = "gps-cdcl"
   solver-version = 1
