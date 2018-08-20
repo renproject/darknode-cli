@@ -21,6 +21,6 @@ do
     cd cmd/darknode &&
     go install &&
     sudo systemctl restart darknode.service &&
-    echo $timestamp >> $HOME/.darknode/update.log &&
+    echo $timestamp >> /home/ubuntu/.darknode/update.log &&
     echo "Finish updating"
 done
