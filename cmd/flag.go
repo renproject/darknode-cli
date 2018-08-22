@@ -46,6 +46,10 @@ var (
 		Name:  "force, f",
 		Usage: "Force destruction without interactive prompts",
 	}
+	AllFlag = cli.BoolFlag{
+		Name: "all",
+		Usage: "Refund all ETH and REN to the operator.",
+	}
 )
 
 // AWS flags

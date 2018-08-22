@@ -78,6 +78,16 @@ func main() {
 				return listAllNodes(c)
 			},
 		},
+		{
+			Name:  "refund",
+			Usage: "refund the bond to the operator account",
+			Flags: []cli.Flag{AllFlag},
+			Action: func(c *cli.Context) error {
+				return refund(c)
+			},
+		},
+
+
 		// {
 		// 	Name:  "exec",
 		// 	Usage: "Execute script on nodes",
