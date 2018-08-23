@@ -55,7 +55,7 @@ func destroyNode(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
-	cmd := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json|tags.out' -delete", nodeDirectory)
+	cmd := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodeDirectory)
 	destroy := exec.Command("bash", "-c", cmd)
 	pipeToStd(destroy)
 	if err := destroy.Start(); err != nil {
@@ -104,7 +104,7 @@ func refund(ctx *cli.Context) error {
 	// fmt.Printf("%sYour REN bonds have been refunded to your nominated address%s \n", GREEN, RESET)
 
 	// Refund ETH and REN in the darknode address if there are
-	if refundAll{
+	if refundAll {
 		ownerAddress, err := contractBinder.GetOwner(config.Address.ID())
 		if err != nil {
 			return err
@@ -113,7 +113,7 @@ func refund(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		balance, err := conn.Client.BalanceAt(context.Background(), darknodeEthAddress,nil)
+		balance, err := conn.Client.BalanceAt(context.Background(), darknodeEthAddress, nil)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func refund(ctx *cli.Context) error {
 
 		// Transfer Eth back to the owner
 		if balance.Cmp(transactionFee) > 0 {
-			ctx, cancel:= context.WithTimeout(context.Background(), 30*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			value := new(big.Int)
 			tx, err := conn.SendEth(ctx, auth, ownerAddress, value.Sub(balance, transactionFee))
@@ -132,7 +132,7 @@ func refund(ctx *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			if receipt.Status == types.ReceiptStatusFailed{
+			if receipt.Status == types.ReceiptStatusFailed {
 				return ErrFailedTx
 			}
 			fmt.Printf("%sWe have refund the ETH in your darknode address%s \n", GREEN, RESET)
@@ -140,17 +140,17 @@ func refund(ctx *cli.Context) error {
 
 		// Transfer REN back to the owners if they accidentally send REN to the darknodes.
 		renAddress := renAddress(config.Ethereum.Network)
-		if renAddress == ""{
+		if renAddress == "" {
 			return ErrUnknownNetwork
 		}
 		tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), bind.ContractBackend(conn.Client))
-		balance, err = tokenContract.BalanceOf(&bind.CallOpts{},darknodeEthAddress)
+		balance, err = tokenContract.BalanceOf(&bind.CallOpts{}, darknodeEthAddress)
 		if err != nil {
 			return err
 		}
 		oneREN := big.NewInt(int64(math.Pow10(18))) // 0.001 ETH as tx fee
 		// Transfer REN back to the owner
-		if balance.Cmp(oneREN)> 0  {
+		if balance.Cmp(oneREN) > 0 {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			tx, err := tokenContract.Transfer(auth, ownerAddress, balance)
@@ -161,7 +161,7 @@ func refund(ctx *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			if receipt.Status == types.ReceiptStatusFailed{
+			if receipt.Status == types.ReceiptStatusFailed {
 				return ErrFailedTx
 			}
 			fmt.Printf("%sWe have refund the REN in your darknode address%s \n", GREEN, RESET)
@@ -184,4 +184,3 @@ func renAddress(network contract.Network) string {
 		return ""
 	}
 }
-

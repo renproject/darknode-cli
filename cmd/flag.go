@@ -46,7 +46,7 @@ var (
 		Usage: "Force destruction without interactive prompts",
 	}
 	AllFlag = cli.BoolFlag{
-		Name: "all",
+		Name:  "all",
 		Usage: "Refund all ETH and REN to the operator.",
 	}
 )

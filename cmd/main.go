@@ -87,7 +87,6 @@ func main() {
 			},
 		},
 
-
 		// {
 		// 	Name:  "exec",
 		// 	Usage: "Execute script on nodes",

@@ -70,7 +70,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		if err != nil {
 			return err
 		}
-		switch config.Ethereum.Network{
+		switch config.Ethereum.Network {
 		case "testnet":
 			branch = "master"
 		case "falcon":
