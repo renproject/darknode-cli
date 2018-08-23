@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
@@ -220,7 +219,6 @@ func parseAwsRegionAndInstance(ctx *cli.Context) (string, string, error) {
 	instance := strings.ToLower(ctx.String("aws-instance"))
 
 	// Parse the input region or pick one region randomly
-	rand.Seed(time.Now().UTC().UnixNano())
 	if region == "" {
 		region = AllAwsRegions[rand.Intn(len(AllAwsRegions))]
 	} else {

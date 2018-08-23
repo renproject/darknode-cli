@@ -7,8 +7,8 @@ The Darknode CLI is a command-line interface for managing Darknodes on Republic 
 To jump straight into running your first Darknode on AWS, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
 
 ## Getting Started on Digital Ocean
-
-Checkout the instructions for using [Digial Ocean](https://github.com/republicprotocol/darknode-cli#digital-ocean).
+ 
+Checkout the instructions for [Creating a Personal Access Token](https://github.com/republicprotocol/darknode-cli#digital-ocean) on Digital Ocean.
 
 ## Installation
 
@@ -28,7 +28,7 @@ To update your Darknode CLI, open a terminal and run:
 curl https://darknode.republicprotocol.com/update.sh -sSf | sh
 ```
 
-This will update your Darknode CLI to the latest version.  
+This will update your Darknode CLI to the latest version without affecting any of your deployed node. 
 
 ## Usage
 
@@ -57,7 +57,7 @@ darknode up --network testnet --name my-first-darknode --aws --aws-access-key YO
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
 You can also associate the darknode to an elastic IP by providing the `EIP-ALLOCATION-ID` of the elastic IP. 
-Make sure you give the same region of the elastic to the darknode. 
+Make sure you give the same region of the elastic IP to the darknode. 
 
 
 ```sh

@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"math/rand"
-	"time"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
@@ -12,23 +10,21 @@ import (
 
 // Available regions on Digital Ocean.
 const (
-	Global = "global"
-	AMS2   = "ams2"
-	AMS3   = "ams3"
-	BLR1   = "blr1"
-	FRA1   = "fra1"
-	LON1   = "lon1"
-	NYC1   = "nyc1"
-	NYC2   = "nyc2"
-	NYC3   = "nyc3"
-	SF01   = "sfo1"
-	SF02   = "sfo2"
-	SGP1   = "sgp1"
-	TOR1   = "tor1"
+	AMS2 = "ams2"
+	AMS3 = "ams3"
+	BLR1 = "blr1"
+	FRA1 = "fra1"
+	LON1 = "lon1"
+	NYC1 = "nyc1"
+	NYC2 = "nyc2"
+	NYC3 = "nyc3"
+	SF01 = "sfo1"
+	SF02 = "sfo2"
+	SGP1 = "sgp1"
+	TOR1 = "tor1"
 )
 
 var AllDoRegions = []string{
-	Global,
 	AMS2,
 	AMS3,
 	BLR1,
@@ -119,9 +115,10 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 	size := ctx.String("do-droplet")
 
 	// Parse the input region or pick one region randomly
-	rand.Seed(time.Now().UTC().UnixNano())
 	if region == "" {
-		region = AllDoRegions[rand.Intn(len(AllDoRegions))]
+		// todo : should randomly pick one from the available regions
+		// by calling the do API
+		region = "nyc01"
 	} else {
 		if !StringInSlice(region, AllDoRegions) {
 			return "", "", ErrUnknownRegion
