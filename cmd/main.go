@@ -13,7 +13,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "2.0.0"
+	app.Version = "2.1.0"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
