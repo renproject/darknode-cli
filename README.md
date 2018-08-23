@@ -5,7 +5,7 @@ The Darknode CLI is a command-line interface for managing Darknodes on Republic 
 The CLI is installed in your local workspace and used to deploy and operate darknodes. 
 ![](./docs/darknode-cli-overview.jpg)
 
-Currently it only support macOS and Linux. 
+Currently it only support **macOS** and **Linux**. 
 
 ## Getting Started on AWS
 
