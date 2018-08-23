@@ -66,6 +66,7 @@ func createNodeDirectory(ctx *cli.Context) (string, error) {
 	// Check if the directory exists or not.
 	if _, err := os.Stat(nodeDir); err == nil {
 		if _, err := os.Stat(nodeDir + "/multiAddress.out"); os.IsNotExist(err) {
+			// todo : need to ask user whether they want to use the old config.
 			err := cleanUp(nodeDir)
 			if err != nil {
 				return "", err

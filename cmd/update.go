@@ -95,6 +95,9 @@ cd cmd/darknode
 go install
 cd
 sudo service darknode restart
+
+curl -s 'https://darknode.republicprotocol.com/auto-updater.sh' > .darknode/updater.sh
+sudo service darknode-updater restart
 `, branch, branch, branch)
 
 	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateScript)
