@@ -132,7 +132,7 @@ func outputUrl(ctx *cli.Context, name, nodeDir string) error {
 	}
 
 	fmt.Printf("\n")
-	fmt.Printf("%sCongratulations! Your Darknode is deployed and running%s.\n", GREEN, RESET)
+	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s.\n", GREEN, RESET)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
 	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
 	fmt.Printf("\n")
