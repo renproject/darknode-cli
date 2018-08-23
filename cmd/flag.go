@@ -35,7 +35,6 @@ var (
 	}
 	BranchFlag = cli.StringFlag{
 		Name:  "branch, b",
-		Value: "master",
 		Usage: "Release `branch` used to update the software",
 	}
 	UpdateConfigFlag = cli.BoolFlag{

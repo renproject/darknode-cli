@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/republicprotocol/co-go"
+	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
 
@@ -60,6 +61,25 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 			return err
 		}
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
+	}
+
+	// Default branch is depends on the network parameter.
+	if branch == "" {
+		// Read the config and refund the REN bonds
+		config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
+		if err != nil {
+			return err
+		}
+		switch config.Ethereum.Network{
+		case "testnet":
+			branch = "master"
+		case "falcon":
+			branch = "develop"
+		case "nightly":
+			branch = "nightly"
+		default:
+			branch = "master"
+		}
 	}
 
 	updateScript := fmt.Sprintf(`
