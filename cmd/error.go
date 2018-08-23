@@ -17,6 +17,10 @@ var ErrKeyNotFound = fmt.Errorf("%splease provide your AWS access key and secret
 // already exists.
 var ErrNodeExist = fmt.Errorf("%snode with same name already exists%s", RED, RESET)
 
+// ErrNodeNotExist is returned when user tries to refund a node which doesn't
+// exist
+var ErrNodeNotExist = fmt.Errorf("%snode with the name doesn't exist%s", RED, RESET)
+
 // ErrMultipleProviders is returned when user gives more than one provider.
 var ErrMultipleProviders = fmt.Errorf("%splease give only one provider%s", RED, RESET)
 
@@ -61,3 +65,9 @@ var ErrEmptyDoToken = fmt.Errorf("%sdigital ocean token cannot be empty%s", RED,
 
 // ErrUnknownDropletSize is returned when the user gives an unknown droplet size
 var ErrUnknownDropletSize = fmt.Errorf("%sunknown droplet size%s", RED, RESET)
+
+// ErrInvalidEthereumAddress is returned when user gives an invalid Ethereum address.
+var ErrInvalidEthereumAddress = fmt.Errorf("%sinvalid Ethereum address%s", RED, RESET)
+
+// ErrFailedTx is returned when the transaction gets reverted on Ethereum
+var ErrFailedTx = fmt.Errorf("%stransaction failed%s", RED, RESET)

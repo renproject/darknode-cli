@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/republicprotocol/co-go"
+	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
 
@@ -62,6 +63,25 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
+	// Default branch is depends on the network parameter.
+	if branch == "" {
+		// Read the config and refund the REN bonds
+		config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
+		if err != nil {
+			return err
+		}
+		switch config.Ethereum.Network {
+		case "testnet":
+			branch = "master"
+		case "falcon":
+			branch = "develop"
+		case "nightly":
+			branch = "nightly"
+		default:
+			branch = "master"
+		}
+	}
+
 	updateScript := fmt.Sprintf(`
 #!/usr/bin/env bash
 
@@ -75,6 +95,9 @@ cd cmd/darknode
 go install
 cd
 sudo service darknode restart
+
+curl -s 'https://darknode.republicprotocol.com/auto-updater.sh' > .darknode/updater.sh
+sudo service darknode-updater restart
 `, branch, branch, branch)
 
 	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateScript)

@@ -3,17 +3,24 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/urfave/cli"
 )
+
+//
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 func main() {
 	// Create new cli application
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "1.2.0"
+	app.Version = "2.1.0"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
@@ -79,13 +86,22 @@ func main() {
 			},
 		},
 		{
-			Name:  "exec",
-			Usage: "Exec scripts on nodes",
-			Flags: []cli.Flag{TagsFlag, ScriptFlag},
+			Name:  "refund",
+			Usage: "refund the bond to the operator account",
+			Flags: []cli.Flag{AllFlag},
 			Action: func(c *cli.Context) error {
-				return execScript(c)
+				return refund(c)
 			},
 		},
+
+		// {
+		// 	Name:  "exec",
+		// 	Usage: "Execute script on nodes",
+		// 	Flags: []cli.Flag{TagsFlag, ScriptFlag},
+		// 	Action: func(c *cli.Context) error {
+		// 		return execScript(c)
+		// 	},
+		// },
 	}
 
 	// Show error message and display the help page for the app

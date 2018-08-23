@@ -35,7 +35,6 @@ var (
 	}
 	BranchFlag = cli.StringFlag{
 		Name:  "branch, b",
-		Value: "master",
 		Usage: "Release `branch` used to update the software",
 	}
 	UpdateConfigFlag = cli.BoolFlag{
@@ -45,6 +44,10 @@ var (
 	ForceFlag = cli.BoolFlag{
 		Name:  "force, f",
 		Usage: "Force destruction without interactive prompts",
+	}
+	AllFlag = cli.BoolFlag{
+		Name:  "all",
+		Usage: "Refund all ETH and REN to the operator.",
 	}
 )
 
@@ -93,7 +96,7 @@ var (
 		Usage: "An optional digital ocean region (default: random)",
 	}
 	DoSizeFlag = cli.StringFlag{
-		Name:  "do-size",
+		Name:  "do-droplet",
 		Value: "8gb",
 		Usage: "An optional digital ocean droplet size (default: 8gb)",
 	}

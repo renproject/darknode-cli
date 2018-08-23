@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
+	"os"
 	"os/exec"
+	"path"
 
 	"github.com/republicprotocol/co-go"
 	"github.com/urfave/cli"
@@ -10,10 +13,11 @@ import (
 // execScript execute a bash script on a darknode
 // or a set of darknodes by the tags.
 func execScript(ctx *cli.Context) error {
-	name := ctx.String("name")
+	name := ctx.Args().First()
 	tags := ctx.String("tags")
 	script := ctx.String("script")
 
+	log.Print("script = ", script)
 	if name == "" && tags == "" {
 		cli.ShowCommandHelp(ctx, "update")
 		return ErrEmptyNameAndTags
@@ -47,8 +51,13 @@ func execSingleNode(name, script string) error {
 	if err != nil {
 		return err
 	}
-
-	execCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", "<", script)
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	filePath := path.Join(cwd, script)
+	// todo : why this not working?
+	execCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "'bash -s'", "", filePath)
 	pipeToStd(execCmd)
 	if err := execCmd.Start(); err != nil {
 		return err

@@ -58,6 +58,8 @@ Once this has finished, close the terminal and open a new one.
 
 ## Deploying a Darknode
 
+> If this step fails, you might have to wait 24 hous before being able to use your AWS account.
+
 Now, you can deploy a Darknode. Think of a catchy name, and run:
 
 ```sh
