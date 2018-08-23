@@ -118,7 +118,7 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 	if region == "" {
 		// todo : should randomly pick one from the available regions
 		// by calling the do API
-		region = "nyc01"
+		region = "nyc1"
 	} else {
 		if !StringInSlice(region, AllDoRegions) {
 			return "", "", ErrUnknownRegion
