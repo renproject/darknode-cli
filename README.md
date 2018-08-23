@@ -2,6 +2,13 @@
 
 The Darknode CLI is a command-line interface for managing Darknodes on Republic Protocol.
 
+![](./docs/darknode-cli-overview.jpg)
+The CLI is installed in your local workspace and can be used to deploy nodes to any supported cloud provider. 
+
+Your only need to have CLI to operate your remote darknode. 
+
+Currently it only support macOS and Linux. 
+
 ## Getting Started on AWS
 
 To jump straight into running your first Darknode on AWS, checkout our [Getting Started on AWS](./docs/getting-started-on-aws.md) tutorial.
@@ -64,6 +71,8 @@ Make sure you give the same region of the elastic IP to the darknode.
 darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region SAME-REGION-AS-EIP --aws-elastic-ip EIP-ALLOCATION-ID
 ``` 
 
+You will see 
+
 #### Digital Ocean
 
 Follow the steps in the [tutorial](https://www.digitalocean.com/docs/api/create-personal-access-token/) to create a API token. 
@@ -81,8 +90,7 @@ darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-
 
 Be aware some region and droplet size are not available to all users.
 
-You can find all available regions from [status page](https://status.digitalocean.com).
-You can find available droplet size slug from [post](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) or using digital ocean API.
+You can find all available regions and droplet size slug by using the digital ocean [API](https://developers.digitalocean.com/documentation/v2/#regions).
 
 ### Destroy a Darknode
 
@@ -145,17 +153,32 @@ darknode ssh my-first-darknode
 To update your Darknode to the latest stable version, open a terminal and run:
 
 ```sh
-darknode update my-first-darknode
+darknode update YOUR-DARKNODE-NAME
 ``` 
 
 To update the configuration of your darknode, first edit the local version of config, by running:
 
 ```sh
-nano $HOME/.darknode/darknodes/my-first-darknode/config.json
+nano $HOME/.darknode/darknodes/YOUR-DARKNODE-NAME/config.json
 ``` 
 
 and now run:
 
 ```sh
 darknode update my-first-darknode --config
+``` 
+
+### Refund your darknode
+
+To refund the bonds of your darknode after deregistering, open a terminal and run:
+
+```sh
+darknode refund YOUR-DARKNODE-NAME
+``` 
+
+If you also have some ETH left in the darknode address or REN accidentally been sent
+to that address, you can get them back by adding the `--all` tag:
+
+```sh
+darknode refund YOUR-DARKNODE-NAME --all
 ``` 
