@@ -2,10 +2,8 @@
 
 The Darknode CLI is a command-line interface for managing Darknodes on Republic Protocol.
 
+The CLI is installed in your local workspace and used to deploy and operate darknodes. 
 ![](./docs/darknode-cli-overview.jpg)
-The CLI is installed in your local workspace and can be used to deploy nodes to any supported cloud provider. 
-
-Your only need to have CLI to operate your remote darknode. 
 
 Currently it only support macOS and Linux. 
 
@@ -71,8 +69,6 @@ Make sure you give the same region of the elastic IP to the darknode.
 darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region SAME-REGION-AS-EIP --aws-elastic-ip EIP-ALLOCATION-ID
 ``` 
 
-You will see 
-
 #### Digital Ocean
 
 Follow the steps in the [tutorial](https://www.digitalocean.com/docs/api/create-personal-access-token/) to create a API token. 
@@ -94,7 +90,7 @@ You can find all available regions and droplet size slug by using the digital oc
 
 ### Destroy a Darknode
 
-_WARNING: Before destroying a Darknode make sure you have de-registered it, and withdrawn all fees earned!_
+_**WARNING: Before destroying a Darknode make sure you have de-registered it, and withdrawn all fees earned!**_
 
 Destroying a Darknode will turn it off and tear down all resources allocated by the cloud provider. To destroy a Darknode, open a terminal and run:
 
