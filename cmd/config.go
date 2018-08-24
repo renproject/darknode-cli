@@ -61,6 +61,7 @@ func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, 
 			Ethereum: contract.Config{
 				Network: contract.Network(network),
 			},
+			Alpha: 8,
 		}
 	} else {
 		cfg, err = config.NewConfigFromJSONFile(configFile)
