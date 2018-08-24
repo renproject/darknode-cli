@@ -176,4 +176,4 @@ to that address, you can get them back by adding the `--all` tag:
 darknode refund YOUR-DARKNODE-NAME --all
 ``` 
 
-> The refund is currently disabled until the next version of the Darknode Registry is deployed, the darknode refund option will not succeed. However, the darknode refund --all option will succeed.
+> The refund is currently disabled until the next version of the Darknode Registry is deployed, the `darknode refund` command will not succeed. However, the `darknode refund --all` command will succeed.
