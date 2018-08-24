@@ -178,3 +178,5 @@ to that address, you can get them back by adding the `--all` tag:
 ```sh
 darknode refund YOUR-DARKNODE-NAME --all
 ``` 
+
+> The refund is currently disabled until the new Darknode Registry is redeployed, the darknode refund option will not succeed.However, the darknode refund --all option will succeed.)
