@@ -18,6 +18,13 @@ rm go1.10.linux-amd64.tar.gz
 echo "export PATH=$PATH:/usr/local/go/bin" >> $HOME/.profile
 sudo ln -s /usr/local/go/bin/go /usr/bin/go
 
+# Setup UFW
+sudo apt-get install ufw
+sudo ufw allow 22/tcp    #ssh
+sudo ufw allow 18514/tcp #republicprotocol
+sudo ufw allow 18515/tcp #status page
+sudo ufw enable
+
 # Configure darknode and the updater
 mkdir ./.darknode/
 mv ./darknode-config.json ./.darknode/config.json
@@ -40,7 +47,7 @@ go install
 cd $HOME
 
 # Will fail if there are any files still in ./provisions/
-rmdir ./provisions/
+rm -rf ./provisions/
 rm -rf ./scripts/
 
 # Start services
