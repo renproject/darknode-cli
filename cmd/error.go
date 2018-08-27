@@ -32,7 +32,7 @@ var ErrUnknownProvider = fmt.Errorf("%sunknown service provider%s", RED, RESET)
 var ErrNilProvider = fmt.Errorf("%sprovider cannot be nil%s", RED, RESET)
 
 // ErrUnknownRegion is returned when the provided region is not valid.
-var ErrUnknownRegion = fmt.Errorf("%sthere is no such region%s", RED, RESET)
+var ErrUnknownRegion = fmt.Errorf("%sthere is no such region or the region is not available%s", RED, RESET)
 
 // ErrUnSupportedInstanceType is returned when the provided instance is not
 // supported in the selected region.

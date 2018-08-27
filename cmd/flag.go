@@ -97,7 +97,7 @@ var (
 	}
 	DoSizeFlag = cli.StringFlag{
 		Name:  "do-droplet",
-		Value: "8gb",
+		Value: "s-2vcpu-4gb",
 		Usage: "An optional digital ocean droplet size (default: 8gb)",
 	}
 )

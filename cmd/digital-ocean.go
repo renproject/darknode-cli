@@ -1,9 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
+	"net/http"
 
+	"github.com/pkg/errors"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
@@ -114,24 +118,90 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 	region := ctx.String("do-region")
 	size := ctx.String("do-droplet")
 
+	regions, err := allRegions(ctx)
+	if err != nil {
+		return "", "", err
+	}
+
 	// Parse the input region or pick one region randomly
 	if region == "" {
-		// todo : should randomly pick one from the available regions
-		// by calling the do API
-		region = "nyc1"
+		for {
+			randomRegion := regions[rand.Intn(len(regions))]
+			if randomRegion.Available == false {
+				continue
+			}
+			// Output the available regions if user gives an invalid droplet size
+			if !StringInSlice(size, randomRegion.Sizes) {
+				fmt.Printf("We have randomly selected [%v] as the droplet region.\n", randomRegion.Slug)
+				fmt.Printf("Your account can only create below slugs in [%v]:\n", randomRegion.Slug)
+				for i := range randomRegion.Sizes {
+					fmt.Println(randomRegion.Sizes[i])
+				}
+				fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
+
+				return "", "", ErrUnSupportedInstanceType
+			}
+		}
 	} else {
-		if !StringInSlice(region, AllDoRegions) {
+		var chosenRegion Region
+		for i := range regions {
+			if region == regions[i].Slug {
+				chosenRegion = regions[i]
+				break
+			}
+		}
+		if chosenRegion.Name == "" {
 			return "", "", ErrUnknownRegion
+		}
+		// Output the available regions if user gives an invalid droplet size
+		if !StringInSlice(size, chosenRegion.Sizes) {
+			fmt.Printf("We have randomly selected [%v] as the droplet region.\n", chosenRegion.Slug)
+			fmt.Printf("Your account can only create below slugs in [%v]:\n", chosenRegion.Slug)
+			for i := range chosenRegion.Sizes {
+				fmt.Println(chosenRegion.Sizes[i])
+			}
+			fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
+			return "", "", ErrUnSupportedInstanceType
 		}
 	}
 
-	// Validate the droplet size
-	if !StringInSlice(size, AllDoDropletSize) {
-		// todo : output available droplet sizes.
-		return "", "", ErrUnSupportedInstanceType
+	return region, size, nil
+}
+
+// allRegions sends a GET request to the DO API to get all available regions
+// and droplet sizes to the given DO token.
+func allRegions(ctx *cli.Context) ([]Region, error) {
+	token := ctx.String("do-token")
+
+	url := "https://api.digitalocean.com/v2/regions"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
 	}
 
-	return region, size, nil
+	// Check the response status code
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(data))
+	}
+
+	// Unmarshal the response
+	regions := struct {
+		Regions []Region `json:"regions"`
+	}{}
+	err = json.Unmarshal(data, &regions)
+
+	return regions.Regions, err
 }
 
 // deployToDo parses the digital ocean credentials and use terraform to
@@ -218,4 +288,12 @@ variable "pvt_key" {
 	}
 
 	return copyFile(Directory+"/instance/digital-ocean/main.tf", nodeDir+"/main.tf")
+}
+
+type Region struct {
+	Name      string   `json:"name"`
+	Slug      string   `json:"slug"`
+	Sizes     []string `json:"sizes"`
+	Features  []string `json:"features"`
+	Available bool     `json:"available"`
 }
