@@ -25,9 +25,9 @@ sudo ln -s /usr/local/go/bin/go /usr/bin/go
 
 # Setup UFW
 sudo apt-get install ufw
-sudo ufw allow 22/tcp     # ssh
+sudo ufw limit 22/tcp     # ssh
 sudo ufw allow 18514/tcp  # republicprotocol
-sudo ufw allow 18515/tcp  # status page
+sudo ufw limit 18515/tcp  # status page
 sudo ufw --force enable
 
 # Configure darknode and the updater
