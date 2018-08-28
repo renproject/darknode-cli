@@ -84,6 +84,7 @@ You can also specify the region and droplet size you want to use for the Darknod
 darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
 ``` 
 
+The default droplet size is `s-4vcpu-8gb` and region will be random. 
 Be aware some region and droplet size are not available to all users.
 
 You can find all available regions and droplet size slug by using the digital ocean [API](https://developers.digitalocean.com/documentation/v2/#regions).
