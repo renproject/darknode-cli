@@ -15,7 +15,6 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove
 # Install services
 sudo mv ./provisions/darknode-updater.service /etc/systemd/system/darknode-updater.service
 sudo mv ./provisions/darknode.service /etc/systemd/system/darknode.service
-sudo mv ./scripts/updater.sh
 
 # Install golang
 wget https://dl.google.com/go/go1.10.linux-amd64.tar.gz
