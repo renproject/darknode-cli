@@ -9,6 +9,7 @@ until sudo apt update; do sleep 2; done
 # Update the system-level updates
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove
 
 # Install services

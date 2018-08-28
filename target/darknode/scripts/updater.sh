@@ -11,6 +11,7 @@ do
     echo "Updating system..."
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove
     echo "Updating darknode..."
     timestamp=$(date +%Y-%m-%d-%H-%M-%S)

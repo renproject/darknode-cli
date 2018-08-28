@@ -204,8 +204,8 @@ func availableRegions(ctx *cli.Context) ([]Region, error) {
 	if err != nil {
 		return nil, err
 	}
-	availableRegions := make([]Region,0)
-	for _, i  := range regions.Regions{
+	availableRegions := make([]Region, 0)
+	for _, i := range regions.Regions {
 		if i.Available {
 			availableRegions = append(availableRegions, i)
 		}
