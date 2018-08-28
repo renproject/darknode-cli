@@ -125,26 +125,23 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 
 	// Parse the input region or pick one region randomly
 	if region == "" {
-		for i := 0; i < 10; i++ {
-			randomRegion := regions[rand.Intn(len(regions))]
-			if randomRegion.Available == false {
-				continue
-			}
-			// Output the available regions if user gives an invalid droplet size
-			if !StringInSlice(size, randomRegion.Sizes) {
-				fmt.Printf("We have randomly selected [%v] as the droplet region.\n", randomRegion.Slug)
-				fmt.Printf("Your account can only create below slugs in [%v]:\n", randomRegion.Slug)
-				for i := range randomRegion.Sizes {
-					fmt.Println(randomRegion.Sizes[i])
-				}
-				fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
-
-				return "", "", ErrUnSupportedInstanceType
-			}
-
-			return randomRegion.Slug, size, nil
+		if len(regions) == 0 {
+			return "", "", errors.New("no available region to your account")
 		}
-		return "", "", errors.New("no available region to your account")
+		randomRegion := regions[rand.Intn(len(regions))]
+
+		// Output the available regions if user gives an invalid droplet size
+		if !StringInSlice(size, randomRegion.Sizes) {
+			fmt.Printf("We have randomly selected [%v] as the droplet region.\n", randomRegion.Slug)
+			fmt.Printf("Your account can only create below slugs in [%v]:\n", randomRegion.Slug)
+			for i := range randomRegion.Sizes {
+				fmt.Println(randomRegion.Sizes[i])
+			}
+			fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
+
+			return "", "", ErrUnSupportedInstanceType
+		}
+		return randomRegion.Slug, size, nil
 	} else {
 		var chosenRegion Region
 		for i := range regions {
@@ -156,6 +153,7 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 		if chosenRegion.Name == "" {
 			return "", "", ErrUnknownRegion
 		}
+
 		// Output the available regions if user gives an invalid droplet size
 		if !StringInSlice(size, chosenRegion.Sizes) {
 			fmt.Printf("We have randomly selected [%v] as the droplet region.\n", chosenRegion.Slug)
@@ -203,8 +201,16 @@ func availableRegions(ctx *cli.Context) ([]Region, error) {
 		Regions []Region `json:"regions"`
 	}{}
 	err = json.Unmarshal(data, &regions)
-
-	return regions.Regions, err
+	if err != nil {
+		return nil, err
+	}
+	availableRegions := make([]Region,0)
+	for _, i  := range regions.Regions{
+		if i.Available {
+			availableRegions = append(availableRegions, i)
+		}
+	}
+	return availableRegions, nil
 }
 
 // deployToDo parses the digital ocean credentials and use terraform to
