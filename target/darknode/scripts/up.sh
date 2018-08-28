@@ -6,6 +6,11 @@ set -x
 # Do until not locked - will enter infinite loop if update fails
 until sudo apt update; do sleep 2; done
 
+# Update the system-level updates
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y update
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove
+
 # Install services
 sudo mv ./provisions/darknode-updater.service /etc/systemd/system/darknode-updater.service
 sudo mv ./provisions/darknode.service /etc/systemd/system/darknode.service
@@ -20,10 +25,10 @@ sudo ln -s /usr/local/go/bin/go /usr/bin/go
 
 # Setup UFW
 sudo apt-get install ufw
-sudo ufw allow 22/tcp    #ssh
-sudo ufw allow 18514/tcp #republicprotocol
-sudo ufw allow 18515/tcp #status page
-sudo ufw enable
+sudo ufw allow 22/tcp     # ssh
+sudo ufw allow 18514/tcp  # republicprotocol
+sudo ufw allow 18515/tcp  # status page
+sudo ufw --force enable
 
 # Configure darknode and the updater
 mkdir ./.darknode/

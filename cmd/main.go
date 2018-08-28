@@ -10,7 +10,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-//
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
@@ -20,7 +19,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "2.1.0"
+	app.Version = "2.1.1"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{

@@ -118,14 +118,14 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 	region := ctx.String("do-region")
 	size := ctx.String("do-droplet")
 
-	regions, err := allRegions(ctx)
+	regions, err := availableRegions(ctx)
 	if err != nil {
 		return "", "", err
 	}
 
 	// Parse the input region or pick one region randomly
 	if region == "" {
-		for {
+		for i := 0; i < 10; i++ {
 			randomRegion := regions[rand.Intn(len(regions))]
 			if randomRegion.Available == false {
 				continue
@@ -141,7 +141,10 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 
 				return "", "", ErrUnSupportedInstanceType
 			}
+
+			return randomRegion.Slug, size, nil
 		}
+		return "", "", errors.New("no available region to your account")
 	} else {
 		var chosenRegion Region
 		for i := range regions {
@@ -163,14 +166,14 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 			fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
 			return "", "", ErrUnSupportedInstanceType
 		}
-	}
 
-	return region, size, nil
+		return chosenRegion.Slug, size, nil
+	}
 }
 
-// allRegions sends a GET request to the DO API to get all available regions
+// availableRegions sends a GET request to the DO API to get all available regions
 // and droplet sizes to the given DO token.
-func allRegions(ctx *cli.Context) ([]Region, error) {
+func availableRegions(ctx *cli.Context) ([]Region, error) {
 	token := ctx.String("do-token")
 
 	url := "https://api.digitalocean.com/v2/regions"
@@ -290,6 +293,7 @@ variable "pvt_key" {
 	return copyFile(Directory+"/instance/digital-ocean/main.tf", nodeDir+"/main.tf")
 }
 
+// Region is the json object returned by the digital-ocean API
 type Region struct {
 	Name      string   `json:"name"`
 	Slug      string   `json:"slug"`
