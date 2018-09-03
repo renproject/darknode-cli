@@ -69,5 +69,8 @@ var ErrUnknownDropletSize = fmt.Errorf("%sunknown droplet size%s", RED, RESET)
 // ErrInvalidEthereumAddress is returned when user gives an invalid Ethereum address.
 var ErrInvalidEthereumAddress = fmt.Errorf("%sinvalid Ethereum address%s", RED, RESET)
 
-// ErrFailedTx is returned when the transaction gets reverted on Ethereum
+// ErrFailedTx is returned when the transaction gets reverted on Ethereum.
 var ErrFailedTx = fmt.Errorf("%stransaction failed%s", RED, RESET)
+
+// ErrEmptyAddress is returned when the Ethereum address is empty.
+var ErrEmptyAddress = fmt.Errorf("%sethereum address cannot be empty%s", RED, RESET)
