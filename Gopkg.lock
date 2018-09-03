@@ -179,8 +179,8 @@
   revision = "4e299fdb0e808f64667498735da03fdc2e0e84c9"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:b1769e138113635d2cd8fd511d7ef3670a3926033aedff8cd6166ac715cb0441"
+  branch = "contract-upgrades"
+  digest = "1:7c4c23be2b2da0568ab7513e2b41157dcccf1b0a286d94f39ded092dff192d84"
   name = "github.com/republicprotocol/republic-go"
   packages = [
     "cmd/darknode/config",
@@ -196,7 +196,7 @@
     "stackint/asm",
   ]
   pruneopts = "T"
-  revision = "684132ae8f7eb31affff953408a80dc9a7f7fb21"
+  revision = "24e7e2dbf5f614e26f1b196deb269a177dfac885"
 
 [[projects]]
   digest = "1:6afc433cbb471b1d32de92131245fb1f76000c9d88940265df4a512572a51b51"

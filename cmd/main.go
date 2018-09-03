@@ -94,7 +94,7 @@ func main() {
 		{
 			Name:  "withdraw",
 			Usage: "withdraw all the ETH and REN the darknode address holds",
-			Flags: []cli.Flag{},
+			Flags: []cli.Flag{AddressFlag},
 			Action: func(c *cli.Context) error {
 				return withdraw(c)
 			},

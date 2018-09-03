@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"math/big"
 	"os"
@@ -168,8 +169,9 @@ func withdraw(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	transactionFee := big.NewInt(int64(5 * math.Pow10(9) * 21001)) //  5 Gwei Gas price
-
+	log.Println("have ", balance)
+	transactionFee := big.NewInt(int64(5 * math.Pow10(9) * 30000)) //  5 Gwei Gas price
+	log.Println("transaction fee : ",transactionFee.Uint64())
 	// Transfer Eth back to the owner
 	if balance.Cmp(transactionFee) > 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
