@@ -90,6 +90,9 @@ func refund(ctx *cli.Context) error {
 		return err
 	}
 	if err := contractBinder.Refund(config.Address.ID()); err != nil {
+		if strings.Contains(err.Error(), "failed to estimate gas needed") {
+			return ErrRejectedTx
+		}
 		return err
 	}
 	fmt.Printf("%sYour REN bonds have been refunded to the operator account%s \n", GREEN, RESET)

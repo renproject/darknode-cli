@@ -74,3 +74,6 @@ var ErrFailedTx = fmt.Errorf("%stransaction failed%s", RED, RESET)
 
 // ErrEmptyAddress is returned when the Ethereum address is empty.
 var ErrEmptyAddress = fmt.Errorf("%sethereum address cannot be empty%s", RED, RESET)
+
+// ErrRejectedTx is returned when the tx is rejected by Ethereum.
+var ErrRejectedTx = fmt.Errorf("%stransaction rejected by Ethereum%s", RED, RESET)
