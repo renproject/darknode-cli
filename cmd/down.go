@@ -100,25 +100,20 @@ func refund(ctx *cli.Context) error {
 	return nil
 }
 
-// Withdraw ETH and REN in the darknode address to the given address
+// Withdraw ETH and REN in the darknode address to the provided receiver address
 func withdraw(ctx *cli.Context) error {
 	name := ctx.Args().First()
 	address := ctx.String("address")
 
-	// Validate the name and Check if the node exists
+	// Validate the name and received ethereum address
 	nodeDir, err := validateDarknodeName(name)
 	if err != nil {
 		return err
 	}
-
-	// Validate the receiver ethereum address
-	if address == "" {
-		return ErrEmptyAddress
+	receiverAddr, err := stringToEthereumAddress(address)
+	if err != nil {
+		return err
 	}
-	if !common.IsHexAddress(address) {
-		return ErrInvalidEthereumAddress
-	}
-	receiverAddr := common.HexToAddress(address)
 
 	// Read the darknode config
 	config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
@@ -134,7 +129,7 @@ func withdraw(ctx *cli.Context) error {
 		return err
 	}
 	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
-	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 GWEI
+	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 Gwei
 
 	// Check REN balance first
 	renAddress := renAddress(config.Ethereum.Network)
@@ -163,16 +158,15 @@ func withdraw(ctx *cli.Context) error {
 		if receipt.Status == types.ReceiptStatusFailed {
 			return ErrFailedTx
 		}
-		fmt.Printf("%sWe have withdraw all the REN in your darknode address%s \n", GREEN, RESET)
+		fmt.Printf("%sAll the REN in your darknode address have been withdrawed to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
 	}
 
-	// Check darknode balance
+	// Check ETH balance of the darknode
 	balance, err := conn.Client.BalanceAt(context.Background(), darknodeEthAddress, nil)
 	if err != nil {
 		return err
 	}
-	// TODO : change the gasLimit to 21001, the conn.SendEth function needs to update prior to it.
-	transactionFee := big.NewInt(int64(5 * math.Pow10(9) * 30000)) //  5 Gwei Gas price
+	transactionFee := big.NewInt(int64(5 * math.Pow10(9) * 21000)) //  5 Gwei Gas price
 	// Transfer Eth back to the owner
 	if balance.Cmp(transactionFee) > 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -189,7 +183,7 @@ func withdraw(ctx *cli.Context) error {
 		if receipt.Status == types.ReceiptStatusFailed {
 			return ErrFailedTx
 		}
-		fmt.Printf("%sWe have refund the ETH in your darknode address%s \n", GREEN, RESET)
+		fmt.Printf("%sAll the ETH in your darknode address have been withdrawed to [%v]%s \n", GREEN,receiverAddr.Hex(), RESET)
 	}
 
 	return nil

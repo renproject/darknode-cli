@@ -177,3 +177,17 @@ func validateDarknodeName(name string) (string, error) {
 
 	return nodeDir, nil
 }
+
+// stringToEthereumAddress converts a hex string to a ethereum address.
+// It returns an error if the provided string is an invalid address.
+func stringToEthereumAddress(addr string) (common.Address, error) {
+	if addr == "" {
+		return common.Address{}, ErrEmptyAddress
+	}
+	if !common.IsHexAddress(addr) {
+		return common.Address{}, ErrInvalidEthereumAddress
+	}
+	address := common.HexToAddress(addr)
+
+	return address, nil
+}
