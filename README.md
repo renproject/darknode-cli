@@ -172,12 +172,17 @@ To refund the bonds of your darknode after deregistering, open a terminal and ru
 ```sh
 darknode refund YOUR-DARKNODE-NAME
 ``` 
+This will refund the 100K REN to the darknode operator address (the one you use to register the darknode)
 
-If you also have some ETH left in the darknode address or REN accidentally been sent
-to that address, you can get them back by adding the `--all` tag:
+
+### Withdraw balance from the darknode.
+
+To withdraw all the ETH left in the darknode address, open a terminal and run:
 
 ```sh
-darknode refund YOUR-DARKNODE-NAME --all
+darknode withdraw YOUR-DARKNODE-NAME --address RECEIVER-ETHEREUM-ADDRESS
 ``` 
 
-> The refund is currently disabled until the new Darknode Registry is redeployed, the darknode refund option will not succeed.However, the darknode refund --all option will succeed.)
+This will also withdraw any REN in the darknode address. 
+
+> Noted this will only withdraw the ETH and REN the address holds directly, not the reward it wins by matching orders.
