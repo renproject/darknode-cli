@@ -165,24 +165,21 @@ and now run:
 darknode update my-first-darknode --config
 ``` 
 
-### Refund your darknode
+### Refund your Darknode
 
-To refund the bonds of your darknode after deregistering, open a terminal and run:
+To refund the bond of your darknode after deregistering, open a terminal and run:
 
 ```sh
 darknode refund YOUR-DARKNODE-NAME
 ``` 
-This will refund the 100K REN to the darknode operator address (the one you use to register the darknode)
+This will refund the 100,000 REN to the darknode operator address (the one you used to register the darknode).
 
+### Withdraw balance from the Darknode
 
-### Withdraw balance from the darknode.
-
-To withdraw all the ETH left in the darknode address, open a terminal and run:
+To withdraw any ETH left in the darknode address, open a terminal and run:
 
 ```sh
 darknode withdraw YOUR-DARKNODE-NAME --address RECEIVER-ETHEREUM-ADDRESS
 ``` 
 
-This will also withdraw any REN in the darknode address. 
-
-> Noted this will only withdraw the ETH and REN the address holds directly, not the reward it wins by matching orders.
+> Note: This will also withdraw any REN in the darknode address. Keep in mind this will only withdraw the ETH and REN the address holds directly, not the rewards it receives by matching orders.
