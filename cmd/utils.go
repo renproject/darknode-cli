@@ -161,3 +161,19 @@ func handleErrs(errs []error) error {
 
 	return nil
 }
+
+// validateDarknodeName validates the darknode name and existence.
+func validateDarknodeName(name string) (string, error) {
+	if name == "" {
+		return "", ErrEmptyNodeName
+	}
+	nodeDir := nodeDirectory(name)
+	if _, err := os.Stat(nodeDir); err != nil {
+		return "", ErrNodeNotExist
+	}
+	if _, err := os.Stat(nodeDir + "/config.json"); os.IsNotExist(err) {
+		return "", ErrNodeNotExist
+	}
+
+	return nodeDir, nil
+}

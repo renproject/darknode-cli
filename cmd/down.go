@@ -65,19 +65,14 @@ func destroyNode(ctx *cli.Context) error {
 	return destroy.Wait()
 }
 
+// refund the REN bonds to the darknode operator.
 func refund(ctx *cli.Context) error {
 	name := ctx.Args().First()
 
 	// Validate the name and check if the directory exists.
-	if name == "" {
-		return ErrEmptyNodeName
-	}
-	nodeDir := nodeDirectory(name)
-	if _, err := os.Stat(nodeDir); err != nil {
-		return ErrNodeNotExist
-	}
-	if _, err := os.Stat(nodeDir + "/config.json"); os.IsNotExist(err) {
-		return ErrNodeNotExist
+	nodeDir, err := validateDarknodeName(name)
+	if err != nil {
+		return err
 	}
 
 	// Read the config and refund the REN bonds
@@ -90,7 +85,6 @@ func refund(ctx *cli.Context) error {
 		return err
 	}
 	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
-	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 GWEI
 	contractBinder, err := contract.NewBinder(auth, conn)
 	if err != nil {
 		return err
@@ -109,15 +103,9 @@ func withdraw(ctx *cli.Context) error {
 	address := ctx.String("address")
 
 	// Validate the name and Check if the node exists
-	if name == "" {
-		return ErrEmptyNodeName
-	}
-	nodeDir := nodeDirectory(name)
-	if _, err := os.Stat(nodeDir); err != nil {
-		return ErrNodeNotExist
-	}
-	if _, err := os.Stat(nodeDir + "/config.json"); os.IsNotExist(err) {
-		return ErrNodeNotExist
+	nodeDir, err := validateDarknodeName(name)
+	if err != nil {
+		return err
 	}
 
 	// Validate the receiver ethereum address
@@ -155,9 +143,9 @@ func withdraw(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	oneREN := big.NewInt(int64(math.Pow10(18)))
 
 	// Withdraw REN if the darknode has more than 1 REN.
+	oneREN := big.NewInt(int64(math.Pow10(18)))
 	if renBalance.Cmp(oneREN) > 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
