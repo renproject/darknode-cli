@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
 	"math"
 	"math/big"
 	"os"
@@ -93,7 +92,7 @@ func refund(ctx *cli.Context) error {
 	if err := contractBinder.Refund(config.Address.ID()); err != nil {
 		return err
 	}
-	fmt.Printf("%sYour REN bonds have been refunded to your nominated address%s \n", GREEN, RESET)
+	fmt.Printf("%sYour REN bonds have been refunded to the operator account%s \n", GREEN, RESET)
 
 	return nil
 }
@@ -169,9 +168,8 @@ func withdraw(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Println("have ", balance)
+	// TODO : change the gasLimit to 21001, the conn.SendEth function needs to update prior to it.
 	transactionFee := big.NewInt(int64(5 * math.Pow10(9) * 30000)) //  5 Gwei Gas price
-	log.Println("transaction fee : ",transactionFee.Uint64())
 	// Transfer Eth back to the owner
 	if balance.Cmp(transactionFee) > 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
