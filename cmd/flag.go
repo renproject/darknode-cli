@@ -37,6 +37,10 @@ var (
 		Name:  "branch, b",
 		Usage: "Release `branch` used to update the software",
 	}
+	AddressFlag = cli.StringFlag{
+		Name:  "address",
+		Usage: "Ethereum address you want to withdraw the tokens to.",
+	}
 	UpdateConfigFlag = cli.BoolFlag{
 		Name:  "config, c",
 		Usage: "An optional configuration file used to update the configuration",
@@ -44,10 +48,6 @@ var (
 	ForceFlag = cli.BoolFlag{
 		Name:  "force, f",
 		Usage: "Force destruction without interactive prompts",
-	}
-	AllFlag = cli.BoolFlag{
-		Name:  "all",
-		Usage: "Refund all ETH and REN to the operator.",
 	}
 )
 
@@ -97,7 +97,7 @@ var (
 	}
 	DoSizeFlag = cli.StringFlag{
 		Name:  "do-droplet",
-		Value: "8gb",
-		Usage: "An optional digital ocean droplet size (default: 8gb)",
+		Value: "s-4vcpu-8gb",
+		Usage: "An optional digital ocean droplet size (default: s-4vcpu-8gb)",
 	}
 )

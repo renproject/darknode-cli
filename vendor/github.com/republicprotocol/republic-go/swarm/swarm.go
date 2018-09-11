@@ -2,6 +2,7 @@ package swarm
 
 import (
 	"context"
+	"errors"
 	"log"
 	"math/rand"
 	"sync"
@@ -11,6 +12,14 @@ import (
 	"github.com/republicprotocol/republic-go/logger"
 	"github.com/republicprotocol/republic-go/registry"
 )
+
+// ErrMultiAddressIsNil is returned when the multi-address is nil or
+// has nil fields.
+var ErrMultiAddressIsNil = errors.New("multi-address is nil")
+
+// ErrAddressIsNil is returned when the query address is nil or
+// has nil fields.
+var ErrAddressIsNil = errors.New("query address is nil")
 
 // A Client exposes methods for invoking RPCs on a remote server.
 type Client interface {
@@ -97,16 +106,25 @@ func (swarmer *swarmer) Ping(ctx context.Context) error {
 
 // Pong implements the Swarmer interface.
 func (swarmer *swarmer) Pong(ctx context.Context, to identity.MultiAddress) error {
+	if to.IsNil() {
+		return ErrMultiAddressIsNil
+	}
 	return swarmer.client.Pong(ctx, to)
 }
 
 // BroadcastMultiAddress implements the Swarmer interface.
 func (swarmer *swarmer) BroadcastMultiAddress(ctx context.Context, multiAddr identity.MultiAddress) error {
+	if multiAddr.IsNil() {
+		return ErrMultiAddressIsNil
+	}
 	return swarmer.pingNodes(ctx, multiAddr)
 }
 
 // Query implements the Swarmer interface.
 func (swarmer *swarmer) Query(ctx context.Context, query identity.Address) (identity.MultiAddress, error) {
+	if query == "" {
+		return identity.MultiAddress{}, ErrAddressIsNil
+	}
 	return swarmer.query(ctx, query)
 }
 
@@ -199,14 +217,14 @@ func (swarmer *swarmer) query(ctx context.Context, query identity.Address) (iden
 			for _, multi := range multiAddrs {
 				if err := swarmer.verifier.Verify(multi.Hash(), multi.Signature); err != nil {
 					log.Println("cannot verify the multiAddress", err)
-					return
+					continue
 				}
 
 				// Mark the new multi as seen and add to the query backlog.
 				seenMu.Lock()
 				if _, ok := seenAddrs[multi.Address()]; ok {
 					seenMu.Unlock()
-					return
+					continue
 				}
 				seenAddrs[multi.Address()] = struct{}{}
 				randomMultiAddrs = append(randomMultiAddrs, multi)
@@ -216,12 +234,12 @@ func (swarmer *swarmer) query(ctx context.Context, query identity.Address) (iden
 				oldMulti, err := swarmer.storer.MultiAddress(multi.Address())
 				if err != nil && err != ErrMultiAddressNotFound {
 					log.Printf("cannot get nonce of %v : %v", multi.Address(), err)
-					return
+					continue
 				}
 				if err == ErrMultiAddressNotFound || oldMulti.Nonce < multi.Nonce {
 					if err = swarmer.storer.InsertMultiAddress(multi); err != nil {
 						log.Printf("cannot store %v: %v", multi.Address(), err)
-						return
+						continue
 					}
 				}
 			}
@@ -249,7 +267,7 @@ func (swarmer *swarmer) pingNodes(ctx context.Context, multiAddr identity.MultiA
 	if len(multiAddrs) <= swarmer.α {
 		dispatch.CoForAll(multiAddrs, func(i int) {
 			if err := pingNode(multiAddrs[i]); err != nil {
-				log.Printf("cannot ping node with address %v: %v", multiAddrs[i], err)
+				log.Printf("cannot ping node with address %v: %v", multiAddrs[i].Address(), err)
 			}
 		})
 		return nil
@@ -309,6 +327,9 @@ func NewServer(swarmer Swarmer, multiAddrStore MultiAddressStorer, α int, verif
 
 // Ping implements the Server interface.
 func (server *server) Ping(ctx context.Context, multiAddr identity.MultiAddress) error {
+	if multiAddr.IsNil() {
+		return ErrMultiAddressIsNil
+	}
 	// Verify the signature
 	if err := server.verifier.Verify(multiAddr.Hash(), multiAddr.Signature); err != nil {
 		return err
@@ -336,6 +357,9 @@ func (server *server) Ping(ctx context.Context, multiAddr identity.MultiAddress)
 
 // Pong will store unseen multi-addresses in the storer.
 func (server *server) Pong(ctx context.Context, from identity.MultiAddress) error {
+	if from.IsNil() {
+		return ErrMultiAddressIsNil
+	}
 	// Verify the signature
 	if err := server.verifier.Verify(from.Hash(), from.Signature); err != nil {
 		return err
@@ -351,6 +375,9 @@ func (server *server) Pong(ctx context.Context, from identity.MultiAddress) erro
 
 // Query implements the Swarmer interface.
 func (server *server) Query(ctx context.Context, query identity.Address) (identity.MultiAddresses, error) {
+	if query == "" {
+		return identity.MultiAddresses{}, ErrAddressIsNil
+	}
 	multiAddr, err := server.multiAddrStore.MultiAddress(query)
 	if err == nil {
 		return []identity.MultiAddress{multiAddr}, nil

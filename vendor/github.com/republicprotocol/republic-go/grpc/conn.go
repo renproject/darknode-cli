@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/republicprotocol/republic-go/identity"
@@ -15,6 +16,9 @@ import (
 // call grpc.ClientConn.Close to terminate all the pending operations after
 // this function returns.
 func Dial(ctx context.Context, multiAddress identity.MultiAddress) (*grpc.ClientConn, error) {
+	if multiAddress.IsNil() {
+		return nil, ErrMultiAddressIsNil
+	}
 	host, err := multiAddress.ValueForProtocol(identity.IP4Code)
 	if err != nil {
 		return nil, err
@@ -25,6 +29,11 @@ func Dial(ctx context.Context, multiAddress identity.MultiAddress) (*grpc.Client
 	}
 	clientConn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%s", host, port), grpc.WithInsecure())
 	if err != nil {
+		if clientConn != nil {
+			if err := clientConn.Close(); err != nil {
+				log.Printf("[error] (dial) cannot close broken connection attempt = %v", err)
+			}
+		}
 		return nil, err
 	}
 

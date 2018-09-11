@@ -115,9 +115,9 @@ func (syncer *syncer) resync(notifications *Notifications) error {
 	}
 	defer orderIter.Release()
 
-	orders, orderStatuses, _, _, err := orderIter.Collect()
+	orders, _, _, _, err := orderIter.Collect()
 	if err != nil {
-		return fmt.Errorf("cannot collect orders: %v", err)
+		log.Printf("[error] (resync) cannot collect orders: %v", err)
 	}
 	if len(orders) == 0 {
 		return nil
@@ -127,7 +127,7 @@ func (syncer *syncer) resync(notifications *Notifications) error {
 	numClosedOrders := 0
 	defer func() {
 		if numClosedOrders > 0 {
-			log.Printf("[info] (sync) closed = %v", numClosedOrders)
+			log.Printf("[info] (resync) closed = %v", numClosedOrders)
 		}
 	}()
 
@@ -135,7 +135,7 @@ func (syncer *syncer) resync(notifications *Notifications) error {
 	deleteOrder := func(orderID order.ID, orderStatus order.Status) {
 		numClosedOrders++
 		if err := syncer.orderStore.DeleteOrder(orderID); err != nil {
-			log.Printf("[error] (sync) cannot delete order: %v", err)
+			log.Printf("[error] (resync) cannot delete order: %v", err)
 			return
 		}
 
@@ -159,26 +159,26 @@ func (syncer *syncer) resync(notifications *Notifications) error {
 	for i := 0; i < limit; i++ {
 		syncer.resyncPointer = (offset + i) % len(orders)
 
-		orderID, orderStatus := orders[syncer.resyncPointer], orderStatuses[syncer.resyncPointer]
-		if orderStatus != order.Open {
-			deleteOrder(orderID, orderStatus)
-			continue
-		}
-
-		orderStatus, err = syncer.contractBinder.Status(orderID)
-		if err != nil {
-			log.Printf("[error] (sync) cannot load order status: %v", err)
-			continue
-		} else if orderStatus != order.Open {
-			deleteOrder(orderID, orderStatus)
-		}
-
+		orderID := orders[syncer.resyncPointer]
 		orderDepth, err := syncer.contractBinder.Depth(orderID)
 		if err != nil {
-			log.Printf("[error] (sync) cannot load order status: %v", err)
+			log.Printf("[error] (resync) cannot load order status: %v", err)
+			continue
+		}
+		if orderDepth < 4 {
 			continue
 		}
 		if orderDepth > 10000 {
+			deleteOrder(orderID, order.Canceled)
+			continue
+		}
+
+		orderStatus, err := syncer.contractBinder.Status(orderID)
+		if err != nil {
+			log.Printf("[error] (resync) cannot load order status: %v", err)
+			continue
+		}
+		if orderStatus != order.Open {
 			deleteOrder(orderID, orderStatus)
 		}
 	}

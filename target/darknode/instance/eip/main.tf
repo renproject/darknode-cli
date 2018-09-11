@@ -1,4 +1,3 @@
-
 variable "region" {}
 variable "avz" {}
 variable "ami" {}

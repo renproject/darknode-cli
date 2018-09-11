@@ -65,20 +65,14 @@ func destroyNode(ctx *cli.Context) error {
 	return destroy.Wait()
 }
 
+// refund the REN bonds to the darknode operator.
 func refund(ctx *cli.Context) error {
 	name := ctx.Args().First()
-	refundAll := ctx.Bool("all")
 
 	// Validate the name and check if the directory exists.
-	if name == "" {
-		return ErrEmptyNodeName
-	}
-	nodeDir := nodeDirectory(name)
-	if _, err := os.Stat(nodeDir); err != nil {
-		return ErrNodeNotExist
-	}
-	if _, err := os.Stat(nodeDir + "/config.json"); os.IsNotExist(err) {
-		return ErrNodeNotExist
+	nodeDir, err := validateDarknodeName(name)
+	if err != nil {
+		return err
 	}
 
 	// Read the config and refund the REN bonds
@@ -91,81 +85,105 @@ func refund(ctx *cli.Context) error {
 		return err
 	}
 	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
-	auth.GasPrice = big.NewInt(10000000000) // Set GasPrise to 10 GWEI
 	contractBinder, err := contract.NewBinder(auth, conn)
 	if err != nil {
 		return err
 	}
-	// TODO : only the darknode owner can call the refund function, disable for now
-	// TODO : and wait for the result of contract auditing.
-	// if err := contractBinder.Refund(config.Address.ID()); err != nil {
-	// 	return err
-	// }
-	// fmt.Printf("%sYour REN bonds have been refunded to your nominated address%s \n", GREEN, RESET)
+	if err := contractBinder.Refund(config.Address.ID()); err != nil {
+		if strings.Contains(err.Error(), "failed to estimate gas needed") {
+			return ErrRejectedTx
+		}
+		return err
+	}
+	fmt.Printf("%sYour REN bonds have been refunded to the operator account%s \n", GREEN, RESET)
 
-	// Refund ETH and REN in the darknode address if there are
-	if refundAll {
-		ownerAddress, err := contractBinder.GetOwner(config.Address.ID())
-		if err != nil {
-			return err
-		}
-		darknodeEthAddress, err := republicAddressToEthAddress(config.Address.String())
-		if err != nil {
-			return err
-		}
-		balance, err := conn.Client.BalanceAt(context.Background(), darknodeEthAddress, nil)
-		if err != nil {
-			return err
-		}
-		transactionFee := big.NewInt(int64(math.Pow10(15))) // 0.001 ETH as tx fee
+	return nil
+}
 
-		// Transfer Eth back to the owner
-		if balance.Cmp(transactionFee) > 0 {
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
-			value := new(big.Int)
-			tx, err := conn.SendEth(ctx, auth, ownerAddress, value.Sub(balance, transactionFee))
-			if err != nil {
-				return err
-			}
-			receipt, err := conn.PatchedWaitMined(ctx, tx)
-			if err != nil {
-				return err
-			}
-			if receipt.Status == types.ReceiptStatusFailed {
-				return ErrFailedTx
-			}
-			fmt.Printf("%sWe have refund the ETH in your darknode address%s \n", GREEN, RESET)
-		}
+// Withdraw ETH and REN in the darknode address to the provided receiver address
+func withdraw(ctx *cli.Context) error {
+	name := ctx.Args().First()
+	address := ctx.String("address")
 
-		// Transfer REN back to the owners if they accidentally send REN to the darknodes.
-		renAddress := renAddress(config.Ethereum.Network)
-		if renAddress == "" {
-			return ErrUnknownNetwork
-		}
-		tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), bind.ContractBackend(conn.Client))
-		balance, err = tokenContract.BalanceOf(&bind.CallOpts{}, darknodeEthAddress)
+	// Validate the name and received ethereum address
+	nodeDir, err := validateDarknodeName(name)
+	if err != nil {
+		return err
+	}
+	receiverAddr, err := stringToEthereumAddress(address)
+	if err != nil {
+		return err
+	}
+
+	// Read the darknode config
+	config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
+	if err != nil {
+		return err
+	}
+	conn, err := contract.Connect(config.Ethereum)
+	if err != nil {
+		return err
+	}
+	darknodeEthAddress, err := republicAddressToEthAddress(config.Address.String())
+	if err != nil {
+		return err
+	}
+	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
+	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 Gwei
+
+	// Check REN balance first
+	renAddress := renAddress(config.Ethereum.Network)
+	if renAddress == "" {
+		return ErrUnknownNetwork
+	}
+	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), bind.ContractBackend(conn.Client))
+	renBalance, err := tokenContract.BalanceOf(&bind.CallOpts{}, darknodeEthAddress)
+	if err != nil {
+		return err
+	}
+
+	// Withdraw REN if the darknode has more than 1 REN.
+	oneREN := big.NewInt(int64(math.Pow10(18)))
+	if renBalance.Cmp(oneREN) > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		tx, err := tokenContract.Transfer(auth, receiverAddr, renBalance)
 		if err != nil {
 			return err
 		}
-		oneREN := big.NewInt(int64(math.Pow10(18))) // 0.001 ETH as tx fee
-		// Transfer REN back to the owner
-		if balance.Cmp(oneREN) > 0 {
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
-			tx, err := tokenContract.Transfer(auth, ownerAddress, balance)
-			if err != nil {
-				return err
-			}
-			receipt, err := conn.PatchedWaitMined(ctx, tx)
-			if err != nil {
-				return err
-			}
-			if receipt.Status == types.ReceiptStatusFailed {
-				return ErrFailedTx
-			}
-			fmt.Printf("%sWe have refund the REN in your darknode address%s \n", GREEN, RESET)
+		receipt, err := conn.PatchedWaitMined(ctx, tx)
+		if err != nil {
+			return err
 		}
+		if receipt.Status == types.ReceiptStatusFailed {
+			return ErrFailedTx
+		}
+		fmt.Printf("%sAll the REN in your darknode address have been withdrawed to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
+	}
+
+	// Check ETH balance of the darknode
+	balance, err := conn.Client.BalanceAt(context.Background(), darknodeEthAddress, nil)
+	if err != nil {
+		return err
+	}
+	transactionFee := big.NewInt(int64(5 * math.Pow10(9) * 21000)) //  5 Gwei Gas price
+	// Transfer Eth back to the owner
+	if balance.Cmp(transactionFee) > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		value := new(big.Int)
+		tx, err := conn.SendEth(ctx, auth, receiverAddr, value.Sub(balance, transactionFee))
+		if err != nil {
+			return err
+		}
+		receipt, err := conn.PatchedWaitMined(ctx, tx)
+		if err != nil {
+			return err
+		}
+		if receipt.Status == types.ReceiptStatusFailed {
+			return ErrFailedTx
+		}
+		fmt.Printf("%sAll the ETH in your darknode address have been withdrawed to [%v]%s \n", GREEN,receiverAddr.Hex(), RESET)
 	}
 
 	return nil

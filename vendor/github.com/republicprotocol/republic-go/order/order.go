@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"math/big"
 	"os"
 	"time"
 
@@ -38,8 +39,9 @@ const (
 	TokenBTC Token = 0
 	TokenETH Token = 1
 	TokenDGX Token = 256
+	TokenABC Token = 257
 	TokenREN Token = 65536
-	TokenABC Token = 65537
+	TokenPQR Token = 65537
 	TokenXYZ Token = 65538
 )
 
@@ -52,10 +54,12 @@ func (token Token) String() string {
 		return "ETH"
 	case TokenDGX:
 		return "DGX"
-	case TokenREN:
-		return "REN"
 	case TokenABC:
 		return "ABC"
+	case TokenREN:
+		return "REN"
+	case TokenPQR:
+		return "PQR"
 	case TokenXYZ:
 		return "XYZ"
 	default:
@@ -69,16 +73,12 @@ type Tokens uint64
 
 // Tokens values.
 const (
-	TokensBTCETH Tokens = Tokens((uint64(TokenBTC) << 32) | uint64(TokenETH))
-	TokensBTCDGX Tokens = Tokens((uint64(TokenBTC) << 32) | uint64(TokenDGX))
-	TokensBTCREN Tokens = Tokens((uint64(TokenBTC) << 32) | uint64(TokenREN))
-	TokensETHDGX Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenDGX))
-	TokensETHREN Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenREN))
-	TokensETHABC Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenABC))
-	TokensETHXYZ Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenXYZ))
-	TokensDGXREN Tokens = Tokens((uint64(TokenDGX) << 32) | uint64(TokenREN))
-	TokensDGXABC Tokens = Tokens((uint64(TokenDGX) << 32) | uint64(TokenABC))
-	TokensDGXXYZ Tokens = Tokens((uint64(TokenDGX) << 32) | uint64(TokenXYZ))
+	TokensBTCETH = Tokens((uint64(TokenBTC) << 32) | uint64(TokenETH))
+	TokensETHDGX = Tokens((uint64(TokenETH) << 32) | uint64(TokenDGX))
+	TokensETHABC = Tokens((uint64(TokenETH) << 32) | uint64(TokenABC))
+	TokensETHREN = Tokens((uint64(TokenETH) << 32) | uint64(TokenREN))
+	TokensETHPQR = Tokens((uint64(TokenETH) << 32) | uint64(TokenPQR))
+	TokensETHXYZ = Tokens((uint64(TokenETH) << 32) | uint64(TokenXYZ))
 )
 
 // PriorityToken returns the priority token of a token pair.
@@ -96,20 +96,16 @@ func (tokens Tokens) String() string {
 	switch tokens {
 	case TokensBTCETH:
 		return "BTC-ETH"
-	case TokensBTCDGX:
-		return "BTC-DGX"
-	case TokensBTCREN:
-		return "BTC-REN"
 	case TokensETHDGX:
 		return "ETH-DGX"
-	case TokensETHREN:
-		return "ETH-REN"
 	case TokensETHABC:
 		return "ETH-ABC"
+	case TokensETHREN:
+		return "ETH-REN"
+	case TokensETHPQR:
+		return "ETH-PQR"
 	case TokensETHXYZ:
 		return "ETH-XYZ"
-	case TokensDGXREN:
-		return "DGX-REN"
 	default:
 		return "unexpected tokens"
 	}
@@ -150,7 +146,7 @@ func (parity Parity) String() string {
 
 // Settlement is a unique identifier for the settlement layer used by the
 // Order.
-type Settlement uint32
+type Settlement uint64
 
 // Values for Settlementt.
 const (
@@ -200,33 +196,36 @@ func (status Status) String() string {
 
 // An Order represents the want to perform a trade of assets.
 type Order struct {
-	Signature  Signature  `json:"signature"`
-	ID         ID         `json:"id"`
-	Type       Type       `json:"type"`
-	Parity     Parity     `json:"parity"`
-	Settlement Settlement `json:"settlement"`
-	Expiry     time.Time  `json:"expiry"`
+	ID ID `json:"id"`
 
-	Tokens        Tokens `json:"tokens"`
-	Price         CoExp  `json:"price"`
-	Volume        CoExp  `json:"volume"`
-	MinimumVolume CoExp  `json:"minimumVolume"`
-	Nonce         uint64 `json:"nonce"`
+	Parity Parity    `json:"parity"`
+	Type   Type      `json:"type"`
+	Expiry time.Time `json:"expiry"`
+	Nonce  uint64    `json:"nonce"`
+
+	Settlement    Settlement `json:"settlement"`
+	Tokens        Tokens     `json:"tokens"`
+	Price         uint64     `json:"price"`
+	Volume        uint64     `json:"volume"`
+	MinimumVolume uint64     `json:"minimumVolume"`
 }
 
 // NewOrder returns a new Order and computes the ID.
-func NewOrder(ty Type, parity Parity, settlement Settlement, expiry time.Time, tokens Tokens, price, volume, minimumVolume CoExp, nonce uint64) Order {
+func NewOrder(parity Parity, ty Type, expiry time.Time, settlement Settlement, tokens Tokens, price, volume, minimumVolume, nonce uint64) Order {
+	priceCoExp := PriceToCoExp(price)
+	volumeCoExp := VolumeToCoExp(volume)
+	minimumVolumeCoExp := VolumeToCoExp(minimumVolume)
 	order := Order{
-		Type:       ty,
-		Parity:     parity,
-		Settlement: settlement,
-		Expiry:     expiry,
+		Parity: parity,
+		Type:   ty,
+		Expiry: expiry,
+		Nonce:  nonce,
 
+		Settlement:    settlement,
 		Tokens:        tokens,
-		Price:         price,
-		Volume:        volume,
-		MinimumVolume: minimumVolume,
-		Nonce:         nonce % shamir.Prime,
+		Price:         PriceFromCoExp(priceCoExp.Co, priceCoExp.Exp),
+		Volume:        VolumeFromCoExp(volumeCoExp.Co, volumeCoExp.Exp),
+		MinimumVolume: VolumeFromCoExp(minimumVolumeCoExp.Co, minimumVolumeCoExp.Exp),
 	}
 	order.ID = ID(order.Hash())
 	return order
@@ -273,31 +272,35 @@ func WriteOrdersToJSONFile(fileName string, orders []*Order) error {
 // Split the Order into n OrderFragments, where k OrderFragments are needed to
 // reconstruct the Order. Returns a slice of all n OrderFragments, or an error.
 func (order *Order) Split(n, k int64) ([]Fragment, error) {
+	priceCoExp := PriceToCoExp(order.Price)
+	volumeCoExp := VolumeToCoExp(order.Volume)
+	minimumVolumeCoExp := VolumeToCoExp(order.MinimumVolume)
+
 	tokens, err := shamir.Split(n, k, uint64(order.Tokens))
 	if err != nil {
 		return nil, err
 	}
-	priceCos, err := shamir.Split(n, k, uint64(order.Price.Co))
+	priceCos, err := shamir.Split(n, k, priceCoExp.Co)
 	if err != nil {
 		return nil, err
 	}
-	priceExps, err := shamir.Split(n, k, uint64(order.Price.Exp))
+	priceExps, err := shamir.Split(n, k, priceCoExp.Exp)
 	if err != nil {
 		return nil, err
 	}
-	volumeCos, err := shamir.Split(n, k, uint64(order.Volume.Co))
+	volumeCos, err := shamir.Split(n, k, volumeCoExp.Co)
 	if err != nil {
 		return nil, err
 	}
-	volumeExps, err := shamir.Split(n, k, uint64(order.Volume.Exp))
+	volumeExps, err := shamir.Split(n, k, volumeCoExp.Exp)
 	if err != nil {
 		return nil, err
 	}
-	minimumVolumeCos, err := shamir.Split(n, k, uint64(order.MinimumVolume.Co))
+	minimumVolumeCos, err := shamir.Split(n, k, minimumVolumeCoExp.Co)
 	if err != nil {
 		return nil, err
 	}
-	minimumVolumeExps, err := shamir.Split(n, k, uint64(order.MinimumVolume.Exp))
+	minimumVolumeExps, err := shamir.Split(n, k, minimumVolumeCoExp.Exp)
 	if err != nil {
 		return nil, err
 	}
@@ -327,27 +330,35 @@ func (order *Order) Split(n, k int64) ([]Fragment, error) {
 }
 
 // Hash returns the Keccak256 hash of an Order. This hash is used to create the
-// ID and signature for an Order.
+// ID and signature for an Order. Returns a zero-d hash if the order cannot be
+// marshaled into bytes.
 func (order *Order) Hash() [32]byte {
-	hash := crypto.Keccak256(order.Bytes())
+	data, err := order.MarshalBinary()
+	if err != nil {
+		return [32]byte{}
+	}
+	hash := crypto.Keccak256(data)
 	hash32 := [32]byte{}
 	copy(hash32[:], hash)
 	return hash32
 }
 
-// Bytes returns an Order serialized into a bytes.
-// TODO: This function should return an error.
-func (order *Order) Bytes() []byte {
+// PrefixHash returns the data used in the prefix header for the order. Returns
+// an empty slice if the order cannot be marshaled into bytes.
+func (order *Order) PrefixHash() []byte {
 	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.BigEndian, order.Type)
-	binary.Write(buf, binary.BigEndian, order.Parity)
-	binary.Write(buf, binary.BigEndian, order.Settlement)
-	binary.Write(buf, binary.BigEndian, order.Expiry.Unix())
-	binary.Write(buf, binary.BigEndian, order.Tokens)
-	binary.Write(buf, binary.BigEndian, order.Price)
-	binary.Write(buf, binary.BigEndian, order.Volume)
-	binary.Write(buf, binary.BigEndian, order.MinimumVolume)
-	binary.Write(buf, binary.BigEndian, order.BytesFromNonce())
+
+	// Marshal the prefix data
+	if err := binary.Write(buf, binary.BigEndian, order.Type); err != nil {
+		return []byte{}
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint64(order.Expiry.Unix())); err != nil {
+		return []byte{}
+	}
+	if err := binary.Write(buf, binary.BigEndian, order.Nonce); err != nil {
+		return []byte{}
+	}
+
 	return buf.Bytes()
 }
 
@@ -355,7 +366,6 @@ func (order *Order) Bytes() []byte {
 func (order *Order) Equal(other *Order) bool {
 	return bytes.Equal(order.ID[:], other.ID[:]) &&
 		order.Type == other.Type &&
-		order.Parity == other.Parity &&
 		order.Settlement == other.Settlement &&
 		order.Expiry.Equal(other.Expiry) &&
 		order.Tokens == other.Tokens &&
@@ -365,9 +375,162 @@ func (order *Order) Equal(other *Order) bool {
 		order.Nonce == other.Nonce
 }
 
-// BytesFromNonce returns the uint64 nonce as a slice of bytes.
-func (order *Order) BytesFromNonce() []byte {
+// MarshalBinary implements the encoding.BinaryMarshaler interface.
+func (order *Order) MarshalBinary() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	binary.Write(buf, binary.BigEndian, order.Nonce)
-	return crypto.Keccak256(buf.Bytes())
+
+	// Marshal the prefix data
+	if err := binary.Write(buf, binary.BigEndian, order.PrefixHash()); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, order.Settlement); err != nil {
+		return nil, err
+	}
+	if order.Parity == ParityBuy {
+		if err := binary.Write(buf, binary.BigEndian, order.Tokens); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := binary.Write(buf, binary.BigEndian, (order.Tokens<<32)|(order.Tokens>>32)); err != nil {
+			return nil, err
+		}
+	}
+	// Price is packed as a uint256
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, order.Price); err != nil {
+		return nil, err
+	}
+	// Volume is packed as a uint256
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, order.Volume); err != nil {
+		return nil, err
+	}
+	// Minimum volume is packed as a uint256
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint64(0)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, order.MinimumVolume); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+// PriceToCoExp converts a price from uint64 to CoExp format.
+func PriceToCoExp(price uint64) CoExp {
+	if price == 0 {
+		return CoExp{
+			Co:  0,
+			Exp: 26,
+		}
+	}
+	if price < 10 {
+		return CoExp{
+			Co:  price * 200,
+			Exp: 26,
+		}
+	}
+	if price < 100 {
+		return CoExp{
+			Co:  price * 20,
+			Exp: 27,
+		}
+	}
+	if price < 1000 {
+		return CoExp{
+			Co:  price * 2,
+			Exp: 28,
+		}
+	}
+	if price < 10000 {
+		return CoExp{
+			Co:  price / 5,
+			Exp: 29,
+		}
+	}
+	coExp := PriceToCoExp(price / 10)
+	return CoExp{
+		Co:  coExp.Co,
+		Exp: coExp.Exp + 1,
+	}
+}
+
+func VolumeToCoExp(volume uint64) CoExp {
+	if volume == 0 {
+		return CoExp{
+			Co:  0,
+			Exp: 0,
+		}
+	}
+	if volume < 10 {
+		return CoExp{
+			Co:  volume * 5,
+			Exp: 0,
+		}
+	}
+	if volume < 100 {
+		return CoExp{
+			Co:  volume / 2,
+			Exp: 1,
+		}
+	}
+	coExp := VolumeToCoExp(volume / 10)
+	return CoExp{
+		Co:  coExp.Co,
+		Exp: coExp.Exp + 1,
+	}
+}
+
+func PriceFromCoExp(co uint64, exp uint64) uint64 {
+	x := big.NewInt(10)
+	y := big.NewInt(0)
+
+	y.SetUint64(exp - 26)
+	x.Exp(x, y, nil)
+
+	y.SetUint64(co)
+	x.Mul(x, y)
+
+	y.SetUint64(200)
+	x.Div(x, y)
+
+	return x.Uint64()
+}
+
+func VolumeFromCoExp(co uint64, exp uint64) uint64 {
+	x := big.NewInt(10)
+	y := big.NewInt(0)
+
+	y.SetUint64(exp)
+	x.Exp(x, y, nil)
+
+	y.SetUint64(co)
+	x.Mul(x, y)
+
+	y.SetUint64(5)
+	x.Div(x, y)
+
+	return x.Uint64()
 }

@@ -24,6 +24,9 @@
 #   go-tests = true
 #   unused-packages = true
 
+[[constraint]]
+  name = "github.com/ethereum/go-ethereum"
+  version = "=1.8.12"
 
 [[constraint]]
   branch = "develop"
@@ -40,6 +43,11 @@
 [[constraint]]
   branch = "master"
   name = "golang.org/x/crypto"
+
+# Fix to resolve dependency issues within go-ethereum
+[[override]]
+  name = "gopkg.in/fatih/set.v0"
+  version = "=0.1.0"
 
 [prune]
   go-tests = true

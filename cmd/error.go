@@ -32,7 +32,7 @@ var ErrUnknownProvider = fmt.Errorf("%sunknown service provider%s", RED, RESET)
 var ErrNilProvider = fmt.Errorf("%sprovider cannot be nil%s", RED, RESET)
 
 // ErrUnknownRegion is returned when the provided region is not valid.
-var ErrUnknownRegion = fmt.Errorf("%sthere is no such region%s", RED, RESET)
+var ErrUnknownRegion = fmt.Errorf("%sthere is no such region or the region is not available%s", RED, RESET)
 
 // ErrUnSupportedInstanceType is returned when the provided instance is not
 // supported in the selected region.
@@ -69,5 +69,11 @@ var ErrUnknownDropletSize = fmt.Errorf("%sunknown droplet size%s", RED, RESET)
 // ErrInvalidEthereumAddress is returned when user gives an invalid Ethereum address.
 var ErrInvalidEthereumAddress = fmt.Errorf("%sinvalid Ethereum address%s", RED, RESET)
 
-// ErrFailedTx is returned when the transaction gets reverted on Ethereum
+// ErrFailedTx is returned when the transaction gets reverted on Ethereum.
 var ErrFailedTx = fmt.Errorf("%stransaction failed%s", RED, RESET)
+
+// ErrEmptyAddress is returned when the Ethereum address is empty.
+var ErrEmptyAddress = fmt.Errorf("%sethereum address cannot be empty%s", RED, RESET)
+
+// ErrRejectedTx is returned when the tx is rejected by Ethereum.
+var ErrRejectedTx = fmt.Errorf("%stransaction rejected by Ethereum%s", RED, RESET)

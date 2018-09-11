@@ -81,6 +81,7 @@ You can also specify the region and droplet size you want to use for the Darknod
 darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
 ``` 
 
+The default droplet size is `s-4vcpu-8gb` and region will be random. 
 Be aware some region and droplet size are not available to all users.
 
 You can find all available regions and droplet size slug by using the digital ocean [API](https://developers.digitalocean.com/documentation/v2/#regions).
@@ -161,19 +162,21 @@ and now run:
 darknode update my-first-darknode --config
 ``` 
 
-### Refund your darknode
+### Refund your Darknode
 
-To refund the bonds of your darknode after deregistering, open a terminal and run:
+To refund the bond of your darknode after deregistering, open a terminal and run:
 
 ```sh
 darknode refund YOUR-DARKNODE-NAME
 ``` 
+This will refund the 100,000 REN to the darknode operator address (the one you used to register the darknode).
 
-If you also have some ETH left in the darknode address or REN accidentally been sent
-to that address, you can get them back by adding the `--all` tag:
+### Withdraw balance from the Darknode
+
+To withdraw any ETH left in the darknode address, open a terminal and run:
 
 ```sh
-darknode refund YOUR-DARKNODE-NAME --all
+darknode withdraw YOUR-DARKNODE-NAME --address RECEIVER-ETHEREUM-ADDRESS
 ``` 
 
-> The refund is currently disabled until the next version of the Darknode Registry is deployed, the `darknode refund` command will not succeed. However, the `darknode refund --all` command will succeed.
+> Note: This will also withdraw any REN in the darknode address. Keep in mind this will only withdraw the ETH and REN the address holds directly, not the rewards it receives by matching orders.
