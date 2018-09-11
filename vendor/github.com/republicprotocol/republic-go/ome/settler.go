@@ -22,19 +22,21 @@ type Settler interface {
 }
 
 type settler struct {
-	computationStore ComputationStorer
-	smpcer           smpc.Smpcer
-	contract         ContractBinder
+	computationStore    ComputationStorer
+	smpcer              smpc.Smpcer
+	contract            ContractBinder
+	minimumSettleVolume uint64 // In units of 1e-12 ETH
 }
 
 // NewSettler returns a Settler that settles orders by first using an
 // smpc.Smpcer to join all of the composing order.Fragments, and then submits
 // them to an Ethereum contract.
-func NewSettler(computationStore ComputationStorer, smpcer smpc.Smpcer, contract ContractBinder) Settler {
+func NewSettler(computationStore ComputationStorer, smpcer smpc.Smpcer, contract ContractBinder, minimumSettleVolume uint64) Settler {
 	return &settler{
-		computationStore: computationStore,
-		smpcer:           smpcer,
-		contract:         contract,
+		computationStore:    computationStore,
+		smpcer:              smpcer,
+		contract:            contract,
+		minimumSettleVolume: minimumSettleVolume,
 	}
 }
 
@@ -91,7 +93,11 @@ func (settler *settler) joinOrderMatch(networkID smpc.NetworkID, com Computation
 			return
 		}
 		buy := order.NewOrder(com.Buy.OrderParity, com.Buy.OrderType, com.Buy.OrderExpiry, com.Buy.OrderSettlement, order.Tokens(values[0]), order.PriceFromCoExp(values[1], values[2]), order.VolumeFromCoExp(values[3], values[4]), order.VolumeFromCoExp(values[5], values[6]), values[7])
+		buy.MinimumVolume = order.VolumeFromCoExp(values[5], values[6])
+
 		sell := order.NewOrder(com.Sell.OrderParity, com.Sell.OrderType, com.Sell.OrderExpiry, com.Sell.OrderSettlement, order.Tokens(values[8]), order.PriceFromCoExp(values[9], values[10]), order.VolumeFromCoExp(values[11], values[12]), order.VolumeFromCoExp(values[13], values[14]), values[15])
+		sell.MinimumVolume = order.VolumeFromCoExp(values[13], values[14])
+
 		settler.settleOrderMatch(com, buy, sell)
 	}, true /* delay message sending to ensure the round-robin */)
 	if err != nil {
@@ -100,15 +106,77 @@ func (settler *settler) joinOrderMatch(networkID smpc.NetworkID, com Computation
 }
 
 func (settler *settler) settleOrderMatch(com Computation, buy, sell order.Order) {
+	// Submit a challenge if the orders do not match.
+	if buy.Tokens != sell.Tokens ||
+		buy.Volume < sell.MinimumVolume ||
+		sell.Volume < buy.MinimumVolume ||
+		buy.Price < sell.Price {
+		if err := settler.contract.SubmitChallengeOrder(buy); err != nil {
+			log.Printf("[error] (settle) cannot submit challenge for buy order = %v: %v", buy.ID, err)
+		}
+		if err := settler.contract.SubmitChallengeOrder(sell); err != nil {
+			log.Printf("[error] (settle) cannot submit challenge for sell order = %v: %v", sell.ID, err)
+		}
+		if err := settler.contract.SubmitChallenge(buy.ID, sell.ID); err != nil {
+			log.Printf("[error] (settle) cannot submit challenge buy = %v, sell = %v: %v", buy.ID, sell.ID, err)
+		}
+		log.Printf("[info] (slash) found mismatched order confirmation")
+		return
+	}
+
+	// Leave the orders if volume is too low and there is no profit for
+	// submitting such orders. Note: minimum volume is set to 1 ETH.
+	settleVolume := volumeInEth(buy, sell)
+	if settleVolume < settler.minimumSettleVolume {
+		log.Printf("[info] (settle) cannot execute settlement buy = %v, sell = %v: volume = %v ETH too low", buy.ID, sell.ID, settleVolume)
+		return
+	}
+
 	if err := settler.contract.Settle(buy, sell); err != nil {
 		log.Printf("[error] (settle) cannot execute settlement buy = %v, sell = %v: %v", buy.ID, sell.ID, err)
 		return
 	}
-	log.Printf("[info] (settle) 💰💰💰 buy = %v, sell = %v 💰💰💰", buy.ID, sell.ID)
 
 	com.State = ComputationStateSettled
 	if err := settler.computationStore.PutComputation(com); err != nil {
 		log.Printf("[error] (settle) cannot store settlement buy = %v, sell = %v: %v", buy.ID, sell.ID, err)
 		return
+	}
+}
+
+func volumeInEth(buy, sell order.Order) uint64 {
+	if buy.Tokens.PriorityToken() == order.TokenETH {
+		// BTC-ETH
+		if buy.Volume >= sell.Volume {
+			return sell.Volume
+		} else {
+			return buy.Volume
+		}
+	} else {
+		// ETH-ERC20
+		var erc20Volume uint64
+		if buy.Volume >= sell.Volume {
+			erc20Volume = sell.Volume
+		} else {
+			erc20Volume = buy.Volume
+		}
+
+		x := big.NewInt(0)
+		y := big.NewInt(0)
+
+		x.SetUint64(buy.Price)
+		y.SetUint64(sell.Price)
+		x.Add(x, y)
+
+		y.SetUint64(2)
+		x.Div(x, y)
+
+		y.SetUint64(erc20Volume)
+		x.Mul(x, y)
+
+		y.SetUint64(1e12)
+		x.Div(x, y)
+
+		return x.Uint64()
 	}
 }

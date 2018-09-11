@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"math"
+	"math/big"
 	"os"
 	"time"
 
@@ -39,8 +39,9 @@ const (
 	TokenBTC Token = 0
 	TokenETH Token = 1
 	TokenDGX Token = 256
+	TokenABC Token = 257
 	TokenREN Token = 65536
-	TokenABC Token = 65537
+	TokenPQR Token = 65537
 	TokenXYZ Token = 65538
 )
 
@@ -53,10 +54,12 @@ func (token Token) String() string {
 		return "ETH"
 	case TokenDGX:
 		return "DGX"
-	case TokenREN:
-		return "REN"
 	case TokenABC:
 		return "ABC"
+	case TokenREN:
+		return "REN"
+	case TokenPQR:
+		return "PQR"
 	case TokenXYZ:
 		return "XYZ"
 	default:
@@ -70,16 +73,12 @@ type Tokens uint64
 
 // Tokens values.
 const (
-	TokensBTCETH Tokens = Tokens((uint64(TokenBTC) << 32) | uint64(TokenETH))
-	TokensBTCDGX Tokens = Tokens((uint64(TokenBTC) << 32) | uint64(TokenDGX))
-	TokensBTCREN Tokens = Tokens((uint64(TokenBTC) << 32) | uint64(TokenREN))
-	TokensETHDGX Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenDGX))
-	TokensETHREN Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenREN))
-	TokensETHABC Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenABC))
-	TokensETHXYZ Tokens = Tokens((uint64(TokenETH) << 32) | uint64(TokenXYZ))
-	TokensDGXREN Tokens = Tokens((uint64(TokenDGX) << 32) | uint64(TokenREN))
-	TokensDGXABC Tokens = Tokens((uint64(TokenDGX) << 32) | uint64(TokenABC))
-	TokensDGXXYZ Tokens = Tokens((uint64(TokenDGX) << 32) | uint64(TokenXYZ))
+	TokensBTCETH = Tokens((uint64(TokenBTC) << 32) | uint64(TokenETH))
+	TokensETHDGX = Tokens((uint64(TokenETH) << 32) | uint64(TokenDGX))
+	TokensETHABC = Tokens((uint64(TokenETH) << 32) | uint64(TokenABC))
+	TokensETHREN = Tokens((uint64(TokenETH) << 32) | uint64(TokenREN))
+	TokensETHPQR = Tokens((uint64(TokenETH) << 32) | uint64(TokenPQR))
+	TokensETHXYZ = Tokens((uint64(TokenETH) << 32) | uint64(TokenXYZ))
 )
 
 // PriorityToken returns the priority token of a token pair.
@@ -97,20 +96,16 @@ func (tokens Tokens) String() string {
 	switch tokens {
 	case TokensBTCETH:
 		return "BTC-ETH"
-	case TokensBTCDGX:
-		return "BTC-DGX"
-	case TokensBTCREN:
-		return "BTC-REN"
 	case TokensETHDGX:
 		return "ETH-DGX"
-	case TokensETHREN:
-		return "ETH-REN"
 	case TokensETHABC:
 		return "ETH-ABC"
+	case TokensETHREN:
+		return "ETH-REN"
+	case TokensETHPQR:
+		return "ETH-PQR"
 	case TokensETHXYZ:
 		return "ETH-XYZ"
-	case TokensDGXREN:
-		return "DGX-REN"
 	default:
 		return "unexpected tokens"
 	}
@@ -443,99 +438,99 @@ func (order *Order) MarshalBinary() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// PriceToCoExp converts a price from uint64 to CoExp format.
 func PriceToCoExp(price uint64) CoExp {
-	priceF := float64(price) / float64(1e12)
-	return PriceFloatToCoExp(priceF)
+	if price == 0 {
+		return CoExp{
+			Co:  0,
+			Exp: 26,
+		}
+	}
+	if price < 10 {
+		return CoExp{
+			Co:  price * 200,
+			Exp: 26,
+		}
+	}
+	if price < 100 {
+		return CoExp{
+			Co:  price * 20,
+			Exp: 27,
+		}
+	}
+	if price < 1000 {
+		return CoExp{
+			Co:  price * 2,
+			Exp: 28,
+		}
+	}
+	if price < 10000 {
+		return CoExp{
+			Co:  price / 5,
+			Exp: 29,
+		}
+	}
+	coExp := PriceToCoExp(price / 10)
+	return CoExp{
+		Co:  coExp.Co,
+		Exp: coExp.Exp + 1,
+	}
 }
 
 func VolumeToCoExp(volume uint64) CoExp {
-	volumeF := float64(volume) / float64(1e12)
-	return VolumeFloatToCoExp(volumeF)
-}
-
-func PriceFloatToCoExp(price float64) CoExp {
-	if price > 10.0 {
-		prev := PriceFloatToCoExp(price / 10)
+	if volume == 0 {
 		return CoExp{
-			Co:  prev.Co,
-			Exp: prev.Exp + 1,
-		}
-
-	} else if price < 0.005 {
-		prev := PriceFloatToCoExp(price * 10)
-		return CoExp{
-			Co:  prev.Co,
-			Exp: prev.Exp - 1,
-		}
-	} else {
-		if price == 0 {
-			return CoExp{
-				Co:  0,
-				Exp: 0,
-			}
-		}
-		if price < 1 {
-			prev := PriceFloatToCoExp(price * 10)
-			return CoExp{
-				Co:  prev.Co,
-				Exp: prev.Exp - 1,
-			}
+			Co:  0,
+			Exp: 0,
 		}
 	}
-	try := math.Round(price / 0.005)
+	if volume < 10 {
+		return CoExp{
+			Co:  volume * 5,
+			Exp: 0,
+		}
+	}
+	if volume < 100 {
+		return CoExp{
+			Co:  volume / 2,
+			Exp: 1,
+		}
+	}
+	coExp := VolumeToCoExp(volume / 10)
 	return CoExp{
-		Co:  uint64(try),
-		Exp: 38,
-	}
-}
-
-func VolumeFloatToCoExp(volume float64) CoExp {
-	if volume > 10 {
-		prev := VolumeFloatToCoExp(volume / 10)
-		return CoExp{
-			Co:  prev.Co,
-			Exp: prev.Exp + 1,
-		}
-	} else if volume < 0.2 {
-		prev := VolumeFloatToCoExp(volume * 10)
-		return CoExp{
-			Co:  prev.Co,
-			Exp: prev.Exp - 1,
-		}
-	} else {
-		if volume == 0 {
-			return CoExp{
-				Co:  0,
-				Exp: 0,
-			}
-		}
-		if volume < 1 {
-			prev := VolumeFloatToCoExp(volume * 10)
-			return CoExp{
-				Co:  prev.Co,
-				Exp: prev.Exp - 1,
-			}
-		}
-	}
-	try := math.Round(volume / 0.2)
-	return CoExp{
-		Co:  uint64(try),
-		Exp: 12,
+		Co:  coExp.Co,
+		Exp: coExp.Exp + 1,
 	}
 }
 
 func PriceFromCoExp(co uint64, exp uint64) uint64 {
-	return uint64(PriceFloatFromCoExp(co, exp))
+	x := big.NewInt(10)
+	y := big.NewInt(0)
+
+	y.SetUint64(exp - 26)
+	x.Exp(x, y, nil)
+
+	y.SetUint64(co)
+	x.Mul(x, y)
+
+	y.SetUint64(200)
+	x.Div(x, y)
+
+	return x.Uint64()
 }
 
 func VolumeFromCoExp(co uint64, exp uint64) uint64 {
-	return uint64(VolumeFloatFromCoExp(co, exp))
-}
+	x := big.NewInt(10)
+	y := big.NewInt(0)
 
-func PriceFloatFromCoExp(co uint64, exp uint64) float64 {
-	return 0.005 * float64(co) * math.Pow(10, float64(exp)-26)
-}
+	y.SetUint64(exp)
+	x.Exp(x, y, nil)
 
-func VolumeFloatFromCoExp(co uint64, exp uint64) float64 {
-	return 0.2 * float64(co) * math.Pow(10, float64(exp))
+	y.SetUint64(co)
+	x.Mul(x, y)
+
+	y.SetUint64(5)
+	x.Div(x, y)
+
+	return x.Uint64()
 }

@@ -9,6 +9,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/aristanetworks/goarista/gnmi"
 
@@ -22,7 +24,7 @@ gnmi -addr [<VRF-NAME>/]ADDRESS:PORT [options...]
   capabilities
   get PATH+
   subscribe PATH+
-  ((update|replace PATH JSON)|(delete PATH))+
+  ((update|replace (origin=ORIGIN) PATH JSON|FILE)|(delete (origin=ORIGIN) PATH))+
 `
 
 func usageAndExit(s string) {
@@ -43,6 +45,20 @@ func main() {
 	flag.StringVar(&cfg.Username, "username", "", "Username to authenticate with")
 	flag.BoolVar(&cfg.TLS, "tls", false, "Enable TLS")
 
+	subscribeOptions := &gnmi.SubscribeOptions{}
+	flag.StringVar(&subscribeOptions.Prefix, "prefix", "", "Subscribe prefix path")
+	flag.BoolVar(&subscribeOptions.UpdatesOnly, "updates_only", false,
+		"Subscribe to updates only (false | true)")
+	flag.StringVar(&subscribeOptions.Mode, "mode", "stream",
+		"Subscribe mode (stream | once | poll)")
+	flag.StringVar(&subscribeOptions.StreamMode, "stream_mode", "target_defined",
+		"Subscribe stream mode, only applies for stream subscriptions "+
+			"(target_defined | on_change | sample)")
+	sampleIntervalStr := flag.String("sample_interval", "0", "Subscribe sample interval, "+
+		"only applies for sample subscriptions (400ms, 2.5s, 1m, etc.)")
+	heartbeatIntervalStr := flag.String("heartbeat_interval", "0", "Subscribe heartbeat "+
+		"interval, only applies for on-change subscriptions (400ms, 2.5s, 1m, etc.)")
+
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, help)
 		flag.PrintDefaults()
@@ -51,6 +67,17 @@ func main() {
 	if cfg.Addr == "" {
 		usageAndExit("error: address not specified")
 	}
+
+	var sampleInterval, heartbeatInterval time.Duration
+	var err error
+	if sampleInterval, err = time.ParseDuration(*sampleIntervalStr); err != nil {
+		usageAndExit(fmt.Sprintf("error: sample interval (%s) invalid", *sampleIntervalStr))
+	}
+	subscribeOptions.SampleInterval = uint64(sampleInterval)
+	if heartbeatInterval, err = time.ParseDuration(*heartbeatIntervalStr); err != nil {
+		usageAndExit(fmt.Sprintf("error: heartbeat interval (%s) invalid", *heartbeatIntervalStr))
+	}
+	subscribeOptions.HeartbeatInterval = uint64(heartbeatInterval)
 
 	args := flag.Args()
 
@@ -87,12 +114,15 @@ func main() {
 			}
 			respChan := make(chan *pb.SubscribeResponse)
 			errChan := make(chan error)
-			defer close(respChan)
 			defer close(errChan)
-			go gnmi.Subscribe(ctx, client, gnmi.SplitPaths(args[i+1:]), respChan, errChan)
+			subscribeOptions.Paths = gnmi.SplitPaths(args[i+1:])
+			go gnmi.Subscribe(ctx, client, subscribeOptions, respChan, errChan)
 			for {
 				select {
-				case resp := <-respChan:
+				case resp, open := <-respChan:
+					if !open {
+						return
+					}
 					if err := gnmi.LogSubscribeResponse(resp); err != nil {
 						glog.Fatal(err)
 					}
@@ -108,10 +138,14 @@ func main() {
 				Type: args[i],
 			}
 			i++
+			if strings.HasPrefix(args[i], "origin=") {
+				op.Origin = strings.TrimPrefix(args[i], "origin=")
+				i++
+			}
 			op.Path = gnmi.SplitPath(args[i])
 			if op.Type != "delete" {
 				if len(args) == i+1 {
-					usageAndExit("error: missing JSON")
+					usageAndExit("error: missing JSON or FILEPATH to data")
 				}
 				i++
 				op.Val = args[i]
