@@ -1,11 +1,8 @@
 # Darknode CLI
 
-The Darknode CLI is a command-line interface for managing Darknodes on Republic Protocol.
+The Darknode CLI is a command-line interface for managing Darknodes on Republic Protocol. It is installed on your local workspace, and will automatically create and update machines for you. Currently it only support **macOS** and **Linux**. 
 
-The CLI is installed in your local workspace and used to deploy and operate darknodes. 
 ![](./docs/darknode-cli-overview.jpg)
-
-Currently it only support **macOS** and **Linux**. 
 
 ## Getting Started on AWS
 
@@ -15,7 +12,7 @@ To jump straight into running your first Darknode on AWS, checkout our [Getting 
  
 Checkout the instructions for [Creating a Personal Access Token](https://github.com/republicprotocol/darknode-cli#digital-ocean) on Digital Ocean.
 
-## Installation
+## Installing the tool
 
 To download and install the Darknode CLI, open a terminal and run:
 
@@ -25,7 +22,7 @@ curl https://darknode.republicprotocol.com/install.sh -sSf | sh
 
 This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode CLI.
 
-## Updating Darknode CLI
+## Updating the tool
 
 To update your Darknode CLI, open a terminal and run:
 
