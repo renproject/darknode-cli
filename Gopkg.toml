@@ -29,7 +29,7 @@
   version = "=1.8.12"
 
 [[constraint]]
-  branch = "develop"
+  branch = "master"
   name = "github.com/republicprotocol/republic-go"
 
 [[constraint]]
