@@ -183,7 +183,7 @@ func withdraw(ctx *cli.Context) error {
 		if receipt.Status == types.ReceiptStatusFailed {
 			return ErrFailedTx
 		}
-		fmt.Printf("%sAll the ETH in your darknode address have been withdrawed to [%v]%s \n", GREEN,receiverAddr.Hex(), RESET)
+		fmt.Printf("%sAll the ETH in your darknode address have been withdrawed to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
 	}
 
 	return nil

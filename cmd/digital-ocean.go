@@ -252,7 +252,7 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputUrl(ctx, name, nodeDir)
+	return outputUrl(name, nodeDir)
 }
 
 // generateDoTFConfig generates the terraform config file for deploying to DO.

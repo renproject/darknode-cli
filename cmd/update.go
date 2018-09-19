@@ -65,20 +65,19 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 
 	// Default branch is depends on the network parameter.
 	if branch == "" {
-		// Read the config and refund the REN bonds
 		config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
 		if err != nil {
 			return err
 		}
 		switch config.Ethereum.Network {
-		case "testnet":
+		case "mainnet":
 			branch = "master"
-		case "falcon":
+		case "testnet":
 			branch = "develop"
-		case "nightly":
+		case "falcon", "nightly":
 			branch = "nightly"
 		default:
-			branch = "master"
+			panic("unknown network")
 		}
 	}
 

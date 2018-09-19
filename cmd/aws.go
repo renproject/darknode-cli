@@ -208,7 +208,7 @@ func deployToAws(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputUrl(ctx, name, nodeDir)
+	return outputUrl(name, nodeDir)
 }
 
 // parseAwsRegionAndInstance parses the region and the instance type from the

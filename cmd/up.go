@@ -112,21 +112,14 @@ func runTerraform(nodeDirectory string) error {
 
 // outputUrl writes success message and the URL for registering the node
 // to the terminal.
-func outputUrl(ctx *cli.Context, name, nodeDir string) error {
-	network := ctx.String("network")
-	ip, err := getIp(nodeDir)
-	if err != nil {
+func outputUrl(name, nodeDir string) error {
+	// Update node to different branch according to the network.
+	if err := updateSingleNode(name, "", false); err != nil {
 		return err
 	}
 
-	// Update node to different branch according to the network.
-	switch network {
-	case "testnet":
-	case "falcon":
-		err = updateSingleNode(name, "develop", false)
-	case "nightly":
-		err = updateSingleNode(name, "nightly", false)
-	}
+	// Get ip address of the darknode
+	ip, err := getIp(nodeDir)
 	if err != nil {
 		return err
 	}
