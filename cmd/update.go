@@ -74,7 +74,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 			branch = "master"
 		case "testnet":
 			branch = "develop"
-		case "falcon", "nightly":
+		case "nightly":
 			branch = "nightly"
 		default:
 			panic("unknown network")

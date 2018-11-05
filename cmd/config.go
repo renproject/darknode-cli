@@ -19,7 +19,7 @@ func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, 
 	configFile := ctx.String("config")
 	network := ctx.String("network")
 
-	if network != "testnet" && network != "falcon" && network != "nightly" {
+	if network != "testnet" && network != "nightly" {
 		return config.Config{}, ErrUnknownNetwork
 	}
 	// Parse the keystore or create a new random one.
@@ -96,12 +96,6 @@ func BootstrapNodes(network string) []identity.MultiAddress {
 		b6, _ := identity.NewMultiAddressFromString("/ip4/18.228.50.197/tcp/18514/republic/8MJrKWdEmUFwZcKArzyABdYvovQQcP")
 
 		addresess = append(addresess, b1, b2, b3, b4, b5, b6)
-	case "falcon":
-		b1, _ := identity.NewMultiAddressFromString("/ip4/13.124.184.167/tcp/18514/republic/8MJw8s6TVKmQH3kdM5kJUYqPmh3JmF")
-		b2, _ := identity.NewMultiAddressFromString("/ip4/52.79.235.44/tcp/18514/republic/8MJEFcsQ5G8XMg5vka1XhswQotjbbj")
-		b3, _ := identity.NewMultiAddressFromString("/ip4/13.114.234.59/tcp/18514/republic/8MKKUenZG8inoZqd8boYxGb1J3waAg")
-		b4, _ := identity.NewMultiAddressFromString("/ip4/35.154.181.5/tcp/18514/republic/8MJNi8mgfQqD52bjUCnUzJ64uneJbk")
-		addresess = append(addresess, b1, b2, b3, b4)
 	case "nightly":
 		b1, _ := identity.NewMultiAddressFromString("/ip4/54.255.182.246/tcp/18514/republic/8MHgRa2Uj7Tj2cgoA1PoULso7UmgVi")
 		b2, _ := identity.NewMultiAddressFromString("/ip4/52.62.18.91/tcp/18514/republic/8MJnjSUVJCgP6YVjNWzaJXtiKE3p1o")

@@ -194,8 +194,6 @@ func renAddress(network contract.Network) string {
 	switch network {
 	case "testnet":
 		return "0x6f429121a3bd3e6c1c17edbc676eec44cf117faf"
-	case "falcon":
-		return "0x87e83f957a2f3a2e5fe16d5c6b22e38fd28bdc06"
 	case "nightly":
 		return "0x15f692d6b9ba8cec643c7d16909e8acdec431bf6"
 	default:
