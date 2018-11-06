@@ -1,13 +1,9 @@
 #!/bin/sh
 
-maxdelay=$((3*60*60))  # 3 hours
-mindelay=$((1*60*60))  # 1 hour
-
 while true
 do
-  randomdelay=$(($RANDOM%maxdelay)) # $RANDOM is a value between 0 and 32767 (9 hrs)
-  delay=$((mindelay + randomdelay))
-  sleep $((delay)) &&
+  R=$(($RANDOM%72))
+  if test $R -eq 0; then
     echo "Updating system..."
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
@@ -27,4 +23,6 @@ do
     sudo systemctl restart darknode.service
     echo $timestamp >> /home/ubuntu/.darknode/update.log
     echo "Finish updating"
+  fi
+  sleep 1h
 done

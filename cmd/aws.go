@@ -16,6 +16,7 @@ import (
 const (
 	ApNorthEast1 = "ap-northeast-1"
 	ApNorthEast2 = "ap-northeast-2"
+	ApNorthEast3 = "ap-northeast-3"
 	ApSouth1     = "ap-south-1"
 	ApSouthEast1 = "ap-southeast-1"
 	ApSouthEast2 = "ap-southeast-2"
@@ -227,16 +228,17 @@ func parseAwsRegionAndInstance(ctx *cli.Context) (string, string, error) {
 		}
 	}
 
+	// TODO : needs to check the instance availability with the API.
 	// Parse the input instance type or use the default one.
-	if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
-		return "", "", ErrUnSupportedInstanceType
-	}
-	if region == ApNorthEast1 && !StringInSlice(instance, AllAwsInstancesInApNortheast1) {
-		return "", "", ErrUnSupportedInstanceType
-	}
-	if !StringInSlice(instance, AllAwsInstances) {
-		return "", "", ErrUnSupportedInstanceType
-	}
+	// if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
+	// 	return "", "", ErrUnSupportedInstanceType
+	// }
+	// if region == ApNorthEast1 && !StringInSlice(instance, AllAwsInstancesInApNortheast1) {
+	// 	return "", "", ErrUnSupportedInstanceType
+	// }
+	// if !StringInSlice(instance, AllAwsInstances) {
+	// 	return "", "", ErrUnSupportedInstanceType
+	// }
 
 	return region, instance, nil
 }
