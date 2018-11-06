@@ -227,6 +227,7 @@ func parseAwsRegionAndInstance(ctx *cli.Context) (string, string, error) {
 		}
 	}
 
+	// TODO : instance check needs to be updated
 	// Parse the input instance type or use the default one.
 	// if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
 	// 	return "", "", ErrUnSupportedInstanceType
