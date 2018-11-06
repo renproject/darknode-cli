@@ -192,10 +192,10 @@ func withdraw(ctx *cli.Context) error {
 // renAddress on different testnet
 func renAddress(network contract.Network) string {
 	switch network {
+	case "mainnet":
+		return "0x81793734c6Cf6961B5D0D2d8a30dD7DF1E1803f1"
 	case "testnet":
 		return "0x6f429121a3bd3e6c1c17edbc676eec44cf117faf"
-	case "nightly":
-		return "0x15f692d6b9ba8cec643c7d16909e8acdec431bf6"
 	default:
 		return ""
 	}

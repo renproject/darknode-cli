@@ -228,15 +228,15 @@ func parseAwsRegionAndInstance(ctx *cli.Context) (string, string, error) {
 	}
 
 	// Parse the input instance type or use the default one.
-	if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
-		return "", "", ErrUnSupportedInstanceType
-	}
-	if region == ApNorthEast1 && !StringInSlice(instance, AllAwsInstancesInApNortheast1) {
-		return "", "", ErrUnSupportedInstanceType
-	}
-	if !StringInSlice(instance, AllAwsInstances) {
-		return "", "", ErrUnSupportedInstanceType
-	}
+	// if region == EuWest3 && !StringInSlice(instance, AllAwsInstancesInEuWest3) {
+	// 	return "", "", ErrUnSupportedInstanceType
+	// }
+	// if region == ApNorthEast1 && !StringInSlice(instance, AllAwsInstancesInApNortheast1) {
+	// 	return "", "", ErrUnSupportedInstanceType
+	// }
+	// if !StringInSlice(instance, AllAwsInstances) {
+	// 	return "", "", ErrUnSupportedInstanceType
+	// }
 
 	return region, instance, nil
 }

@@ -15,7 +15,7 @@ mkdir -p $HOME/.darknode/darknodes
 mkdir -p $HOME/.darknode/bin
 cd $HOME/.darknode
 curl -s 'https://darknode.republicprotocol.com/darknode.zip' > darknode.zip
-unzip darknode.zip
+unzip -o darknode.zip
 
 # get system information
 ostype="$(uname -s)"
@@ -55,26 +55,26 @@ if ! [ -x "$(command -v darknode)" ]; then
 
   if [ "$shell" = 'zsh' ] ; then
     if [ -f "$HOME/.zprofile" ] ; then
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
+      echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zprofile
     elif [ -f "$HOME/.zshrc" ] ; then
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zshrc
+      echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.zshrc
     elif [ -f "$HOME/.profile" ] ; then
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+      echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
     fi
   elif  [ "$shell" = 'bash' ] ; then
     if [ -f "$HOME/.bash_profile" ] ; then
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
+      echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
     elif [ -f "$HOME/.bashrc" ] ; then
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
+      echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bashrc
     elif [ -f "$HOME/.profile" ] ; then
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+      echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
     else
-      echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
+      echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.bash_profile
     fi
   elif [ -f "$HOME/.profile" ] ; then
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+    echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
   else
-    echo 'export PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
+    echo '\nexport PATH=$PATH:$HOME/.darknode/bin' >> $HOME/.profile
   fi
 
   echo ''
