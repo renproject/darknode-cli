@@ -132,8 +132,10 @@ func (settler *settler) settleOrderMatch(com Computation, buy, sell order.Order)
 		return
 	}
 
-	if err := settler.contract.Settle(buy, sell); err != nil {
-		log.Printf("[error] (settle) cannot execute settlement buy = %v, sell = %v: %v", buy.ID, sell.ID, err)
+	// Try settling the orders for at most 3 times.
+	err := settler.contract.Settle(buy, sell)
+	if err != nil {
+		log.Printf("[error] (settle) cannot store settlement buy = %v, sell = %v: %v", buy.ID, sell.ID, err)
 		return
 	}
 
