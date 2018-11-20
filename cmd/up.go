@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/urfave/cli"
@@ -129,5 +131,20 @@ func outputUrl(name, nodeDir string) error {
 	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
 	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
 	fmt.Printf("\n")
-	return nil
+
+	// Redirect the user to the registering URL.
+	var redirect *exec.Cmd
+	switch runtime.GOOS {
+	case "darwin":
+		redirect = exec.Command("open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
+	case "linux":
+		redirect = exec.Command("xdg-open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
+	default:
+		log.Fatal("unsupported operating system")
+	}
+	pipeToStd(redirect)
+	if err := redirect.Start(); err != nil {
+		return err
+	}
+	return redirect.Wait()
 }

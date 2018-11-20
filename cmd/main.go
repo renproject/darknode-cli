@@ -39,7 +39,7 @@ func main() {
 			Name:    "destroy",
 			Usage:   "Destroy one of your Darknode",
 			Aliases: []string{"down"},
-			Flags:   []cli.Flag{TagsFlag, ForceFlag},
+			Flags:   []cli.Flag{TagsFlag},
 			Action: func(c *cli.Context) error {
 				return destroyNode(c)
 			},
