@@ -45,10 +45,6 @@ var (
 		Name:  "config, c",
 		Usage: "An optional configuration file used to update the configuration",
 	}
-	ForceFlag = cli.BoolFlag{
-		Name:  "force, f",
-		Usage: "Force destruction without interactive prompts",
-	}
 )
 
 // AWS flags
