@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 	"math"
 	"math/big"
 	"os/exec"
@@ -26,7 +26,6 @@ import (
 // destroyNode tears down the deployed darknode by its name.
 func destroyNode(ctx *cli.Context) error {
 	name := ctx.Args().First()
-
 	if name == "" {
 		cli.ShowCommandHelp(ctx, "down")
 		return ErrEmptyNodeName
@@ -47,11 +46,10 @@ func destroyNode(ctx *cli.Context) error {
 	dnrAddress := common.HexToAddress(dnrAddress(network))
 	testnet := ethereumTestnet(network)
 
-	// Query registry smart contract on Ethereum if the darknode has been
-	// fully de-registered
+	// Query registry smart contract on Ethereum if the darknode is registered
 	client, err := ethclient.Dial(fmt.Sprintf("https://%v.infura.io", testnet))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	registry, err := dnr.NewBindings(dnrAddress, client)
 	if err != nil {
@@ -75,7 +73,7 @@ func destroyNode(ctx *cli.Context) error {
 		case "linux":
 			redirect = exec.Command("xdg-open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
 		default:
-			log.Fatal("unsupported operating system")
+			return errors.New("unsupported operating system")
 		}
 		pipeToStd(redirect)
 		if err := redirect.Start(); err != nil {
@@ -97,8 +95,6 @@ func destroyNode(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
-	time.Sleep(time.Hour)
-
 	cmd := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodeDirectory)
 	destroy := exec.Command("bash", "-c", cmd)
 	pipeToStd(destroy)
