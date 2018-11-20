@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"math/big"
@@ -73,7 +72,7 @@ func destroyNode(ctx *cli.Context) error {
 		case "linux":
 			redirect = exec.Command("xdg-open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
 		default:
-			return errors.New("unsupported operating system")
+			return ErrUnsupportedOS
 		}
 		pipeToStd(redirect)
 		if err := redirect.Start(); err != nil {
@@ -228,6 +227,7 @@ func withdraw(ctx *cli.Context) error {
 
 	return nil
 }
+
 
 // renAddress on different testnet
 func renAddress(network contract.Network) string {

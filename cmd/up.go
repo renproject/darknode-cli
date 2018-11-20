@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -140,7 +139,7 @@ func outputUrl(name, nodeDir string) error {
 	case "linux":
 		redirect = exec.Command("xdg-open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
 	default:
-		log.Fatal("unsupported operating system")
+		return ErrUnsupportedOS
 	}
 	pipeToStd(redirect)
 	if err := redirect.Start(); err != nil {
