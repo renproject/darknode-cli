@@ -51,7 +51,7 @@ func destroyNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	registry, err := dnr.NewBindings(dnrAddress, client)
+	registry, err := dnr.NewDarknodeRegistry(dnrAddress, client)
 	if err != nil {
 		return err
 	}
