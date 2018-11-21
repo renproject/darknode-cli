@@ -14,7 +14,7 @@ var Providers = []string{"aws", "do"}
 
 // deployNode deploys node to the given cloud provider.
 func deployNode(ctx *cli.Context) error {
-	provider, err := getProvider(ctx)
+	provider, err := provider(ctx)
 	if err != nil {
 		return err
 	}
@@ -29,9 +29,8 @@ func deployNode(ctx *cli.Context) error {
 	}
 }
 
-// getProvider parses all provider flags and make sure only one provider is
-// present.
-func getProvider(ctx *cli.Context) (string, error) {
+// provider parses all provider flags and make sure only one provider is given.
+func provider(ctx *cli.Context) (string, error) {
 	var provider string
 
 	counter := 0
@@ -61,14 +60,12 @@ func mkdir(name, tags string) error{
 	}
 	nodeDir := nodeDirectory(name)
 
-
 	// Check if the directory exists or not.
 	if _, err := os.Stat(nodeDir); err == nil {
 		if _, err := os.Stat(nodeDir + "/multiAddress.out"); os.IsNotExist(err) {
 			// todo : need to ask user whether they want to use the old config.
-			err := run("rm", "-rf", nodeDir)
-			if err != nil {
-				return  err
+			if err := run("rm", "-rf", nodeDir); err != nil {
+				return err
 			}
 		} else {
 			return  ErrNodeExist

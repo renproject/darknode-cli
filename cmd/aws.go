@@ -17,7 +17,7 @@ import (
 var AllAwsRegions = []string{
 	"ap-northeast-1",
 	"ap-northeast-2",
-	"ap-northeast-3",
+	// "ap-northeast-3", Terraform having issue support this provider
 	"ap-south-1",
 	"ap-southeast-1",
 	"ap-southeast-2",
@@ -99,32 +99,27 @@ func awsCredentials(ctx *cli.Context) (string, string, error) {
 	return accessKey, secretKey, nil
 }
 
+// Terraform contains all the fields needed to generate a terraform config file
+// so that we can deploy the node on AWS.
 type Terraform struct {
-	Name   string
-	Source string
-	Region string
-	Address string
-	InstanceType string
-	SshPubKey string
+	Name          string
+	Source        string
+	Region        string
+	Address       string
+	InstanceType  string
+	SshPubKey     string
 	SshPriKeyPath string
-	AccessKey string
-	SecretKey string
-	Port string
-	Path string
+	AccessKey     string
+	SecretKey     string
+	Port          string
+	Path          string
+	AllocationID  string
 }
 
 // awsTerraformConfig generates the terraform config file for deploying to AWS.
 func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, nodeDir, region, instance string) error {
-	// allocationID := ctx.String("aws-elastic-ip")
-
-	// allocationConfig, tfFolder := "", "std"
-	// if allocationID != "" {
-	// 	allocationConfig = fmt.Sprintf(`allocation_id = "%v"`, allocationID)
-	// 	tfFolder = "eip"
-	// }
 	tf := Terraform{
 		Name:          ctx.String("name"),
-		Source:        path.Join(Directory, "instance", "aws"),
 		Region:        region,
 		Address:       config.Address.String(),
 		InstanceType:  instance,
@@ -134,12 +129,13 @@ func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKe
 		SecretKey:     secretKey,
 		Port:          config.Port,
 		Path:          Directory,
+		AllocationID:  ctx.String("aws-elastic-ip"),
 	}
 
 	fmap := template.FuncMap{}
-	templateFile := path.Join(Directory, "instance","aws", "aws.tmpl")
+	templateFile := path.Join(Directory, "instance", "aws", "aws.tmpl")
 	t := template.Must(template.New("aws.tmpl").Funcs(fmap).ParseFiles(templateFile))
-	tfFile, err  := os.Create(path.Join(nodeDir, "main.tf"))
+	tfFile, err := os.Create(path.Join(nodeDir, "main.tf"))
 	if err != nil {
 		return err
 	}
