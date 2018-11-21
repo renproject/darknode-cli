@@ -13,34 +13,19 @@ import (
 )
 
 // Available regions on Digital Ocean.
-const (
-	AMS2 = "ams2"
-	AMS3 = "ams3"
-	BLR1 = "blr1"
-	FRA1 = "fra1"
-	LON1 = "lon1"
-	NYC1 = "nyc1"
-	NYC2 = "nyc2"
-	NYC3 = "nyc3"
-	SF01 = "sfo1"
-	SF02 = "sfo2"
-	SGP1 = "sgp1"
-	TOR1 = "tor1"
-)
-
 var AllDoRegions = []string{
-	AMS2,
-	AMS3,
-	BLR1,
-	FRA1,
-	LON1,
-	NYC1,
-	NYC2,
-	NYC3,
-	SF01,
-	SF02,
-	SGP1,
-	TOR1,
+	"ams2",
+	"ams3",
+	"blr1",
+	"fra1",
+	"lon1",
+	"nyc1",
+	"nyc2",
+	"nyc3",
+	"sfo1",
+	"sfo2",
+	"sgp1",
+	"tor1",
 }
 
 // All available droplet size on digital ocean
@@ -228,8 +213,9 @@ func deployToDo(ctx *cli.Context) error {
 	}
 
 	// Create node directory
-	name, err := createNodeDirectory(ctx)
-	if err != nil {
+	name := ctx.String("name")
+	tags := ctx.String("tags")
+	if err := mkdir(name, tags); err != nil {
 		return err
 	}
 	nodeDir := nodeDirectory(name)

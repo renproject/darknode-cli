@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 
 	"github.com/urfave/cli"
 )
+
+var Providers = []string{"aws", "do"}
 
 // deployNode deploys node to the given cloud provider.
 func deployNode(ctx *cli.Context) error {
@@ -20,7 +21,7 @@ func deployNode(ctx *cli.Context) error {
 
 	switch provider {
 	case "aws":
-		return deployToAws(ctx)
+		return awsDeployment(ctx)
 	case "do":
 		return deployToDo(ctx)
 	default:
@@ -28,87 +29,69 @@ func deployNode(ctx *cli.Context) error {
 	}
 }
 
-// getProvider parses all provider flags and  make sure only
-// one provider is present.
+// getProvider parses all provider flags and make sure only one provider is
+// present.
 func getProvider(ctx *cli.Context) (string, error) {
-	var providers = []string{"aws", "do"}
-	aws := ctx.Bool("aws")
-	digitalOcean := ctx.Bool("do")
+	var provider string
 
-	// Make sure only one provider is provided
-	counter, provider := 0, ""
-	for i, j := range []bool{aws, digitalOcean} {
-		if j {
-			counter++
-			provider = providers[i]
+	counter := 0
+	for i := range Providers{
+		selected := ctx.Bool(Providers[i])
+		if selected{
+			counter ++
+			provider = Providers[i]
 		}
 	}
 
-	if counter == 0 {
+	switch counter {
+	case 0:
 		return "", ErrNilProvider
-	} else if counter > 1 {
+	case 1:
+		return provider, nil
+	default:
 		return "", ErrMultipleProviders
 	}
-
-	return provider, nil
 }
 
-// createNodeDirectory create the directory for the node.
-func createNodeDirectory(ctx *cli.Context) (string, error) {
-	name := ctx.String("name")
-	tags := ctx.String("tags")
-	nodeDir := nodeDirectory(name)
-
+// mkdir creates the directory for the node.
+func mkdir(name, tags string) error{
 	// Make sure name is not nil
 	if name == "" {
-		return "", ErrEmptyNodeName
+		return ErrEmptyNodeName
 	}
+	nodeDir := nodeDirectory(name)
+
 
 	// Check if the directory exists or not.
 	if _, err := os.Stat(nodeDir); err == nil {
 		if _, err := os.Stat(nodeDir + "/multiAddress.out"); os.IsNotExist(err) {
 			// todo : need to ask user whether they want to use the old config.
-			err := cleanUp(nodeDir)
+			err := run("rm", "-rf", nodeDir)
 			if err != nil {
-				return "", err
+				return  err
 			}
 		} else {
-			return "", ErrNodeExist
+			return  ErrNodeExist
 		}
 	}
 	if err := os.Mkdir(nodeDir, 0777); err != nil {
-		return "", err
+		return  err
 	}
 
 	// Store the tags
-	if err := ioutil.WriteFile(nodeDir+"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
-		return "", err
-	}
-
-	return name, nil
+	return ioutil.WriteFile(nodeDir+"/tags.out", []byte(strings.TrimSpace(tags)), 0666)
 }
 
 // runTerraform initializes and applies terraform
 func runTerraform(nodeDirectory string) error {
-	cmd := fmt.Sprintf("cd %v && terraform init", nodeDirectory)
-	init := exec.Command("bash", "-c", cmd)
-	pipeToStd(init)
-	if err := init.Start(); err != nil {
-		return err
-	}
-	if err := init.Wait(); err != nil {
+	init := fmt.Sprintf("cd %v && terraform init", nodeDirectory)
+	if err := run("bash", "-c", init ); err != nil {
 		return err
 	}
 
 	fmt.Printf("%sDeploying dark nodes ... %s\n", GREEN, RESET)
-
-	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
-	apply := exec.Command("bash", "-c", cmd)
-	pipeToStd(apply)
-	if err := apply.Start(); err != nil {
-		return err
-	}
-	return apply.Wait()
+	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
+	return run("bash", "-c", apply )
 }
 
 // outputUrl writes success message and the URL for registering the node
@@ -132,18 +115,16 @@ func outputUrl(name, nodeDir string) error {
 	fmt.Printf("\n")
 
 	// Redirect the user to the registering URL.
-	var redirect *exec.Cmd
+	var redirect string
 	switch runtime.GOOS {
 	case "darwin":
-		redirect = exec.Command("open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
+		redirect = "open"
 	case "linux":
-		redirect = exec.Command("xdg-open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
+		redirect = "xdg-open"
 	default:
 		return ErrUnsupportedOS
 	}
-	pipeToStd(redirect)
-	if err := redirect.Start(); err != nil {
-		return err
-	}
-	return redirect.Wait()
+	url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+
+	return run(redirect, url)
 }

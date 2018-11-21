@@ -191,3 +191,12 @@ func stringToEthereumAddress(addr string) (common.Address, error) {
 
 	return address, nil
 }
+
+func run(name string , args... string) error {
+	cmd := exec.Command(name, args...)
+	pipeToStd(cmd)
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	return cmd.Wait()
+}

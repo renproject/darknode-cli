@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"os/exec"
 	"path"
 
 	"github.com/republicprotocol/co-go"
@@ -56,12 +55,7 @@ func execSingleNode(name, script string) error {
 		return err
 	}
 	filePath := path.Join(cwd, script)
-	// todo : why this not working?
-	execCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "'bash -s'", "", filePath)
-	pipeToStd(execCmd)
-	if err := execCmd.Start(); err != nil {
-		return err
-	}
 
-	return execCmd.Wait()
+	// todo : why this not working?
+	return run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "'bash -s'", "", filePath)
 }

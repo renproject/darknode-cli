@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"os/exec"
 	"path"
 	"runtime"
 	"strings"
@@ -65,20 +64,17 @@ func destroyNode(ctx *cli.Context) error {
 		fmt.Printf("%sYou will be redirected to deregister your node%s\n", RED, RESET)
 		time.Sleep(3 * time.Second)
 
-		var redirect *exec.Cmd
+		var redirect string
 		switch runtime.GOOS {
 		case "darwin":
-			redirect = exec.Command("open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
+			redirect = "open"
 		case "linux":
-			redirect = exec.Command("xdg-open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
+			redirect = "xdg-open"
 		default:
 			return ErrUnsupportedOS
 		}
-		pipeToStd(redirect)
-		if err := redirect.Start(); err != nil {
-			return err
-		}
-		return redirect.Wait()
+		url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+		return run(redirect, url)
 	}
 
 	// Check if the darknode is in pending deregistration state.
@@ -94,14 +90,9 @@ func destroyNode(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
-	cmd := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodeDirectory)
-	destroy := exec.Command("bash", "-c", cmd)
-	pipeToStd(destroy)
-	if err := destroy.Start(); err != nil {
-		return err
-	}
 
-	return destroy.Wait()
+	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodeDirectory)
+	return run("bash", "-c",destroy)
 }
 
 // refund the REN bonds to the darknode operator.

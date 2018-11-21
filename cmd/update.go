@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os/exec"
 
 	"github.com/republicprotocol/co-go"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
@@ -52,14 +51,10 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 			return err
 		}
 		updateConfigScript := fmt.Sprintf(`echo '%s' > $HOME/.darknode/config.json`, string(data))
-		updateConfigCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript)
-		pipeToStd(updateConfigCmd)
-		if err := updateConfigCmd.Start(); err != nil {
+		if err := run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript); err != nil {
 			return err
 		}
-		if err := updateConfigCmd.Wait(); err != nil {
-			return err
-		}
+
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
@@ -97,12 +92,7 @@ curl -s 'https://darknode.republicprotocol.com/auto-updater.sh' > .darknode/upda
 sudo service darknode-updater restart
 `, branch, branch, branch)
 
-	updateCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateScript)
-	pipeToStd(updateCmd)
-	if err := updateCmd.Start(); err != nil {
-		return err
-	}
-	if err := updateCmd.Wait(); err != nil {
+	if err := run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateScript); err !=nil {
 		return err
 	}
 
@@ -123,11 +113,6 @@ func sshNode(ctx *cli.Context) error {
 		return err
 	}
 	keyPairPath := nodeDirectory + "/ssh_keypair"
-	ssh := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip)
-	pipeToStd(ssh)
-	if err := ssh.Start(); err != nil {
-		return err
-	}
 
-	return ssh.Wait()
+	return run("ssh","-i", keyPairPath, "ubuntu@"+ip)
 }
