@@ -1,10 +1,10 @@
 [Unit]
 Description=Republic Protocol's Darknode Daemon
-AssertPathExists=$HOME/.darknode
+AssertPathExists=/home/darknode/.darknode
 
 [Service]
-WorkingDirectory=$HOME/.darknode
-ExecStart=$HOME/.darknode/bin/darknode --config $HOME/.darknode/config.json
+WorkingDirectory=/home/darknode/.darknode
+ExecStart=/home/darknode/.darknode/bin/darknode --config /home/darknode/.darknode/config.json
 Restart=on-failure
 PrivateTmp=true
 NoNewPrivileges=true

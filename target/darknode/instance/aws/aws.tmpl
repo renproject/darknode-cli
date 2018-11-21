@@ -155,8 +155,8 @@ resource "aws_instance" "darknode" {
   }
 
   provisioner "file" {
-    source      = "${var.path}/provisions"
-    destination = "$HOME/provisions"
+    source      = "${var.path}/services"
+    destination = "$HOME/services"
 
     connection {
       type        = "ssh"

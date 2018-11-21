@@ -1,9 +1,9 @@
 [Unit]
 Description=Republic Protocol's Darknode Automatic Updater
-AssertPathExists=$HOME/.darknode
+AssertPathExists=/home/darknode/.darknode
 
 [Service]
-ExecStart=/bin/bash $HOME/.darknode/bin/update.sh
+ExecStart=/bin/bash /home/darknode/.darknode/bin/update.sh
 Restart=on-failure
 PrivateTmp=true
 NoNewPrivileges=true
