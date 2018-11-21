@@ -57,5 +57,5 @@ func execSingleNode(name, script string) error {
 	filePath := path.Join(cwd, script)
 
 	// todo : why this not working?
-	return run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "'bash -s'", "", filePath)
+	return run("ssh", "-i", keyPairPath, "darknode@"+ip, "'bash -s'", "", filePath)
 }

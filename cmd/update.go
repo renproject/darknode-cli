@@ -9,8 +9,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-// updateNode updates the Darknode to the latest release from master branch.
-// This will restart the Darknode.
+// updateNode updates the Darknode to the provided branch(default:master),
+// It can also update the config file of the darknode.
 func updateNode(ctx *cli.Context) error {
 	name := ctx.Args().First()
 	updateConfig := ctx.Bool("config")
@@ -51,7 +51,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 			return err
 		}
 		updateConfigScript := fmt.Sprintf(`echo '%s' > $HOME/.darknode/config.json`, string(data))
-		if err := run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript); err != nil {
+		if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript); err != nil {
 			return err
 		}
 
@@ -92,7 +92,7 @@ curl -s 'https://darknode.republicprotocol.com/auto-updater.sh' > .darknode/upda
 sudo service darknode-updater restart
 `, branch, branch, branch)
 
-	if err := run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", updateScript); err !=nil {
+	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", updateScript); err !=nil {
 		return err
 	}
 
@@ -114,5 +114,5 @@ func sshNode(ctx *cli.Context) error {
 	}
 	keyPairPath := nodeDirectory + "/ssh_keypair"
 
-	return run("ssh","-i", keyPairPath, "ubuntu@"+ip)
+	return run("ssh","-i", keyPairPath, "darknode@"+ip)
 }

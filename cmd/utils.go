@@ -33,14 +33,6 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
-// pipeToStd sets the input and output stream of the command to os standard
-// input/output stream
-func pipeToStd(cmd *exec.Cmd) {
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-}
-
 // getIp parses the ip address from a bytes representation of
 // multiAddress.
 func getIp(nodeDirectory string) (string, error) {
@@ -63,10 +55,10 @@ func getNodesByTag(tag string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	nodes := []string{}
+	nodes := make([]string, 0)
 
 	for _, f := range files {
-		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tagFile := path.Join(Directory, "darknodes", f.Name(), "tags.out")
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
@@ -88,7 +80,7 @@ func getNodesByTags(tags string) ([]string, error) {
 	ts := strings.Split(strings.TrimSpace(tags), ",")
 	nodes := make([]string, 0)
 	for _, f := range files {
-		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tagFile := path.Join(Directory ,"darknodes", f.Name(), "tags.out")
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
@@ -105,16 +97,6 @@ func getNodesByTags(tags string) ([]string, error) {
 	}
 
 	return nodes, nil
-}
-
-// cleanUp removes the directory
-func cleanUp(nodeDirectory string) error {
-	cleanCmd := exec.Command("rm", "-rf", nodeDirectory)
-	if err := cleanCmd.Start(); err != nil {
-		return err
-	}
-
-	return cleanCmd.Wait()
 }
 
 // republicAddressToEthAddress converts republic address to ethereum address
@@ -192,9 +174,12 @@ func stringToEthereumAddress(addr string) (common.Address, error) {
 	return address, nil
 }
 
+// run the command and pipe the output to the stdout
 func run(name string , args... string) error {
 	cmd := exec.Command(name, args...)
-	pipeToStd(cmd)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
 		return err
 	}

@@ -95,7 +95,7 @@ func startSingleNode(name string) error {
 	}
 	startScript := "sudo systemctl start darknode"
 	keyPairPath := nodeDir + "/ssh_keypair"
-	if err := run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", startScript); err != nil {
+	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", startScript); err != nil {
 		return err
 	}
 	fmt.Printf("%s[%s] has been turned on.%s \n", GREEN, name, RESET)
@@ -139,7 +139,7 @@ func stopSingleNode(name string) error {
 	}
 	stopScript := "sudo systemctl stop darknode"
 	keyPairPath := nodeDirectory + "/ssh_keypair"
-	if err := run("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", stopScript); err != nil {
+	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", stopScript); err != nil {
 		return err
 	}
 
