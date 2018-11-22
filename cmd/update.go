@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"path"
 
 	"github.com/republicprotocol/co-go"
-	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
 
@@ -37,7 +37,7 @@ func updateNode(ctx *cli.Context) error {
 }
 
 func updateSingleNode(name, branch string, updateConfig bool) error {
-	nodeDir := nodeDirectory(name)
+	nodeDir := nodeDirPath(name)
 	keyPairPath := nodeDir + "/ssh_keypair"
 	ip, err := getIp(nodeDir)
 	if err != nil {
@@ -58,44 +58,15 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
-	// Default branch is depends on the network parameter.
-	if branch == "" {
-		config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
-		if err != nil {
-			return err
-		}
-		switch config.Ethereum.Network {
-		case "mainnet":
-			branch = "master"
-		case "testnet":
-			branch = "develop"
-		default:
-			panic("unknown network")
-		}
-	}
-
-	updateScript := fmt.Sprintf(`
-#!/usr/bin/env bash
-
-cd ./go/src/github.com/republicprotocol/republic-go
-sudo git reset --hard HEAD
-sudo git clean -f -d
-sudo git checkout %v
-sudo git fetch origin %v
-sudo git reset --hard origin/%v
-cd cmd/darknode
-go install
-cd
-sudo service darknode restart
-
-curl -s 'https://darknode.republicprotocol.com/auto-updater.sh' > .darknode/updater.sh
-sudo service darknode-updater restart
-`, branch, branch, branch)
-
-	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", updateScript); err !=nil {
+	// todo : do we want to support update node with certain branch
+	udpate, err := ioutil.ReadFile(path.Join(Directory, "scripts", "update.sh"))
+	if err != nil {
 		return err
 	}
-
+	err = run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", string(udpate))
+	if err != nil {
+		return err
+	}
 	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s \n", GREEN, name, branch, RESET)
 	return nil
 }
@@ -107,12 +78,12 @@ func sshNode(ctx *cli.Context) error {
 		cli.ShowCommandHelp(ctx, "ssh")
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := nodeDirectory(name)
+	nodeDirectory := nodeDirPath(name)
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err
 	}
 	keyPairPath := nodeDirectory + "/ssh_keypair"
 
-	return run("ssh","-i", keyPairPath, "darknode@"+ip)
+	return run("ssh", "-i", keyPairPath, "darknode@"+ip)
 }

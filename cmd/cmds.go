@@ -88,13 +88,13 @@ func startNode(ctx *cli.Context) error {
 
 // startSingleNode starts a single node by its name
 func startSingleNode(name string) error {
-	nodeDir := nodeDirectory(name)
-	ip, err := getIp(nodeDir)
+	nodePath := nodeDirPath(name)
+	ip, err := getIp(nodePath)
 	if err != nil {
 		return err
 	}
 	startScript := "sudo systemctl start darknode"
-	keyPairPath := nodeDir + "/ssh_keypair"
+	keyPairPath := nodePath + "/ssh_keypair"
 	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", startScript); err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func stopSingleNode(name string) error {
 	if name == "" {
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := nodeDirectory(name)
+	nodeDirectory := nodeDirPath(name)
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return err

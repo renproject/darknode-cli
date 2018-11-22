@@ -17,7 +17,7 @@ import (
 var AllAwsRegions = []string{
 	"ap-northeast-1",
 	"ap-northeast-2",
-	// "ap-northeast-3", Terraform having issue support this provider
+	// "ap-northeast-3", awsTerraform having issue support this provider
 	"ap-south-1",
 	"ap-southeast-1",
 	"ap-southeast-2",
@@ -53,7 +53,7 @@ func awsDeployment(ctx *cli.Context) error {
 	if err := mkdir(name, tags); err != nil {
 		return err
 	}
-	nodeDir := nodeDirectory(name)
+	nodeDir := nodeDirPath(name)
 
 	// Generate config and ssh key for the node
 	config, err := GetConfigOrGenerateNew(ctx, nodeDir)
@@ -66,7 +66,7 @@ func awsDeployment(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := awsTerraformConfig(ctx, config, key, accessKey, secretKey, nodeDir, region, instance); err != nil {
+	if err := awsTerraformConfig(ctx, config, key, accessKey, secretKey, region, instance); err != nil {
 		return err
 	}
 	if err := runTerraform(nodeDir); err != nil {
@@ -99,11 +99,10 @@ func awsCredentials(ctx *cli.Context) (string, string, error) {
 	return accessKey, secretKey, nil
 }
 
-// Terraform contains all the fields needed to generate a terraform config file
+// awsTerraform contains all the fields needed to generate a terraform config file
 // so that we can deploy the node on AWS.
-type Terraform struct {
+type awsTerraform struct {
 	Name          string
-	Source        string
 	Region        string
 	Address       string
 	InstanceType  string
@@ -117,9 +116,11 @@ type Terraform struct {
 }
 
 // awsTerraformConfig generates the terraform config file for deploying to AWS.
-func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, nodeDir, region, instance string) error {
-	tf := Terraform{
-		Name:          ctx.String("name"),
+func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, region, instance string) error {
+	name := ctx.String("name")
+	nodeDir := nodeDirPath(name)
+	tf := awsTerraform{
+		Name:          name,
 		Region:        region,
 		Address:       config.Address.String(),
 		InstanceType:  instance,
@@ -132,9 +133,8 @@ func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKe
 		AllocationID:  ctx.String("aws-elastic-ip"),
 	}
 
-	fmap := template.FuncMap{}
 	templateFile := path.Join(Directory, "instance", "aws", "aws.tmpl")
-	t := template.Must(template.New("aws.tmpl").Funcs(fmap).ParseFiles(templateFile))
+	t := template.Must(template.New("aws.tmpl").Funcs(template.FuncMap{}).ParseFiles(templateFile))
 	tfFile, err := os.Create(path.Join(nodeDir, "main.tf"))
 	if err != nil {
 		return err

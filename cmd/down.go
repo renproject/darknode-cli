@@ -6,7 +6,6 @@ import (
 	"math"
 	"math/big"
 	"path"
-	"runtime"
 	"strings"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	dnr "github.com/republicprotocol/darknode-cli/bindings"
+	dnr "github.com/republicprotocol/darknode-cli/cmd/bindings"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/contract/bindings"
@@ -29,7 +28,7 @@ func destroyNode(ctx *cli.Context) error {
 		return ErrEmptyNodeName
 	}
 
-	nodeDirectory := nodeDirectory(name)
+	nodeDirectory := nodeDirPath(name)
 	ip, err := getIp(nodeDirectory)
 	if err != nil {
 		return ErrNoDeploymentFound
@@ -64,14 +63,9 @@ func destroyNode(ctx *cli.Context) error {
 		fmt.Printf("%sYou will be redirected to deregister your node%s\n", RED, RESET)
 		time.Sleep(3 * time.Second)
 
-		var redirect string
-		switch runtime.GOOS {
-		case "darwin":
-			redirect = "open"
-		case "linux":
-			redirect = "xdg-open"
-		default:
-			return ErrUnsupportedOS
+		redirect, err := redirectCommand()
+		if err != nil {
+			return err
 		}
 		url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
 		return run(redirect, url)
@@ -92,7 +86,7 @@ func destroyNode(ctx *cli.Context) error {
 	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
 
 	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodeDirectory)
-	return run("bash", "-c",destroy)
+	return run("bash", "-c", destroy)
 }
 
 // refund the REN bonds to the darknode operator.
@@ -218,7 +212,6 @@ func withdraw(ctx *cli.Context) error {
 
 	return nil
 }
-
 
 // renAddress on different testnet
 func renAddress(network contract.Network) string {

@@ -15,7 +15,7 @@ variable "size" {
 }
 
 variable "path" {
-  default = "{{.Size}}"
+  default = "{{.Path}}"
 }
 
 variable "address" {
@@ -27,7 +27,11 @@ variable "pub_key" {
 }
 
 variable "pvt_key" {
-  default = "{{.PrvKey}}"
+  default = "{{.PvtKey}}"
+}
+
+provider "digitalocean" {
+  token = "${var.do_token}"
 }
 
 resource "digitalocean_ssh_key" "darknode" {
@@ -93,7 +97,7 @@ resource "digitalocean_droplet" "darknode" {
 
     connection {
       type = "ssh"
-      user = "ubuntu"
+      user = "darknode"
       private_key = "${file("${var.pvt_key}")}"
     }
   }

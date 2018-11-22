@@ -20,3 +20,6 @@ sudo ufw allow 18514/tcp  # republicprotocol
 sudo ufw limit 18515/tcp  # status page
 sudo ufw --force enable
 
+
+
+

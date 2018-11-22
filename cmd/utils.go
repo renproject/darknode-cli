@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,8 +18,8 @@ import (
 // Directory is the directory address of the cli and all darknodes data.
 var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 
-// nodeDirectory return the absolute directory of the node.
-func nodeDirectory(name string) string {
+// nodeDirPath return the absolute directory of the node.
+func nodeDirPath(name string) string {
 	return path.Join(Directory, "darknodes", name)
 }
 
@@ -80,7 +81,7 @@ func getNodesByTags(tags string) ([]string, error) {
 	ts := strings.Split(strings.TrimSpace(tags), ",")
 	nodes := make([]string, 0)
 	for _, f := range files {
-		tagFile := path.Join(Directory ,"darknodes", f.Name(), "tags.out")
+		tagFile := path.Join(Directory, "darknodes", f.Name(), "tags.out")
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
@@ -149,7 +150,7 @@ func validateDarknodeName(name string) (string, error) {
 	if name == "" {
 		return "", ErrEmptyNodeName
 	}
-	nodeDir := nodeDirectory(name)
+	nodeDir := nodeDirPath(name)
 	if _, err := os.Stat(nodeDir); err != nil {
 		return "", ErrNodeNotExist
 	}
@@ -175,7 +176,7 @@ func stringToEthereumAddress(addr string) (common.Address, error) {
 }
 
 // run the command and pipe the output to the stdout
-func run(name string , args... string) error {
+func run(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -184,4 +185,15 @@ func run(name string , args... string) error {
 		return err
 	}
 	return cmd.Wait()
+}
+
+func redirectCommand() (string, error) {
+	switch runtime.GOOS {
+	case "darwin":
+		return "open", nil
+	case "linux":
+		return "xdg-open", nil
+	default:
+		return "", ErrUnsupportedOS
+	}
 }

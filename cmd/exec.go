@@ -44,7 +44,7 @@ func execSingleNode(name, script string) error {
 	if script == "" {
 		return ErrEmptyFilePath
 	}
-	nodeDirectory := nodeDirectory(name)
+	nodeDirectory := nodeDirPath(name)
 	keyPairPath := nodeDirectory + "/ssh_keypair"
 	ip, err := getIp(nodeDirectory)
 	if err != nil {

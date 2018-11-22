@@ -43,7 +43,7 @@ type DarknodeRegistryFilterer struct {
 // DarknodeRegistrySession is an auto generated Go binding around an Ethereum contract,
 // with pre-set call and transact options.
 type DarknodeRegistrySession struct {
-	Contract     *DarknodeRegistry         // Generic contract binding to set the session for
+	Contract     *DarknodeRegistry // Generic contract binding to set the session for
 	CallOpts     bind.CallOpts     // Call options to use throughout this session
 	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
 }
@@ -52,14 +52,14 @@ type DarknodeRegistrySession struct {
 // with pre-set call options.
 type DarknodeRegistryCallerSession struct {
 	Contract *DarknodeRegistryCaller // Generic contract caller binding to set the session for
-	CallOpts bind.CallOpts   // Call options to use throughout this session
+	CallOpts bind.CallOpts           // Call options to use throughout this session
 }
 
 // DarknodeRegistryTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
 // with pre-set transact options.
 type DarknodeRegistryTransactorSession struct {
 	Contract     *DarknodeRegistryTransactor // Generic contract transactor binding to set the session for
-	TransactOpts bind.TransactOpts   // Transaction auth options to use throughout this session
+	TransactOpts bind.TransactOpts           // Transaction auth options to use throughout this session
 }
 
 // DarknodeRegistryRaw is an auto generated low-level Go binding around an Ethereum contract.

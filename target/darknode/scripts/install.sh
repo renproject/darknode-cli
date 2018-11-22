@@ -25,7 +25,7 @@ unzip -o darknode.zip
 mkdir -p ./.darknode/bin
 mv ./darknode ./.darknode/bin/darknode
 mv ./darknode-config.json ./.darknode/config.json
-mv ./scripts/update.sh ./.darknode/bin/update.sh
+mv ./scripts/updater.sh ./.darknode/bin/update.sh
 
 rm -rf ./scripts/
 rm -rf ./services/
@@ -36,4 +36,3 @@ systemctl --user enable darknode-updater.service
 systemctl --user enable darknode.service
 systemctl --user start darknode-updater.service
 systemctl --user start darknode.service
-
