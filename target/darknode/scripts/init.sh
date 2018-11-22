@@ -2,6 +2,7 @@
 
 # create new user and enable ssh login
 sudo adduser darknode --gecos \",,,\" --disabled-password
+sudo usermod -aG systemd-journal darknode
 sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode
 
 until sudo apt update; do sleep 2; done
@@ -18,7 +19,3 @@ sudo ufw limit 22/tcp     # ssh
 sudo ufw allow 18514/tcp  # republicprotocol
 sudo ufw limit 18515/tcp  # status page
 sudo ufw --force enable
-
-
-
-

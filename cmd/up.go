@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Providers have all the cloud service providers currently supported.
 var Providers = []string{"aws", "do"}
 
 // deployNode deploys node to the given cloud provider.
@@ -54,7 +55,6 @@ func provider(ctx *cli.Context) (string, error) {
 
 // mkdir creates the directory for the node.
 func mkdir(name, tags string) error {
-	// Make sure name is not nil
 	if name == "" {
 		return ErrEmptyNodeName
 	}
