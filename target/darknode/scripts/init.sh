@@ -5,7 +5,6 @@ sudo adduser darknode --gecos \",,,\" --disabled-password
 sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode
 
 until sudo apt update; do sleep 2; done
-sudo apt-get install unzip
 
 # Update the system-level updates
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y update

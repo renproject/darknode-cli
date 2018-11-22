@@ -60,8 +60,11 @@ func destroyNode(ctx *cli.Context) error {
 	// Redirect the user to the de-registering URL if darknode is still registered.
 	if registered {
 		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
-		fmt.Printf("%sYou will be redirected to deregister your node%s\n", RED, RESET)
-		time.Sleep(3 * time.Second)
+		for i := 9; i > 0; i-- {
+			time.Sleep(time.Second)
+			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
+		}
+		fmt.Printf("\r%sPlease try again after you fully deregister your node%s\n", RED, RESET)
 
 		redirect, err := redirectCommand()
 		if err != nil {
