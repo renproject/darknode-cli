@@ -28,8 +28,7 @@ func main() {
 			Usage: "Deploy a new Darknode",
 			Flags: []cli.Flag{
 				NameFlag, TagsFlag, KeystoreFlag, PassphraseFlag, NetworkFlag, ConfigFlag,
-				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag,
-				AwsElasticIpFlag, AwsProfileFlag,
+				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag, AwsProfileFlag,
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 			},
 			Action: func(c *cli.Context) error {
@@ -40,7 +39,7 @@ func main() {
 			Name:    "destroy",
 			Usage:   "Destroy one of your Darknode",
 			Aliases: []string{"down"},
-			Flags:   []cli.Flag{TagsFlag},
+			Flags:   []cli.Flag{TagsFlag, ForceFlag},
 			Action: func(c *cli.Context) error {
 				return destroyNode(c)
 			},

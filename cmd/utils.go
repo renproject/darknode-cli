@@ -18,8 +18,8 @@ import (
 // Directory is the directory address of the cli and all darknodes data.
 var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 
-// nodeDirPath return the absolute directory of the node.
-func nodeDirPath(name string) string {
+// nodePath return the absolute directory of the node.
+func nodePath(name string) string {
 	return path.Join(Directory, "darknodes", name)
 }
 
@@ -150,15 +150,15 @@ func validateDarknodeName(name string) (string, error) {
 	if name == "" {
 		return "", ErrEmptyNodeName
 	}
-	nodeDir := nodeDirPath(name)
-	if _, err := os.Stat(nodeDir); err != nil {
+	nodePath := nodePath(name)
+	if _, err := os.Stat(nodePath); err != nil {
 		return "", ErrNodeNotExist
 	}
-	if _, err := os.Stat(nodeDir + "/config.json"); os.IsNotExist(err) {
+	if _, err := os.Stat(nodePath + "/config.json"); os.IsNotExist(err) {
 		return "", ErrNodeNotExist
 	}
 
-	return nodeDir, nil
+	return nodePath, nil
 }
 
 // stringToEthereumAddress converts a hex string to a ethereum address.

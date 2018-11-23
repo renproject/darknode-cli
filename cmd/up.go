@@ -53,30 +53,30 @@ func provider(ctx *cli.Context) (string, error) {
 	}
 }
 
-// mkdir creates the directory for the node.
+// mkdir creates the directory for the darknode.
 func mkdir(name, tags string) error {
 	if name == "" {
 		return ErrEmptyNodeName
 	}
-	nodeDirPath := nodeDirPath(name)
+	nodePath := nodePath(name)
 
 	// Check if the directory exists or not.
-	if _, err := os.Stat(nodeDirPath); err == nil {
-		if _, err := os.Stat(nodeDirPath + "/multiAddress.out"); os.IsNotExist(err) {
+	if _, err := os.Stat(nodePath); err == nil {
+		if _, err := os.Stat(nodePath + "/multiAddress.out"); os.IsNotExist(err) {
 			// todo : need to ask user whether they want to use the old config.
-			if err := run("rm", "-rf", nodeDirPath); err != nil {
+			if err := run("rm", "-rf", nodePath); err != nil {
 				return err
 			}
 		} else {
 			return ErrNodeExist
 		}
 	}
-	if err := os.Mkdir(nodeDirPath, 0777); err != nil {
+	if err := os.Mkdir(nodePath, 0777); err != nil {
 		return err
 	}
 
 	// Store the tags
-	return ioutil.WriteFile(nodeDirPath+"/tags.out", []byte(strings.TrimSpace(tags)), 0666)
+	return ioutil.WriteFile(nodePath+"/tags.out", []byte(strings.TrimSpace(tags)), 0666)
 }
 
 // runTerraform initializes and applies terraform
@@ -93,7 +93,7 @@ func runTerraform(nodeDirectory string) error {
 
 // outputUrl writes success message and the URL for registering the node
 // to the terminal.
-func outputUrl(name, nodeDir string) error {
+func outputUrl(nodeDir string) error {
 	ip, err := getIp(nodeDir)
 	if err != nil {
 		return err

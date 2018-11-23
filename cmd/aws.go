@@ -53,14 +53,14 @@ func awsDeployment(ctx *cli.Context) error {
 	if err := mkdir(name, tags); err != nil {
 		return err
 	}
-	nodeDir := nodeDirPath(name)
+	nodePath := nodePath(name)
 
 	// Generate config and ssh key for the node
-	config, err := GetConfigOrGenerateNew(ctx, nodeDir)
+	config, err := GetConfigOrGenerateNew(ctx, nodePath)
 	if err != nil {
 		return err
 	}
-	key, err := NewSshKeyPair(nodeDir)
+	key, err := NewSshKeyPair(nodePath)
 	if err != nil {
 		return err
 	}
@@ -69,11 +69,11 @@ func awsDeployment(ctx *cli.Context) error {
 	if err := awsTerraformConfig(ctx, config, key, accessKey, secretKey, region, instance); err != nil {
 		return err
 	}
-	if err := runTerraform(nodeDir); err != nil {
+	if err := runTerraform(nodePath); err != nil {
 		return err
 	}
 
-	return outputUrl(name, nodeDir)
+	return outputUrl(nodePath)
 }
 
 // awsCredentials tries to get the AWS credentials from the user input
@@ -83,7 +83,7 @@ func awsCredentials(ctx *cli.Context) (string, string, error) {
 	accessKey := ctx.String("aws-access-key")
 	secretKey := ctx.String("aws-secret-key")
 
-	// Try read the credential files if user does not provide them directly
+	// Try reading the credential files if user does not provide them directly
 	if accessKey == "" || secretKey == "" {
 		creds := credentials.NewSharedCredentials("", profile)
 		credValue, err := creds.Get()
@@ -118,14 +118,14 @@ type awsTerraform struct {
 // awsTerraformConfig generates the terraform config file for deploying to AWS.
 func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, region, instance string) error {
 	name := ctx.String("name")
-	nodeDir := nodeDirPath(name)
+	nodePath := nodePath(name)
 	tf := awsTerraform{
 		Name:          name,
 		Region:        region,
 		Address:       config.Address.String(),
 		InstanceType:  instance,
 		SshPubKey:     strings.TrimSpace(StringfySshPubkey(key)),
-		SshPriKeyPath: path.Join(nodeDir, "ssh_keypair"),
+		SshPriKeyPath: path.Join(nodePath, "ssh_keypair"),
 		AccessKey:     accessKey,
 		SecretKey:     secretKey,
 		Port:          config.Port,
@@ -135,7 +135,7 @@ func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKe
 
 	templateFile := path.Join(Directory, "instance", "aws", "aws.tmpl")
 	t := template.Must(template.New("aws.tmpl").Funcs(template.FuncMap{}).ParseFiles(templateFile))
-	tfFile, err := os.Create(path.Join(nodeDir, "main.tf"))
+	tfFile, err := os.Create(path.Join(nodePath, "main.tf"))
 	if err != nil {
 		return err
 	}

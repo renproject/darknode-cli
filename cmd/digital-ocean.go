@@ -142,7 +142,7 @@ func deployToDo(ctx *cli.Context) error {
 	if err := mkdir(name, tags); err != nil {
 		return err
 	}
-	nodePath := nodeDirPath(name)
+	nodePath := nodePath(name)
 
 	// Generate config and ssh key for the node
 	config, err := GetConfigOrGenerateNew(ctx, nodePath)
@@ -161,7 +161,7 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputUrl(name, nodePath)
+	return outputUrl(nodePath)
 }
 
 func doRegionAndDroplet(ctx *cli.Context) (string, string, error) {
@@ -257,7 +257,7 @@ func availableRegions(ctx *cli.Context) ([]Region, error) {
 func generateDoTFConfig(ctx *cli.Context, config config.Config, region, size string) error {
 	name := ctx.String("name")
 	token := ctx.String("do-token")
-	nodePath := nodeDirPath(name)
+	nodePath := nodePath(name)
 
 	tf := doTerraform{
 		Name:    name,

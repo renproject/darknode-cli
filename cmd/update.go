@@ -9,8 +9,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-// updateNode updates the Darknode to the provided branch(default:master),
-// It can also update the config file of the darknode.
+// updateNode updates the Darknode to the latest release. It can also be used
+// to update the config file of the darknode.
 func updateNode(ctx *cli.Context) error {
 	name := ctx.Args().First()
 	updateConfig := ctx.Bool("config")
@@ -37,16 +37,16 @@ func updateNode(ctx *cli.Context) error {
 }
 
 func updateSingleNode(name, branch string, updateConfig bool) error {
-	nodeDir := nodeDirPath(name)
-	keyPairPath := nodeDir + "/ssh_keypair"
-	ip, err := getIp(nodeDir)
+	nodePath := nodePath(name)
+	keyPairPath := path.Join(nodePath, "ssh_keypair")
+	ip, err := getIp(nodePath)
 	if err != nil {
 		return err
 	}
 
 	// Check if we need to update the node config
 	if updateConfig {
-		data, err := ioutil.ReadFile(nodeDir + "/config.json")
+		data, err := ioutil.ReadFile(path.Join(nodePath, "config.json"))
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,6 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
-	// todo : do we want to support update node with certain branch
 	udpate, err := ioutil.ReadFile(path.Join(Directory, "scripts", "update.sh"))
 	if err != nil {
 		return err
@@ -78,12 +77,12 @@ func sshNode(ctx *cli.Context) error {
 		cli.ShowCommandHelp(ctx, "ssh")
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := nodeDirPath(name)
-	ip, err := getIp(nodeDirectory)
+	nodePath := nodePath(name)
+	ip, err := getIp(nodePath)
 	if err != nil {
 		return err
 	}
-	keyPairPath := nodeDirectory + "/ssh_keypair"
+	keyPairPath := nodePath + "/ssh_keypair"
 
 	return run("ssh", "-i", keyPairPath, "darknode@"+ip)
 }
