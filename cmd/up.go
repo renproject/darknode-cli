@@ -105,7 +105,7 @@ func outputUrl(nodeDir string) error {
 	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
 	for i := 5; i >= 0; i-- {
 		time.Sleep(time.Second)
-		fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", GREEN, i, RESET)
+		fmt.Printf("\r%sYou will be redirected to register your node in %v seconds%s", GREEN, i, RESET)
 	}
 
 	// Redirect the user to the registering URL.
