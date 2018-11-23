@@ -49,6 +49,11 @@ darknode up --network testnet --name my-first-darknode --aws --aws-access-key YO
 ``` 
 
 The Darknode CLI will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
+By default it will use the credentials of `default` profile,but you can specify which profile you want to use for deployment by:
+
+```sh
+darknode up --network testnet --name my-first-darknode --aws --aws-profile PROFILE-NAME
+```
 
 You can also specify the region and instance type you want to use for the Darknode:
 
@@ -88,7 +93,7 @@ You can find all available regions and droplet size slug by using the digital oc
 
 ### Destroy a Darknode
 
-_**WARNING: Before destroying a Darknode make sure you have de-registered it, and withdrawn all fees earned!**_
+_**WARNING: Before destroying a Darknode make sure you have de-registered it, and withdrawn all fees earned! You will not be able to destroy your darknode if it's not fully deregistered. The CLI will guide you to the page where you can deregister your node**_
 
 Destroying a Darknode will turn it off and tear down all resources allocated by the cloud provider. To destroy a Darknode, open a terminal and run:
 
@@ -96,7 +101,7 @@ Destroying a Darknode will turn it off and tear down all resources allocated by 
 darknode destroy my-first-darknode
 ``` 
 
-To avoid the command-line prompt reminding you to deregister your Darknode, use the `--force` argument: 
+To avoid the command-line prompt confirming the destruction, use the `--force` argument: 
 
 ```sh
 darknode destroy my-first-darknode --force
