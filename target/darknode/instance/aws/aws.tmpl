@@ -76,22 +76,6 @@ resource "aws_security_group" "darknode" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  // Logstash
-  ingress {
-    from_port   = 9200
-    to_port     = 9200
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  // Kibana
-  ingress {
-    from_port   = 5601
-    to_port     = 5601
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   // Republic Protocol
   ingress {
     from_port   = 18514
@@ -190,3 +174,4 @@ resource "aws_instance" "darknode" {
     command = "echo /ip4/${aws_instance.darknode.public_ip}/tcp/${var.port}/republic/${var.address} > multiAddress.out"
   }
 }
+
