@@ -7,40 +7,28 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
+	"path"
+	"text/template"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 )
 
 // Available regions on Digital Ocean.
-const (
-	AMS2 = "ams2"
-	AMS3 = "ams3"
-	BLR1 = "blr1"
-	FRA1 = "fra1"
-	LON1 = "lon1"
-	NYC1 = "nyc1"
-	NYC2 = "nyc2"
-	NYC3 = "nyc3"
-	SF01 = "sfo1"
-	SF02 = "sfo2"
-	SGP1 = "sgp1"
-	TOR1 = "tor1"
-)
-
 var AllDoRegions = []string{
-	AMS2,
-	AMS3,
-	BLR1,
-	FRA1,
-	LON1,
-	NYC1,
-	NYC2,
-	NYC3,
-	SF01,
-	SF02,
-	SGP1,
-	TOR1,
+	"ams2",
+	"ams3",
+	"blr1",
+	"fra1",
+	"lon1",
+	"nyc1",
+	"nyc2",
+	"nyc3",
+	"sfo1",
+	"sfo2",
+	"sgp1",
+	"tor1",
 }
 
 // All available droplet size on digital ocean
@@ -114,9 +102,71 @@ var AllDoDropletSize = []string{
 	SizeC64,
 }
 
-func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
+// Region is the json object returned by the digital-ocean API
+type Region struct {
+	Name      string   `json:"name"`
+	Slug      string   `json:"slug"`
+	Sizes     []string `json:"sizes"`
+	Features  []string `json:"features"`
+	Available bool     `json:"available"`
+}
+
+// doTerraform contains all the fields needed to generate a terraform config file
+// so that we can deploy the node on Digital Ocean.
+type doTerraform struct {
+	Name    string
+	Token   string
+	Region  string
+	Address string
+	Size    string
+	Path    string
+	PubKey  string
+	PvtKey  string
+}
+
+// deployToDo parses the digital ocean credentials and use terraform to
+// deploy the node to digital ocean.
+func deployToDo(ctx *cli.Context) error {
+	token := ctx.String("do-token")
+	if token == "" {
+		return ErrEmptyDoToken
+	}
+	region, size, err := doRegionAndDroplet(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Create node directory
+	name := ctx.String("name")
+	tags := ctx.String("tags")
+	if err := mkdir(name, tags); err != nil {
+		return err
+	}
+	nodePath := nodePath(name)
+
+	// Generate config and ssh key for the node
+	config, err := GetConfigOrGenerateNew(ctx, nodePath)
+	if err != nil {
+		return err
+	}
+	if _, err := NewSshKeyPair(nodePath); err != nil {
+		return err
+	}
+
+	// Generate terraform config and start deploying
+	if err := generateDoTFConfig(ctx, config, region, size); err != nil {
+		return err
+	}
+	if err := runTerraform(nodePath); err != nil {
+		return err
+	}
+
+	return outputUrl(nodePath)
+}
+
+func doRegionAndDroplet(ctx *cli.Context) (string, string, error) {
 	region := ctx.String("do-region")
-	size := ctx.String("do-droplet")
+	droplet := ctx.String("do-droplet")
 
 	regions, err := availableRegions(ctx)
 	if err != nil {
@@ -126,22 +176,10 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 	// Parse the input region or pick one region randomly
 	if region == "" {
 		if len(regions) == 0 {
-			return "", "", errors.New("no available region to your account")
+			return "", "", ErrNoAvailableRegion
 		}
 		randomRegion := regions[rand.Intn(len(regions))]
-
-		// Output the available regions if user gives an invalid droplet size
-		if !StringInSlice(size, randomRegion.Sizes) {
-			fmt.Printf("We have randomly selected [%v] as the droplet region.\n", randomRegion.Slug)
-			fmt.Printf("Your account can only create below slugs in [%v]:\n", randomRegion.Slug)
-			for i := range randomRegion.Sizes {
-				fmt.Println(randomRegion.Sizes[i])
-			}
-			fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
-
-			return "", "", ErrUnSupportedInstanceType
-		}
-		return randomRegion.Slug, size, nil
+		return randomRegion.Slug, droplet, validateDroplet(droplet, randomRegion.Slug, randomRegion.Sizes)
 	} else {
 		var chosenRegion Region
 		for i := range regions {
@@ -153,24 +191,26 @@ func parseDoRegionAndSize(ctx *cli.Context) (string, string, error) {
 		if chosenRegion.Name == "" {
 			return "", "", ErrUnknownRegion
 		}
-
-		// Output the available regions if user gives an invalid droplet size
-		if !StringInSlice(size, chosenRegion.Sizes) {
-			fmt.Printf("We have randomly selected [%v] as the droplet region.\n", chosenRegion.Slug)
-			fmt.Printf("Your account can only create below slugs in [%v]:\n", chosenRegion.Slug)
-			for i := range chosenRegion.Sizes {
-				fmt.Println(chosenRegion.Sizes[i])
-			}
-			fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
-			return "", "", ErrUnSupportedInstanceType
-		}
-
-		return chosenRegion.Slug, size, nil
+		return chosenRegion.Slug, droplet, validateDroplet(droplet, chosenRegion.Slug, chosenRegion.Sizes)
 	}
 }
 
-// availableRegions sends a GET request to the DO API to get all available regions
-// and droplet sizes to the given DO token.
+// validateDroplet validates whether the droplet is available in the region.
+func validateDroplet(droplet, region string, droplets []string) error {
+	if !StringInSlice(droplet, droplets) {
+		fmt.Printf("[%v] is the selected droplet region.\n", region)
+		fmt.Printf("Your account can only create below slugs in [%v]:\n", region)
+		for i := range droplets {
+			fmt.Println(droplets[i])
+		}
+		fmt.Println("You can find more details about these slugs from https://www.digitalocean.com/pricing")
+		return ErrUnSupportedInstanceType
+	}
+	return nil
+}
+
+// availableRegions sends a GET request to the DO API to get all available
+// regions and droplet sizes of the given DO token.
 func availableRegions(ctx *cli.Context) ([]Region, error) {
 	token := ctx.String("do-token")
 
@@ -213,97 +253,29 @@ func availableRegions(ctx *cli.Context) ([]Region, error) {
 	return availableRegions, nil
 }
 
-// deployToDo parses the digital ocean credentials and use terraform to
-// deploy the node to digital ocean.
-func deployToDo(ctx *cli.Context) error {
-	token := ctx.String("do-token")
-
-	if token == "" {
-		return ErrEmptyDoToken
-	}
-	// Parse DO related data.
-	region, size, err := parseDoRegionAndSize(ctx)
-	if err != nil {
-		return err
-	}
-
-	// Create node directory
-	name, err := createNodeDirectory(ctx)
-	if err != nil {
-		return err
-	}
-	nodeDir := nodeDirectory(name)
-
-	// Generate config and ssh key for the node
-	config, err := GetConfigOrGenerateNew(ctx, nodeDir)
-	if err != nil {
-		return err
-	}
-	_, err = NewSshKeyPair(nodeDir)
-	if err != nil {
-		return err
-	}
-
-	// Generate terraform config and start deploying
-	if err := generateDoTFConfig(config, token, name, nodeDir, region, size); err != nil {
-		return err
-	}
-	if err := runTerraform(nodeDir); err != nil {
-		return err
-	}
-
-	return outputUrl(name, nodeDir)
-}
-
 // generateDoTFConfig generates the terraform config file for deploying to DO.
-func generateDoTFConfig(config config.Config, token, name, nodeDir, region, size string) error {
-	terraformConfig := fmt.Sprintf(`
-variable "do_token" {
-	default = "%v"
-}
+func generateDoTFConfig(ctx *cli.Context, config config.Config, region, size string) error {
+	name := ctx.String("name")
+	token := ctx.String("do-token")
+	nodePath := nodePath(name)
 
-variable "name" {
-	default = "%v"
-}
+	tf := doTerraform{
+		Name:    name,
+		Token:   token,
+		Region:  region,
+		Address: config.Address.String(),
+		Size:    size,
+		Path:    Directory,
+		PubKey:  path.Join(nodePath, "ssh_keypair.pub"),
+		PvtKey:  path.Join(nodePath, "ssh_keypair"),
+	}
 
-variable "region" {
-	default = "%v"
-}
-
-variable "size" {
-	default = "%v"
-}
-
-variable "path" {
-  default = "%v"
-}
-
-variable "id" {
-  default = "%v"
-}
-
-variable "pub_key" {
-  default = "%v/darknodes/%v/ssh_keypair.pub"
-}
-
-variable "pvt_key" {
-  default = "%v/darknodes/%v/ssh_keypair"
-}
-	`, token, name, region, size, Directory, config.Address, Directory, name, Directory, name)
-
-	err := ioutil.WriteFile(nodeDir+"/variables.tf", []byte(terraformConfig), 0644)
+	templateFile := path.Join(Directory, "instance", "do", "do.tmpl")
+	t := template.Must(template.New("do.tmpl").Funcs(template.FuncMap{}).ParseFiles(templateFile))
+	tfFile, err := os.Create(path.Join(nodePath, "main.tf"))
 	if err != nil {
 		return err
 	}
 
-	return copyFile(Directory+"/instance/digital-ocean/main.tf", nodeDir+"/main.tf")
-}
-
-// Region is the json object returned by the digital-ocean API
-type Region struct {
-	Name      string   `json:"name"`
-	Slug      string   `json:"slug"`
-	Sizes     []string `json:"sizes"`
-	Features  []string `json:"features"`
-	Available bool     `json:"available"`
+	return t.Execute(tfFile, tf)
 }

@@ -1,0 +1,17 @@
+[Unit]
+Description=Republic Protocol's Darknode Daemon
+AssertPathExists=/home/darknode/.darknode
+
+[Service]
+WorkingDirectory=/home/darknode/.darknode
+ExecStart=/home/darknode/.darknode/bin/darknode --config /home/darknode/.darknode/config.json
+Restart=on-failure
+PrivateTmp=true
+NoNewPrivileges=true
+
+# Specifies which signal to use when killing a service. Defaults to SIGTERM.
+# SIGHUP gives parity time to exit cleanly before SIGKILL (default 90s)
+KillSignal=SIGHUP
+
+[Install]
+WantedBy=default.target

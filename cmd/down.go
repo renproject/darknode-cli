@@ -1,13 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"math"
 	"math/big"
-	"os/exec"
+	"os"
 	"path"
-	"runtime"
 	"strings"
 	"time"
 
@@ -15,7 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	dnr "github.com/republicprotocol/darknode-cli/bindings"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/contract/bindings"
@@ -24,19 +23,20 @@ import (
 
 // destroyNode tears down the deployed darknode by its name.
 func destroyNode(ctx *cli.Context) error {
+	force := ctx.Bool("force")
 	name := ctx.Args().First()
 	if name == "" {
 		cli.ShowCommandHelp(ctx, "down")
 		return ErrEmptyNodeName
 	}
 
-	nodeDirectory := nodeDirectory(name)
-	ip, err := getIp(nodeDirectory)
+	nodePath := nodePath(name)
+	ip, err := getIp(nodePath)
 	if err != nil {
 		return ErrNoDeploymentFound
 	}
 
-	config, err := config.NewConfigFromJSONFile(path.Join(nodeDirectory, "config.json"))
+	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func destroyNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	registry, err := dnr.NewDarknodeRegistry(dnrAddress, client)
+	registry, err := bindings.NewDarknodeRegistry(dnrAddress, client)
 	if err != nil {
 		return err
 	}
@@ -62,23 +62,18 @@ func destroyNode(ctx *cli.Context) error {
 	// Redirect the user to the de-registering URL if darknode is still registered.
 	if registered {
 		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
-		fmt.Printf("%sYou will be redirected to deregister your node%s\n", RED, RESET)
-		time.Sleep(3 * time.Second)
-
-		var redirect *exec.Cmd
-		switch runtime.GOOS {
-		case "darwin":
-			redirect = exec.Command("open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
-		case "linux":
-			redirect = exec.Command("xdg-open", fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip))
-		default:
-			return ErrUnsupportedOS
+		for i := 5; i >= 0; i-- {
+			time.Sleep(time.Second)
+			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
 		}
-		pipeToStd(redirect)
-		if err := redirect.Start(); err != nil {
+		fmt.Printf("%sPlease try again after you fully deregister your node%s\n", RED, RESET)
+
+		redirect, err := redirectCommand()
+		if err != nil {
 			return err
 		}
-		return redirect.Wait()
+		url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+		return run(redirect, url)
 	}
 
 	// Check if the darknode is in pending deregistration state.
@@ -93,15 +88,31 @@ func destroyNode(ctx *cli.Context) error {
 		return nil
 	}
 
-	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
-	cmd := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodeDirectory)
-	destroy := exec.Command("bash", "-c", cmd)
-	pipeToStd(destroy)
-	if err := destroy.Start(); err != nil {
+	pendingRegistration, err := registry.IsPendingRegistration(&bind.CallOpts{}, common.BytesToAddress(id))
+	if err != nil {
 		return err
 	}
+	if pendingRegistration {
+		fmt.Printf("%sYour node is pending for registration%s\n", RED, RESET)
+		fmt.Printf("%sDarknode can only be destroyed when fully deregistred%s\n", RED, RESET)
+		fmt.Printf("%sPlease deregister your node after the epoch shuffle and try again%s\n", RED, RESET)
+		return nil
+	}
 
-	return destroy.Wait()
+	if !force {
+		fmt.Println("Do you really want to destroy your darknode? (Yes/No)")
+
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		input := strings.ToLower(strings.TrimSpace(text))
+		if input != "yes" && input != "y" {
+			return nil
+		}
+	}
+	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
+
+	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
+	return run("bash", "-c", destroy)
 }
 
 // refund the REN bonds to the darknode operator.
@@ -109,13 +120,13 @@ func refund(ctx *cli.Context) error {
 	name := ctx.Args().First()
 
 	// Validate the name and check if the directory exists.
-	nodeDir, err := validateDarknodeName(name)
+	nodePath, err := validateDarknodeName(name)
 	if err != nil {
 		return err
 	}
 
 	// Read the config and refund the REN bonds
-	config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
+	config, err := config.NewConfigFromJSONFile(nodePath + "/config.json")
 	if err != nil {
 		return err
 	}
@@ -145,7 +156,7 @@ func withdraw(ctx *cli.Context) error {
 	address := ctx.String("address")
 
 	// Validate the name and received ethereum address
-	nodeDir, err := validateDarknodeName(name)
+	nodePath, err := validateDarknodeName(name)
 	if err != nil {
 		return err
 	}
@@ -155,7 +166,7 @@ func withdraw(ctx *cli.Context) error {
 	}
 
 	// Read the darknode config
-	config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
+	config, err := config.NewConfigFromJSONFile(nodePath + "/config.json")
 	if err != nil {
 		return err
 	}
@@ -227,7 +238,6 @@ func withdraw(ctx *cli.Context) error {
 
 	return nil
 }
-
 
 // renAddress on different testnet
 func renAddress(network contract.Network) string {

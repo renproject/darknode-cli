@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -80,4 +79,7 @@ var ErrEmptyAddress = fmt.Errorf("%sethereum address cannot be empty%s", RED, RE
 var ErrRejectedTx = fmt.Errorf("%stransaction rejected by Ethereum%s", RED, RESET)
 
 // ErrUnsupportedOS is returned when the operating system is not supported.
-var ErrUnsupportedOS = errors.New("unsupported operating system")
+var ErrUnsupportedOS = fmt.Errorf("%sunsupported operating system%s", RED, RESET)
+
+// ErrNoAvailableRegion is returned when the provided account has no available region
+var ErrNoAvailableRegion = fmt.Errorf("%sno available region to your account%s", RED, RESET)

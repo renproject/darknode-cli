@@ -45,6 +45,10 @@ var (
 		Name:  "config, c",
 		Usage: "An optional configuration file used to update the configuration",
 	}
+	ForceFlag = cli.BoolFlag{
+		Name:  "force, f",
+		Usage: "Force destruction without interactive prompts",
+	}
 )
 
 // AWS flags
@@ -73,6 +77,11 @@ var (
 	AwsElasticIpFlag = cli.StringFlag{
 		Name:  "aws-elastic-ip",
 		Usage: "An optional allocation ID for an elastic IP address",
+	}
+	AwsProfileFlag = cli.StringFlag{
+		Name:  "aws-profile",
+		Value: "default",
+		Usage: "Name of the profile containing the credentials",
 	}
 )
 
