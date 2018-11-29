@@ -40,7 +40,6 @@ func NewSshKeyPair(directory string) (ssh.PublicKey, error) {
 	err = ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
 
 	return publicRsaKey, err
-
 }
 
 // StringfySshPubkey returned the

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,8 +18,8 @@ import (
 // Directory is the directory address of the cli and all darknodes data.
 var Directory = path.Join(os.Getenv("HOME"), ".darknode")
 
-// nodeDirectory return the absolute directory of the node.
-func nodeDirectory(name string) string {
+// nodePath return the absolute directory of the node.
+func nodePath(name string) string {
 	return path.Join(Directory, "darknodes", name)
 }
 
@@ -31,14 +32,6 @@ func StringInSlice(a string, list []string) bool {
 	}
 
 	return false
-}
-
-// pipeToStd sets the input and output stream of the command to os standard
-// input/output stream
-func pipeToStd(cmd *exec.Cmd) {
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 }
 
 // getIp parses the ip address from a bytes representation of
@@ -63,10 +56,10 @@ func getNodesByTag(tag string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	nodes := []string{}
+	nodes := make([]string, 0)
 
 	for _, f := range files {
-		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tagFile := path.Join(Directory, "darknodes", f.Name(), "tags.out")
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
@@ -88,7 +81,7 @@ func getNodesByTags(tags string) ([]string, error) {
 	ts := strings.Split(strings.TrimSpace(tags), ",")
 	nodes := make([]string, 0)
 	for _, f := range files {
-		tagFile := Directory + "/darknodes/" + f.Name() + "/tags.out"
+		tagFile := path.Join(Directory, "darknodes", f.Name(), "tags.out")
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
@@ -105,16 +98,6 @@ func getNodesByTags(tags string) ([]string, error) {
 	}
 
 	return nodes, nil
-}
-
-// cleanUp removes the directory
-func cleanUp(nodeDirectory string) error {
-	cleanCmd := exec.Command("rm", "-rf", nodeDirectory)
-	if err := cleanCmd.Start(); err != nil {
-		return err
-	}
-
-	return cleanCmd.Wait()
 }
 
 // republicAddressToEthAddress converts republic address to ethereum address
@@ -167,15 +150,15 @@ func validateDarknodeName(name string) (string, error) {
 	if name == "" {
 		return "", ErrEmptyNodeName
 	}
-	nodeDir := nodeDirectory(name)
-	if _, err := os.Stat(nodeDir); err != nil {
+	nodePath := nodePath(name)
+	if _, err := os.Stat(nodePath); err != nil {
 		return "", ErrNodeNotExist
 	}
-	if _, err := os.Stat(nodeDir + "/config.json"); os.IsNotExist(err) {
+	if _, err := os.Stat(nodePath + "/config.json"); os.IsNotExist(err) {
 		return "", ErrNodeNotExist
 	}
 
-	return nodeDir, nil
+	return nodePath, nil
 }
 
 // stringToEthereumAddress converts a hex string to a ethereum address.
@@ -190,4 +173,27 @@ func stringToEthereumAddress(addr string) (common.Address, error) {
 	address := common.HexToAddress(addr)
 
 	return address, nil
+}
+
+// run the command and pipe the output to the stdout
+func run(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	return cmd.Wait()
+}
+
+func redirectCommand() (string, error) {
+	switch runtime.GOOS {
+	case "darwin":
+		return "open", nil
+	case "linux":
+		return "xdg-open", nil
+	default:
+		return "", ErrUnsupportedOS
+	}
 }

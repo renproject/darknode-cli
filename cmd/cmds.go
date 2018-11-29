@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os/exec"
 	"strings"
 
 	"github.com/republicprotocol/co-go"
@@ -89,19 +88,14 @@ func startNode(ctx *cli.Context) error {
 
 // startSingleNode starts a single node by its name
 func startSingleNode(name string) error {
-	nodeDir := nodeDirectory(name)
-	ip, err := getIp(nodeDir)
+	nodePath := nodePath(name)
+	ip, err := getIp(nodePath)
 	if err != nil {
 		return err
 	}
-	startScript := "sudo systemctl start darknode"
-	keyPairPath := nodeDir + "/ssh_keypair"
-	startCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", startScript)
-	pipeToStd(startCmd)
-	if err := startCmd.Start(); err != nil {
-		return err
-	}
-	if err := startCmd.Wait(); err != nil {
+	startScript := "systemctl --user start darknode"
+	keyPairPath := nodePath + "/ssh_keypair"
+	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", startScript); err != nil {
 		return err
 	}
 	fmt.Printf("%s[%s] has been turned on.%s \n", GREEN, name, RESET)
@@ -138,19 +132,14 @@ func stopSingleNode(name string) error {
 	if name == "" {
 		return ErrEmptyNodeName
 	}
-	nodeDirectory := nodeDirectory(name)
-	ip, err := getIp(nodeDirectory)
+	nodePath := nodePath(name)
+	ip, err := getIp(nodePath)
 	if err != nil {
 		return err
 	}
-	stopScript := "sudo systemctl stop darknode"
-	keyPairPath := nodeDirectory + "/ssh_keypair"
-	stopCmd := exec.Command("ssh", "-i", keyPairPath, "ubuntu@"+ip, "-oStrictHostKeyChecking=no", stopScript)
-	pipeToStd(stopCmd)
-	if err := stopCmd.Start(); err != nil {
-		return err
-	}
-	if err := stopCmd.Wait(); err != nil {
+	stopScript := "systemctl --user stop darknode"
+	keyPairPath := nodePath + "/ssh_keypair"
+	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", stopScript); err != nil {
 		return err
 	}
 

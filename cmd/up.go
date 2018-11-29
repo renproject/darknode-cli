@@ -4,22 +4,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/urfave/cli"
 )
 
+// Providers have all the cloud service providers currently supported.
+var Providers = []string{"aws", "do"}
+
 // deployNode deploys node to the given cloud provider.
 func deployNode(ctx *cli.Context) error {
-	provider, err := getProvider(ctx)
+	provider, err := provider(ctx)
 	if err != nil {
 		return err
 	}
 
 	switch provider {
 	case "aws":
-		return deployToAws(ctx)
+		return awsDeployment(ctx)
 	case "do":
 		return deployToDo(ctx)
 	default:
@@ -27,98 +30,70 @@ func deployNode(ctx *cli.Context) error {
 	}
 }
 
-// getProvider parses all provider flags and  make sure only
-// one provider is present.
-func getProvider(ctx *cli.Context) (string, error) {
-	var providers = []string{"aws", "do"}
-	aws := ctx.Bool("aws")
-	digitalOcean := ctx.Bool("do")
+// provider parses all provider flags and make sure only one provider is given.
+func provider(ctx *cli.Context) (string, error) {
+	var provider string
 
-	// Make sure only one provider is provided
-	counter, provider := 0, ""
-	for i, j := range []bool{aws, digitalOcean} {
-		if j {
+	counter := 0
+	for i := range Providers {
+		selected := ctx.Bool(Providers[i])
+		if selected {
 			counter++
-			provider = providers[i]
+			provider = Providers[i]
 		}
 	}
 
-	if counter == 0 {
+	switch counter {
+	case 0:
 		return "", ErrNilProvider
-	} else if counter > 1 {
+	case 1:
+		return provider, nil
+	default:
 		return "", ErrMultipleProviders
 	}
-
-	return provider, nil
 }
 
-// createNodeDirectory create the directory for the node.
-func createNodeDirectory(ctx *cli.Context) (string, error) {
-	name := ctx.String("name")
-	tags := ctx.String("tags")
-	nodeDir := nodeDirectory(name)
-
-	// Make sure name is not nil
+// mkdir creates the directory for the darknode.
+func mkdir(name, tags string) error {
 	if name == "" {
-		return "", ErrEmptyNodeName
+		return ErrEmptyNodeName
 	}
+	nodePath := nodePath(name)
 
 	// Check if the directory exists or not.
-	if _, err := os.Stat(nodeDir); err == nil {
-		if _, err := os.Stat(nodeDir + "/multiAddress.out"); os.IsNotExist(err) {
+	if _, err := os.Stat(nodePath); err == nil {
+		if _, err := os.Stat(nodePath + "/multiAddress.out"); os.IsNotExist(err) {
 			// todo : need to ask user whether they want to use the old config.
-			err := cleanUp(nodeDir)
-			if err != nil {
-				return "", err
+			if err := run("rm", "-rf", nodePath); err != nil {
+				return err
 			}
 		} else {
-			return "", ErrNodeExist
+			return ErrNodeExist
 		}
 	}
-	if err := os.Mkdir(nodeDir, 0777); err != nil {
-		return "", err
+	if err := os.Mkdir(nodePath, 0777); err != nil {
+		return err
 	}
 
 	// Store the tags
-	if err := ioutil.WriteFile(nodeDir+"/tags.out", []byte(strings.TrimSpace(tags)), 0666); err != nil {
-		return "", err
-	}
-
-	return name, nil
+	return ioutil.WriteFile(nodePath+"/tags.out", []byte(strings.TrimSpace(tags)), 0666)
 }
 
 // runTerraform initializes and applies terraform
 func runTerraform(nodeDirectory string) error {
-	cmd := fmt.Sprintf("cd %v && terraform init", nodeDirectory)
-	init := exec.Command("bash", "-c", cmd)
-	pipeToStd(init)
-	if err := init.Start(); err != nil {
-		return err
-	}
-	if err := init.Wait(); err != nil {
+	init := fmt.Sprintf("cd %v && terraform init", nodeDirectory)
+	if err := run("bash", "-c", init); err != nil {
 		return err
 	}
 
 	fmt.Printf("%sDeploying dark nodes ... %s\n", GREEN, RESET)
-
-	cmd = fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
-	apply := exec.Command("bash", "-c", cmd)
-	pipeToStd(apply)
-	if err := apply.Start(); err != nil {
-		return err
-	}
-	return apply.Wait()
+	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
+	return run("bash", "-c", apply)
 }
 
 // outputUrl writes success message and the URL for registering the node
 // to the terminal.
-func outputUrl(name, nodeDir string) error {
-	// Update node to different branch according to the network.
-	if err := updateSingleNode(name, "", false); err != nil {
-		return err
-	}
-
-	// Get ip address of the darknode
+func outputUrl(nodeDir string) error {
 	ip, err := getIp(nodeDir)
 	if err != nil {
 		return err
@@ -128,6 +103,16 @@ func outputUrl(name, nodeDir string) error {
 	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s.\n", GREEN, RESET)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
 	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
-	fmt.Printf("\n")
-	return nil
+	for i := 5; i >= 0; i-- {
+		time.Sleep(time.Second)
+		fmt.Printf("\r%sYou will be redirected to register your node in %v seconds%s", GREEN, i, RESET)
+	}
+
+	// Redirect the user to the registering URL.
+	redirect, err := redirectCommand()
+	if err != nil {
+		return err
+	}
+	url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+	return run(redirect, url)
 }

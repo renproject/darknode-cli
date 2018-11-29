@@ -11,6 +11,10 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# Dependency
+Gopkg.lock
+vendor
+
 # IDE config
 .idea/
 .DS_Store

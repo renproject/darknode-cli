@@ -7,13 +7,14 @@ import (
 	"math"
 	"math/big"
 	"os"
-	"os/exec"
+	"path"
 	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/contract/bindings"
@@ -22,47 +23,96 @@ import (
 
 // destroyNode tears down the deployed darknode by its name.
 func destroyNode(ctx *cli.Context) error {
-	name := ctx.Args().First()
 	force := ctx.Bool("force")
-
+	name := ctx.Args().First()
 	if name == "" {
 		cli.ShowCommandHelp(ctx, "down")
 		return ErrEmptyNodeName
 	}
 
-	nodeDirectory := nodeDirectory(name)
-	if !force {
-		ip, err := getIp(nodeDirectory)
-		if err != nil {
-			return ErrNoDeploymentFound
-		}
-
-		for {
-			fmt.Printf("You need to %sderegister your Darknode%s and %swithdraw all fees%s at\n", RED, RESET, RED, RESET)
-			fmt.Printf("https://darknode.republicprotocol.com/status/%v\n", ip)
-			fmt.Println("Have you deregistered your Darknode and withdrawn all fees? (Yes/No)")
-
-			reader := bufio.NewReader(os.Stdin)
-			text, _ := reader.ReadString('\n')
-			input := strings.ToLower(strings.TrimSpace(text))
-			if input == "yes" || input == "y" {
-				break
-			}
-			if input == "no" || input == "n" {
-				return nil
-			}
-		}
+	nodePath := nodePath(name)
+	ip, err := getIp(nodePath)
+	if err != nil {
+		return ErrNoDeploymentFound
 	}
 
-	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
-	cmd := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodeDirectory)
-	destroy := exec.Command("bash", "-c", cmd)
-	pipeToStd(destroy)
-	if err := destroy.Start(); err != nil {
+	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
+	if err != nil {
+		return err
+	}
+	id := config.Address.ID()
+	network := config.Ethereum.Network
+	dnrAddress := common.HexToAddress(dnrAddress(network))
+	testnet := ethereumTestnet(network)
+
+	// Query registry smart contract on Ethereum if the darknode is registered
+	client, err := ethclient.Dial(fmt.Sprintf("https://%v.infura.io", testnet))
+	if err != nil {
+		return err
+	}
+	registry, err := bindings.NewDarknodeRegistry(dnrAddress, client)
+	if err != nil {
+		return err
+	}
+	registered, err := registry.IsRegistered(&bind.CallOpts{}, common.BytesToAddress(id))
+	if err != nil {
 		return err
 	}
 
-	return destroy.Wait()
+	// Redirect the user to the de-registering URL if darknode is still registered.
+	if registered {
+		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
+		for i := 5; i >= 0; i-- {
+			time.Sleep(time.Second)
+			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
+		}
+		fmt.Printf("%sPlease try again after you fully deregister your node%s\n", RED, RESET)
+
+		redirect, err := redirectCommand()
+		if err != nil {
+			return err
+		}
+		url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+		return run(redirect, url)
+	}
+
+	// Check if the darknode is in pending deregistration state.
+	pendingDeregistration, err := registry.IsPendingDeregistration(&bind.CallOpts{}, common.BytesToAddress(id))
+	if err != nil {
+		return err
+	}
+	if pendingDeregistration {
+		fmt.Printf("%sYour node is pending for deregistration%s\n", RED, RESET)
+		fmt.Printf("%sDarknode can only be destroyed when fully deregistred%s\n", RED, RESET)
+		fmt.Printf("%sPlease wait for it to be fully deregistered and try again%s\n", RED, RESET)
+		return nil
+	}
+
+	pendingRegistration, err := registry.IsPendingRegistration(&bind.CallOpts{}, common.BytesToAddress(id))
+	if err != nil {
+		return err
+	}
+	if pendingRegistration {
+		fmt.Printf("%sYour node is pending for registration%s\n", RED, RESET)
+		fmt.Printf("%sDarknode can only be destroyed when fully deregistred%s\n", RED, RESET)
+		fmt.Printf("%sPlease deregister your node after the epoch shuffle and try again%s\n", RED, RESET)
+		return nil
+	}
+
+	if !force {
+		fmt.Println("Do you really want to destroy your darknode? (Yes/No)")
+
+		reader := bufio.NewReader(os.Stdin)
+		text, _ := reader.ReadString('\n')
+		input := strings.ToLower(strings.TrimSpace(text))
+		if input != "yes" && input != "y" {
+			return nil
+		}
+	}
+	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
+
+	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
+	return run("bash", "-c", destroy)
 }
 
 // refund the REN bonds to the darknode operator.
@@ -70,13 +120,13 @@ func refund(ctx *cli.Context) error {
 	name := ctx.Args().First()
 
 	// Validate the name and check if the directory exists.
-	nodeDir, err := validateDarknodeName(name)
+	nodePath, err := validateDarknodeName(name)
 	if err != nil {
 		return err
 	}
 
 	// Read the config and refund the REN bonds
-	config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
+	config, err := config.NewConfigFromJSONFile(nodePath + "/config.json")
 	if err != nil {
 		return err
 	}
@@ -106,7 +156,7 @@ func withdraw(ctx *cli.Context) error {
 	address := ctx.String("address")
 
 	// Validate the name and received ethereum address
-	nodeDir, err := validateDarknodeName(name)
+	nodePath, err := validateDarknodeName(name)
 	if err != nil {
 		return err
 	}
@@ -116,7 +166,7 @@ func withdraw(ctx *cli.Context) error {
 	}
 
 	// Read the darknode config
-	config, err := config.NewConfigFromJSONFile(nodeDir + "/config.json")
+	config, err := config.NewConfigFromJSONFile(nodePath + "/config.json")
 	if err != nil {
 		return err
 	}
@@ -196,6 +246,30 @@ func renAddress(network contract.Network) string {
 		return "0x81793734c6Cf6961B5D0D2d8a30dD7DF1E1803f1"
 	case "testnet":
 		return "0x6f429121a3bd3e6c1c17edbc676eec44cf117faf"
+	default:
+		return ""
+	}
+}
+
+// darknode registry on different testnet
+func dnrAddress(network contract.Network) string {
+	switch network {
+	case "mainnet":
+		return "0x3799006a87FDE3CCFC7666B3E6553B03ED341c2F"
+	case "testnet":
+		return "0x75Fa8349fc9C7C640A4e9F1A1496fBB95D2Dc3d5"
+	default:
+		return ""
+	}
+}
+
+// ethereumTestnet returns the testnet name of different network
+func ethereumTestnet(network contract.Network) string {
+	switch network {
+	case "mainnet":
+		return "mainnet"
+	case "testnet":
+		return "kovan"
 	default:
 		return ""
 	}

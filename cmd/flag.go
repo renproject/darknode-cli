@@ -78,6 +78,11 @@ var (
 		Name:  "aws-elastic-ip",
 		Usage: "An optional allocation ID for an elastic IP address",
 	}
+	AwsProfileFlag = cli.StringFlag{
+		Name:  "aws-profile",
+		Value: "default",
+		Usage: "Name of the profile containing the credentials",
+	}
 )
 
 // Digital ocean flags

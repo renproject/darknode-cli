@@ -19,7 +19,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "2.1.2"
+	app.Version = "2.2.0"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
@@ -28,7 +28,7 @@ func main() {
 			Usage: "Deploy a new Darknode",
 			Flags: []cli.Flag{
 				NameFlag, TagsFlag, KeystoreFlag, PassphraseFlag, NetworkFlag, ConfigFlag,
-				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag,
+				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag, AwsProfileFlag,
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 			},
 			Action: func(c *cli.Context) error {
@@ -99,7 +99,6 @@ func main() {
 				return withdraw(c)
 			},
 		},
-
 		// {
 		// 	Name:  "exec",
 		// 	Usage: "Execute script on nodes",
