@@ -6,13 +6,17 @@ sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode
 
 until sudo apt update; do sleep 2; done
 
-# Update the system-level updates
+# update the system-level updates
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove
 
-# Setup UFW
+# install unzip
+sudo apt-get update
+sudo apt-get install unzip
+
+# setup UFW
 sudo apt-get install ufw
 sudo ufw limit 22/tcp     # ssh
 sudo ufw allow 18514/tcp  # republicprotocol
