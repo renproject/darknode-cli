@@ -19,8 +19,8 @@ mkdir -p ./.darknode
 mv ./darknode-config.json ./.darknode/config.json
 
 cd darknode
-chmod +x install.sh
-./install.sh
+chmod +x update.sh
+./update.sh
 cd
 
 rm darknode.zip

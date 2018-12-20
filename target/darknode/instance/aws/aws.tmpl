@@ -138,28 +138,6 @@ resource "aws_instance" "darknode" {
     }
   }
 
-  provisioner "file" {
-    source      = "${var.path}/services"
-    destination = "$HOME/services"
-
-    connection {
-      type        = "ssh"
-      user        = "darknode"
-      private_key = "${file("${var.ssh_private_key_path}")}"
-    }
-  }
-
-  provisioner "file" {
-    source      = "${var.path}/scripts"
-    destination = "$HOME/scripts"
-
-    connection {
-      type        = "ssh"
-      user        = "darknode"
-      private_key = "${file("${var.ssh_private_key_path}")}"
-    }
-  }
-
   provisioner "remote-exec" {
     script = "${var.path}/scripts/install.sh"
 
