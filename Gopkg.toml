@@ -30,7 +30,7 @@
 
 [[constraint]]
   name = "github.com/republicprotocol/republic-go"
-  branch = "master"
+  branch = "develop"
 
 [[constraint]]
   name = "github.com/republicprotocol/co-go"

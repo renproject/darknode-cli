@@ -12,7 +12,6 @@
 *.out
 
 # Dependency
-Gopkg.lock
 vendor
 
 # IDE config

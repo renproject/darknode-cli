@@ -23,6 +23,7 @@ chmod +x install.sh
 ./install.sh
 cd
 
+rm -rf darknode
 rm darknode.zip
 
 
