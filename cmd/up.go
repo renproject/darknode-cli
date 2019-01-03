@@ -101,11 +101,12 @@ func outputUrl(nodeDir string, publicKey []byte) error {
 	}
 
 	publicKeyHex := hex.EncodeToString(publicKey)
+	url := fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%v?action=register&public_key=0x%v", id, publicKeyHex)
 
 	fmt.Printf("\n")
 	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s.\n", GREEN, RESET)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
-	fmt.Printf("%shttps://darknode-center-testnet.herokuapp.com/darknode/%v?action=register&public_key=0x%v%s\n", GREEN, id, publicKeyHex, RESET)
+	fmt.Printf("%s%s%s\n", GREEN, url, RESET)
 	for i := 5; i >= 0; i-- {
 		time.Sleep(time.Second)
 		fmt.Printf("\r%sYou will be redirected to register your node in %v seconds%s", GREEN, i, RESET)
@@ -116,6 +117,5 @@ func outputUrl(nodeDir string, publicKey []byte) error {
 	if err != nil {
 		return err
 	}
-	url := fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%v?action=register&public_key=0x%v", id, publicKeyHex)
 	return run(redirect, url)
 }

@@ -31,10 +31,6 @@ func destroyNode(ctx *cli.Context) error {
 	}
 
 	nodePath := nodePath(name)
-	ip, err := getIp(nodePath)
-	if err != nil {
-		return ErrNoDeploymentFound
-	}
 
 	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
 	if err != nil {
@@ -61,7 +57,11 @@ func destroyNode(ctx *cli.Context) error {
 
 	// Redirect the user to the de-registering URL if darknode is still registered.
 	if registered {
+		url := fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%v?action=deregister", id)
+
 		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
+		fmt.Printf("%sDeregister your darknode at %s.%s.\n", RED, url, RESET)
+
 		for i := 5; i >= 0; i-- {
 			time.Sleep(time.Second)
 			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
@@ -72,7 +72,7 @@ func destroyNode(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+
 		return run(redirect, url)
 	}
 
