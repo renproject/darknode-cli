@@ -50,6 +50,22 @@ func getIp(nodeDirectory string) (string, error) {
 	return multi.ValueForProtocol(identity.IP4Code)
 }
 
+// getID parses the ID address from a bytes representation of
+// multiAddress.
+func getID(nodeDirectory string) (string, error) {
+	addressFile := nodeDirectory + "/multiAddress.out"
+	data, err := ioutil.ReadFile(addressFile)
+	if err != nil {
+		return "", err
+	}
+	multi, err := identity.NewMultiAddressFromString(strings.TrimSpace(string(data)))
+	if err != nil {
+		return "", err
+	}
+
+	return multi.ValueForProtocol(identity.RepublicCode)
+}
+
 // getNodesByTag return the names of the nodes having the given tag.
 func getNodesByTag(tag string) ([]string, error) {
 	files, err := ioutil.ReadDir(Directory + "/darknodes")

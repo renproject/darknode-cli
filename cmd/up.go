@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -93,16 +94,18 @@ func runTerraform(nodeDirectory string) error {
 
 // outputUrl writes success message and the URL for registering the node
 // to the terminal.
-func outputUrl(nodeDir string) error {
-	ip, err := getIp(nodeDir)
+func outputUrl(nodeDir string, publicKey []byte) error {
+	id, err := getID(nodeDir)
 	if err != nil {
 		return err
 	}
 
+	publicKeyHex := hex.EncodeToString(publicKey)
+
 	fmt.Printf("\n")
 	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s.\n", GREEN, RESET)
 	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
-	fmt.Printf("%shttps://darknode.republicprotocol.com/status/%v%s\n", GREEN, ip, RESET)
+	fmt.Printf("%shttps://darknode-center-testnet.herokuapp.com/darknode/%v?action=register&public_key=0x%v%s\n", GREEN, id, publicKeyHex, RESET)
 	for i := 5; i >= 0; i-- {
 		time.Sleep(time.Second)
 		fmt.Printf("\r%sYou will be redirected to register your node in %v seconds%s", GREEN, i, RESET)
@@ -113,6 +116,6 @@ func outputUrl(nodeDir string) error {
 	if err != nil {
 		return err
 	}
-	url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+	url := fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%v?action=register&public_key=0x%v", id, publicKeyHex)
 	return run(redirect, url)
 }

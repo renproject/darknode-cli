@@ -149,7 +149,8 @@ func deployToDo(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if _, err := NewSshKeyPair(nodePath); err != nil {
+	key, err := NewSshKeyPair(nodePath)
+	if err != nil {
 		return err
 	}
 
@@ -161,7 +162,7 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputUrl(nodePath)
+	return outputUrl(nodePath, key.Marshal())
 }
 
 func doRegionAndDroplet(ctx *cli.Context) (string, string, error) {

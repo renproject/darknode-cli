@@ -73,7 +73,7 @@ func awsDeployment(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputUrl(nodePath)
+	return outputUrl(nodePath, key.Marshal())
 }
 
 // awsCredentials tries to get the AWS credentials from the user input
