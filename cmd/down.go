@@ -109,7 +109,7 @@ func destroyNode(ctx *cli.Context) error {
 			return nil
 		}
 	}
-	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
+	fmt.Printf("%sDestroying your darknode ...%s\n", RESET, RESET)
 
 	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
 	return run("bash", "-c", destroy)
@@ -208,7 +208,7 @@ func withdraw(ctx *cli.Context) error {
 		if receipt.Status == types.ReceiptStatusFailed {
 			return ErrFailedTx
 		}
-		fmt.Printf("%sAll the REN in your darknode address have been withdrawed to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
+		fmt.Printf("%sYour REN has been withdrawn from your darknode to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
 	}
 
 	// Check ETH balance of the darknode
@@ -233,7 +233,7 @@ func withdraw(ctx *cli.Context) error {
 		if receipt.Status == types.ReceiptStatusFailed {
 			return ErrFailedTx
 		}
-		fmt.Printf("%sAll the ETH in your darknode address have been withdrawed to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
+		fmt.Printf("%sYour ETH has been withdrawn from your darknode to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
 	}
 
 	return nil

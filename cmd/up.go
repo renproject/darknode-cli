@@ -11,8 +11,16 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Provider represents a Terraform provider
+type Provider string
+
+const (
+	AWS           Provider = "aws"
+	DIGITAL_OCEAN Provider = "do"
+)
+
 // Providers have all the cloud service providers currently supported.
-var Providers = []string{"aws", "do"}
+var Providers = []Provider{AWS, DIGITAL_OCEAN}
 
 // deployNode deploys node to the given cloud provider.
 func deployNode(ctx *cli.Context) error {
@@ -22,9 +30,9 @@ func deployNode(ctx *cli.Context) error {
 	}
 
 	switch provider {
-	case "aws":
+	case AWS:
 		return awsDeployment(ctx)
-	case "do":
+	case DIGITAL_OCEAN:
 		return deployToDo(ctx)
 	default:
 		return ErrUnknownProvider
@@ -32,12 +40,12 @@ func deployNode(ctx *cli.Context) error {
 }
 
 // provider parses all provider flags and make sure only one provider is given.
-func provider(ctx *cli.Context) (string, error) {
-	var provider string
+func provider(ctx *cli.Context) (Provider, error) {
+	var provider Provider
 
 	counter := 0
 	for i := range Providers {
-		selected := ctx.Bool(Providers[i])
+		selected := ctx.Bool(string(Providers[i]))
 		if selected {
 			counter++
 			provider = Providers[i]
@@ -87,14 +95,14 @@ func runTerraform(nodeDirectory string) error {
 		return err
 	}
 
-	fmt.Printf("%sDeploying dark nodes ... %s\n", GREEN, RESET)
-	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve", nodeDirectory)
+	fmt.Printf("\n%sDeploying dark nodes ... %s\n", RESET, RESET)
+	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", nodeDirectory)
 	return run("bash", "-c", apply)
 }
 
-// outputUrl writes success message and the URL for registering the node
+// outputURL writes success message and the URL for registering the node
 // to the terminal.
-func outputUrl(nodeDir string, publicKey []byte) error {
+func outputURL(nodeDir string, publicKey []byte) error {
 	id, err := getID(nodeDir)
 	if err != nil {
 		return err
@@ -104,13 +112,13 @@ func outputUrl(nodeDir string, publicKey []byte) error {
 	url := fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%v?action=register&public_key=0x%v", id, publicKeyHex)
 
 	fmt.Printf("\n")
-	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s.\n", GREEN, RESET)
-	fmt.Printf("%sJoin the network by registering your Darknode at%s\n", GREEN, RESET)
-	fmt.Printf("%s%s%s\n", GREEN, url, RESET)
-	for i := 5; i >= 0; i-- {
+	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s\n\n", GREEN, RESET)
+	fmt.Printf("%sJoin the network by registering your Darknode at %s%s\n\n", GREEN, url, RESET)
+	for i := 5; i > 0; i-- {
+		fmt.Printf("\rYou will be redirected to register your node in %v seconds", i)
 		time.Sleep(time.Second)
-		fmt.Printf("\r%sYou will be redirected to register your node in %v seconds%s", GREEN, i, RESET)
 	}
+	fmt.Printf("\r")
 
 	// Redirect the user to the registering URL.
 	redirect, err := redirectCommand()
