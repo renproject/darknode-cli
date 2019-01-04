@@ -162,7 +162,7 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputURL(nodePath, key.Marshal())
+	return outputURL(nodePath, name, key.Marshal())
 }
 
 func doRegionAndDroplet(ctx *cli.Context) (string, string, error) {
