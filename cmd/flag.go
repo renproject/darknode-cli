@@ -30,8 +30,8 @@ var (
 	}
 	NetworkFlag = cli.StringFlag{
 		Name:  "network",
-		Value: "testnet",
-		Usage: "Darkpool network of your node",
+		Value: "mainnet",
+		Usage: "Darkpool network of your node (default: mainnet)",
 	}
 	BranchFlag = cli.StringFlag{
 		Name:  "branch, b",

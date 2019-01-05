@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"text/template"
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
@@ -136,6 +137,12 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
+	network := ctx.String("network")
+	network = strings.ToLower(network)
+	if network != "testnet" || network != "mainnet" {
+		return ErrInvalidNetwork
+	}
+
 	// Create node directory
 	name := ctx.String("name")
 	tags := ctx.String("tags")
@@ -162,7 +169,7 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputURL(nodePath, name, key.Marshal())
+	return outputURL(nodePath, name, network, key.Marshal())
 }
 
 func doRegionAndDroplet(ctx *cli.Context) (string, string, error) {

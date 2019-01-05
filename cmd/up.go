@@ -102,14 +102,20 @@ func runTerraform(nodeDirectory string) error {
 
 // outputURL writes success message and the URL for registering the node
 // to the terminal.
-func outputURL(nodeDir string, name string, publicKey []byte) error {
+func outputURL(nodeDir, name, network string, publicKey []byte) error {
 	id, err := getID(nodeDir)
 	if err != nil {
 		return err
 	}
 
 	publicKeyHex := hex.EncodeToString(publicKey)
-	url := fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
+	var url string
+	switch network {
+	case "mainnet":
+		url = fmt.Sprintf("https://darknode-center-mainnet.herokuapp.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
+	case "testnet":
+		url = fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
+	}
 
 	fmt.Printf("\n")
 	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s\n\n", GREEN, RESET)

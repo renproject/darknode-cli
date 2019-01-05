@@ -47,6 +47,12 @@ func awsDeployment(ctx *cli.Context) error {
 		return err
 	}
 
+	network := ctx.String("network")
+	network = strings.ToLower(network)
+	if network != "testnet" || network != "mainnet" {
+		return ErrInvalidNetwork
+	}
+
 	// Create node directory
 	name := ctx.String("name")
 	tags := ctx.String("tags")
@@ -73,7 +79,7 @@ func awsDeployment(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputURL(nodePath, name, key.Marshal())
+	return outputURL(nodePath, name, network, key.Marshal())
 }
 
 // awsCredentials tries to get the AWS credentials from the user input
