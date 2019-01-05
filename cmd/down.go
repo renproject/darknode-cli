@@ -31,10 +31,6 @@ func destroyNode(ctx *cli.Context) error {
 	}
 
 	nodePath := nodePath(name)
-	ip, err := getIp(nodePath)
-	if err != nil {
-		return ErrNoDeploymentFound
-	}
 
 	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
 	if err != nil {
@@ -43,10 +39,10 @@ func destroyNode(ctx *cli.Context) error {
 	id := config.Address.ID()
 	network := config.Ethereum.Network
 	dnrAddress := common.HexToAddress(dnrAddress(network))
-	testnet := ethereumTestnet(network)
+	ethereumNet := ethereumNetwork(network)
 
 	// Query registry smart contract on Ethereum if the darknode is registered
-	client, err := ethclient.Dial(fmt.Sprintf("https://%v.infura.io", testnet))
+	client, err := ethclient.Dial(fmt.Sprintf("https://%v.infura.io", ethereumNet))
 	if err != nil {
 		return err
 	}
@@ -61,7 +57,20 @@ func destroyNode(ctx *cli.Context) error {
 
 	// Redirect the user to the de-registering URL if darknode is still registered.
 	if registered {
+		var url string
+
+		switch network {
+		case "testnet":
+			url = fmt.Sprintf("https://darknode-command-center-testnet.republicprotocol.com/darknode/%v?action=deregister", id)
+		case "mainnet":
+			url = fmt.Sprintf("https://darknode-command-center.republicprotocol.com/darknode/%v?action=deregister", id)
+		default:
+			return ErrUnknownNetwork
+		}
+
 		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
+		fmt.Printf("%sDeregister your darknode at %s.%s.\n", RED, url, RESET)
+
 		for i := 5; i >= 0; i-- {
 			time.Sleep(time.Second)
 			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
@@ -72,7 +81,7 @@ func destroyNode(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		url := fmt.Sprintf("https://darknode.republicprotocol.com/status/%v", ip)
+
 		return run(redirect, url)
 	}
 
@@ -109,7 +118,7 @@ func destroyNode(ctx *cli.Context) error {
 			return nil
 		}
 	}
-	fmt.Printf("%sDestroying your darknode ...%s\n", GREEN, RESET)
+	fmt.Printf("%sDestroying your darknode ...%s\n", RESET, RESET)
 
 	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
 	return run("bash", "-c", destroy)
@@ -208,7 +217,7 @@ func withdraw(ctx *cli.Context) error {
 		if receipt.Status == types.ReceiptStatusFailed {
 			return ErrFailedTx
 		}
-		fmt.Printf("%sAll the REN in your darknode address have been withdrawed to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
+		fmt.Printf("%sYour REN has been withdrawn from your darknode to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
 	}
 
 	// Check ETH balance of the darknode
@@ -233,7 +242,7 @@ func withdraw(ctx *cli.Context) error {
 		if receipt.Status == types.ReceiptStatusFailed {
 			return ErrFailedTx
 		}
-		fmt.Printf("%sAll the ETH in your darknode address have been withdrawed to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
+		fmt.Printf("%sYour ETH has been withdrawn from your darknode to [%v]%s \n", GREEN, receiverAddr.Hex(), RESET)
 	}
 
 	return nil
@@ -243,7 +252,7 @@ func withdraw(ctx *cli.Context) error {
 func renAddress(network contract.Network) string {
 	switch network {
 	case "mainnet":
-		return "0x81793734c6Cf6961B5D0D2d8a30dD7DF1E1803f1"
+		return "0x408e41876cCCDC0F92210600ef50372656052a38"
 	case "testnet":
 		return "0x6f429121a3bd3e6c1c17edbc676eec44cf117faf"
 	default:
@@ -255,7 +264,7 @@ func renAddress(network contract.Network) string {
 func dnrAddress(network contract.Network) string {
 	switch network {
 	case "mainnet":
-		return "0x3799006a87FDE3CCFC7666B3E6553B03ED341c2F"
+		return "0x34bd421C7948Bc16f826Fd99f9B785929b121633"
 	case "testnet":
 		return "0x75Fa8349fc9C7C640A4e9F1A1496fBB95D2Dc3d5"
 	default:
@@ -263,8 +272,9 @@ func dnrAddress(network contract.Network) string {
 	}
 }
 
-// ethereumTestnet returns the testnet name of different network
-func ethereumTestnet(network contract.Network) string {
+// ethereumNetwork returns the ethereum network name of the given republic
+// protocol network
+func ethereumNetwork(network contract.Network) string {
 	switch network {
 	case "mainnet":
 		return "mainnet"

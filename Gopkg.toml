@@ -26,15 +26,15 @@
 
 [[constraint]]
   name = "github.com/ethereum/go-ethereum"
-  version = "1.8.12"
+  version = "1.8.17"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/republicprotocol/republic-go"
+  branch = "develop"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/republicprotocol/co-go"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/urfave/cli"

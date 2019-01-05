@@ -19,7 +19,7 @@ func GetConfigOrGenerateNew(ctx *cli.Context, directory string) (config.Config, 
 	configFile := ctx.String("config")
 	network := ctx.String("network")
 
-	if network != "testnet" {
+	if network != "testnet" && network != "mainnet" {
 		return config.Config{}, ErrUnknownNetwork
 	}
 	// Parse the keystore or create a new random one.
@@ -88,16 +88,16 @@ func BootstrapNodes(network string) []identity.MultiAddress {
 
 	switch network {
 	case "mainnet":
-		b1, _ := identity.NewMultiAddressFromString("/ip4/35.174.101.254/tcp/18514/republic/8MHmkFdy1miDmChmv243WTVg8U8H1t")
-		b2, _ := identity.NewMultiAddressFromString("/ip4/18.221.96.210/tcp/18514/republic/8MHdjyZxfuQT7unjYWzFCpm6m4qJNL")
-		b3, _ := identity.NewMultiAddressFromString("/ip4/52.9.204.195/tcp/18514/republic/8MG7prjbz51yqn1fqSygKSJfW3geBF")
-		b4, _ := identity.NewMultiAddressFromString("/ip4/54.201.216.97/tcp/18514/republic/8MKXcuQAjR2eEq8bsSHDPkYEmqmjtj")
-		b5, _ := identity.NewMultiAddressFromString("/ip4/52.77.88.84/tcp/18514/republic/8MJE7dUD8rHbYJ4RoWuVD6re4LKPVL")
-		b6, _ := identity.NewMultiAddressFromString("/ip4/54.252.152.19/tcp/18514/republic/8MJXyfjYuVZDPAfDm63G1NH1khgb2A")
-		b7, _ := identity.NewMultiAddressFromString("/ip4/18.195.208.147/tcp/18514/republic/8MHe93qDv1dBxoxygKLmeRwmMvpRam")
-		b8, _ := identity.NewMultiAddressFromString("/ip4/54.171.114.214/tcp/18514/republic/8MH2zgndxdCYReXL6uwggaCKGRHzdw")
+		b1, _ := identity.NewMultiAddressFromString("/ip4/18.228.241.135/tcp/18514/republic/8MGdaR6EfrQdDb1MNDbYYvdx3KKqoc")
+		// b2, _ := identity.NewMultiAddressFromString("/ip4/18.221.96.210/tcp/18514/republic/8MHdjyZxfuQT7unjYWzFCpm6m4qJNL")
+		// b3, _ := identity.NewMultiAddressFromString("/ip4/52.9.204.195/tcp/18514/republic/8MG7prjbz51yqn1fqSygKSJfW3geBF")
+		// b4, _ := identity.NewMultiAddressFromString("/ip4/54.201.216.97/tcp/18514/republic/8MKXcuQAjR2eEq8bsSHDPkYEmqmjtj")
+		// b5, _ := identity.NewMultiAddressFromString("/ip4/52.77.88.84/tcp/18514/republic/8MJE7dUD8rHbYJ4RoWuVD6re4LKPVL")
+		// b6, _ := identity.NewMultiAddressFromString("/ip4/54.252.152.19/tcp/18514/republic/8MJXyfjYuVZDPAfDm63G1NH1khgb2A")
+		// b7, _ := identity.NewMultiAddressFromString("/ip4/18.195.208.147/tcp/18514/republic/8MHe93qDv1dBxoxygKLmeRwmMvpRam")
+		// b8, _ := identity.NewMultiAddressFromString("/ip4/54.171.114.214/tcp/18514/republic/8MH2zgndxdCYReXL6uwggaCKGRHzdw")
 
-		addresess = append(addresess, b1, b2, b3, b4, b5, b6, b7, b8)
+		addresess = append(addresess, b1)
 	case "testnet":
 		b1, _ := identity.NewMultiAddressFromString("/ip4/18.211.224.194/tcp/18514/republic/8MJ7iKwcDxjndpD9EcXPgzKL9QJo2A")
 		b2, _ := identity.NewMultiAddressFromString("/ip4/52.53.120.119/tcp/18514/republic/8MGdWRSn51Bc7ievAAkZ6x1hFAiJjf")
