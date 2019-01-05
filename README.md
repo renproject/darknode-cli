@@ -45,20 +45,20 @@ These guidelines are for advanced users. If you just want to see what deploying 
 To deploy a Darknode on AWS, open a terminal and run:
 
 ```sh
-darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
+darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY
 ``` 
 
 The Darknode CLI will automatically use the credentials available at `$HOME/.aws/credentials` if you do not explicitly set the `--access-key` and `--secret-key` arguments.
 By default it will use the credentials of `default` profile,but you can specify which profile you want to use for deployment by:
 
 ```sh
-darknode up --network testnet --name my-first-darknode --aws --aws-profile PROFILE-NAME
+darknode up --name my-first-darknode --aws --aws-profile PROFILE-NAME
 ```
 
 You can also specify the region and instance type you want to use for the Darknode:
 
 ```sh
-darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
+darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
 ``` 
 
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
@@ -68,7 +68,7 @@ Make sure you give the same region of the elastic IP to the darknode.
 
 
 ```sh
-darknode up --network testnet --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region SAME-REGION-AS-EIP --aws-elastic-ip EIP-ALLOCATION-ID
+darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region SAME-REGION-AS-EIP --aws-elastic-ip EIP-ALLOCATION-ID
 ``` 
 
 #### Digital Ocean
@@ -77,13 +77,13 @@ Follow the steps in the [tutorial](https://www.digitalocean.com/docs/api/create-
 To deploy a Darknode on Digital Ocean, open a terminal and run:
 
 ```sh
-darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-TOKEN
+darknode up --name my-first-darknode --do --do-token YOUR-API-TOKEN
 ``` 
 
 You can also specify the region and droplet size you want to use for the Darknode:
 
 ```sh
-darknode up --network testnet --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
+darknode up --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
 ``` 
 
 The default droplet size is `s-4vcpu-8gb` and region will be random. 
