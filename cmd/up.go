@@ -112,9 +112,9 @@ func outputURL(nodeDir, name, network string, publicKey []byte) error {
 	var url string
 	switch network {
 	case "mainnet":
-		url = fmt.Sprintf("https://darknode-center-mainnet.herokuapp.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
+		url = fmt.Sprintf("https://darknode-command-center.republicprotocol.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
 	case "testnet":
-		url = fmt.Sprintf("https://darknode-center-testnet.herokuapp.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
+		url = fmt.Sprintf("https://darknode-command-center-testnet.republicprotocol.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
 	}
 
 	fmt.Printf("\n")
