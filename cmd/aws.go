@@ -49,8 +49,8 @@ func awsDeployment(ctx *cli.Context) error {
 
 	network := ctx.String("network")
 	network = strings.ToLower(network)
-	if network != "testnet" || network != "mainnet" {
-		return ErrInvalidNetwork
+	if network != "testnet" && network != "mainnet" {
+		return ErrUnknownNetwork
 	}
 
 	// Create node directory

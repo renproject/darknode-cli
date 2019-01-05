@@ -83,6 +83,3 @@ var ErrUnsupportedOS = fmt.Errorf("%sunsupported operating system%s", RED, RESET
 
 // ErrNoAvailableRegion is returned when the provided account has no available region
 var ErrNoAvailableRegion = fmt.Errorf("%sno available region to your account%s", RED, RESET)
-
-// ErrInvalidNetwork is returned when an invalid network is passed.
-var ErrInvalidNetwork = fmt.Errorf("%splease provide a valid network%s")
