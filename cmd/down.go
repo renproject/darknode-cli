@@ -61,9 +61,9 @@ func destroyNode(ctx *cli.Context) error {
 
 		switch network {
 		case "testnet":
-			url = fmt.Sprintf("https://darknode-command-center-testnet.republicprotocol.com/darknode/%v?action=deregister", id)
+			url = fmt.Sprintf("https://dcc-testnet.republicprotocol.com/darknode/%v?action=deregister", id)
 		case "mainnet":
-			url = fmt.Sprintf("https://darknode-command-center.republicprotocol.com/darknode/%v?action=deregister", id)
+			url = fmt.Sprintf("https://dcc.republicprotocol.com/darknode/%v?action=deregister", id)
 		default:
 			return ErrUnknownNetwork
 		}
