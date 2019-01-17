@@ -15,6 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pkg/errors"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/contract/bindings"
@@ -134,7 +135,7 @@ func refund(ctx *cli.Context) error {
 		return err
 	}
 
-	// Read the config and refund the REN bonds
+	// Read the config and connect to Ethereum
 	config, err := config.NewConfigFromJSONFile(nodePath + "/config.json")
 	if err != nil {
 		return err
@@ -144,6 +145,21 @@ func refund(ctx *cli.Context) error {
 		return err
 	}
 	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
+
+	// Check if the darknode is refundable
+	dnr, err := bindings.NewDarknodeRegistry(common.HexToAddress(conn.Config.DarknodeRegistryAddress), bind.ContractBackend(conn.Client))
+	if err != nil {
+		return err
+	}
+	refundable, err := dnr.IsRefundable(&bind.CallOpts{}, common.BytesToAddress(config.Address.ID()))
+	if err != nil {
+		return err
+	}
+	if !refundable {
+		return errors.Errorf("%sThe darknode is not refundable, please make sure your darknode is fully deregistered%s\n", RED, RESET)
+	}
+
+	// Refund the bonds
 	contractBinder, err := contract.NewBinder(auth, conn)
 	if err != nil {
 		return err
