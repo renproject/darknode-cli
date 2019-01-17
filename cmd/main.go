@@ -86,7 +86,7 @@ func main() {
 		},
 		{
 			Name:  "refund",
-			Usage: "refund the bond to the operator account",
+			Usage: "refund the bond to the operator account. The darknode needs to be fully deregistered to be refunded.",
 			Action: func(c *cli.Context) error {
 				return refund(c)
 			},

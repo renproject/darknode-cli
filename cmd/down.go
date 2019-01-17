@@ -15,7 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/pkg/errors"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/contract/bindings"
@@ -156,7 +155,7 @@ func refund(ctx *cli.Context) error {
 		return err
 	}
 	if !refundable {
-		return errors.Errorf("%sThe darknode is not refundable, please make sure your darknode is fully deregistered%s\n", RED, RESET)
+		return fmt.Errorf("%sThe darknode is not refundable, please deregister your darknode first.%s\n", RED, RESET)
 	}
 
 	// Refund the bonds
