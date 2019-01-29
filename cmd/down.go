@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"math"
 	"math/big"
 	"os"
@@ -18,6 +20,7 @@ import (
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/contract"
 	"github.com/republicprotocol/republic-go/contract/bindings"
+	"github.com/republicprotocol/republic-go/identity"
 	"github.com/urfave/cli"
 )
 
@@ -30,84 +33,39 @@ func destroyNode(ctx *cli.Context) error {
 		return ErrEmptyNodeName
 	}
 
+	// Read the node config
 	nodePath := nodePath(name)
-
 	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
 	if err != nil {
 		return err
 	}
 	id := config.Address.ID()
-	network := config.Ethereum.Network
-	dnrAddress := common.HexToAddress(dnrAddress(network))
-	ethereumNet := ethereumNetwork(network)
+	address := common.BytesToAddress(id)
 
-	// Query registry smart contract on Ethereum if the darknode is registered
-	client, err := ethclient.Dial(fmt.Sprintf("https://%v.infura.io", ethereumNet))
+	// Connect to Ethereum
+	_, dnr, err := connect(config.Ethereum.Network)
 	if err != nil {
 		return err
 	}
-	registry, err := bindings.NewDarknodeRegistry(dnrAddress, client)
+	// Check if the node is registered
+	if err := checkRegistered(dnr, config.Ethereum.Network, id, address); err != nil {
+		return err
+	}
+	// Check if the node is in pending registration/deregistration stage
+	if err := checkPendingStage(dnr, address); err != nil {
+		return err
+	}
+	// Check if the darknode has been refunded
+	refunded, err := dnr.IsRefunded(&bind.CallOpts{}, address)
 	if err != nil {
 		return err
 	}
-	registered, err := registry.IsRegistered(&bind.CallOpts{}, common.BytesToAddress(id))
-	if err != nil {
-		return err
-	}
-
-	// Redirect the user to the de-registering URL if darknode is still registered.
-	if registered {
-		var url string
-
-		switch network {
-		case "testnet":
-			url = fmt.Sprintf("https://dcc-testnet.republicprotocol.com/darknode/%v?action=deregister", id)
-		case "mainnet":
-			url = fmt.Sprintf("https://dcc.republicprotocol.com/darknode/%v?action=deregister", id)
-		default:
-			return ErrUnknownNetwork
-		}
-
-		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
-		fmt.Printf("%sDeregister your darknode at %s.%s.\n", RED, url, RESET)
-
-		for i := 5; i >= 0; i-- {
-			time.Sleep(time.Second)
-			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
-		}
-		fmt.Printf("%sPlease try again after you fully deregister your node%s\n", RED, RESET)
-
-		redirect, err := redirectCommand()
-		if err != nil {
-			return err
-		}
-
-		return run(redirect, url)
-	}
-
-	// Check if the darknode is in pending deregistration state.
-	pendingDeregistration, err := registry.IsPendingDeregistration(&bind.CallOpts{}, common.BytesToAddress(id))
-	if err != nil {
-		return err
-	}
-	if pendingDeregistration {
-		fmt.Printf("%sYour node is pending for deregistration%s\n", RED, RESET)
-		fmt.Printf("%sDarknode can only be destroyed when fully deregistred%s\n", RED, RESET)
-		fmt.Printf("%sPlease wait for it to be fully deregistered and try again%s\n", RED, RESET)
+	if !refunded {
+		fmt.Printf("You haven't refund your darknode. Please refund with `darknode refund %v` command", name)
 		return nil
 	}
 
-	pendingRegistration, err := registry.IsPendingRegistration(&bind.CallOpts{}, common.BytesToAddress(id))
-	if err != nil {
-		return err
-	}
-	if pendingRegistration {
-		fmt.Printf("%sYour node is pending for registration%s\n", RED, RESET)
-		fmt.Printf("%sDarknode can only be destroyed when fully deregistred%s\n", RED, RESET)
-		fmt.Printf("%sPlease deregister your node after the epoch shuffle and try again%s\n", RED, RESET)
-		return nil
-	}
-
+	// Check if user want to process without extra confirmation
 	if !force {
 		fmt.Println("Do you really want to destroy your darknode? (Yes/No)")
 
@@ -134,24 +92,49 @@ func refund(ctx *cli.Context) error {
 		return err
 	}
 
-	// Read the config and refund the REN bonds
+	// Read the config and connect to Ethereum
 	config, err := config.NewConfigFromJSONFile(nodePath + "/config.json")
 	if err != nil {
 		return err
 	}
-	conn, err := contract.Connect(config.Ethereum)
+	client, dnr, err := connect(config.Ethereum.Network)
 	if err != nil {
 		return err
 	}
+	id := config.Address.ID()
+	address := common.BytesToAddress(id)
 	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
-	contractBinder, err := contract.NewBinder(auth, conn)
+
+	refundable, err := dnr.IsRefundable(&bind.CallOpts{}, address)
 	if err != nil {
 		return err
 	}
-	if err := contractBinder.Refund(config.Address.ID()); err != nil {
-		if strings.Contains(err.Error(), "failed to estimate gas needed") {
-			return ErrRejectedTx
+	if !refundable {
+		// Check if the darknode has been refunded
+		refunded, err := dnr.IsRefunded(&bind.CallOpts{}, address)
+		if err != nil {
+			return err
 		}
+		if refunded {
+			return errors.New("you have already refunded the darknode")
+		}
+
+		// Check if the node is registered
+		if err := checkRegistered(dnr, config.Ethereum.Network, id, address); err != nil {
+			return err
+		}
+		// Check if the node is in pending registration/deregistration stage
+		return checkPendingStage(dnr, address)
+	}
+
+	tx, err := dnr.Refund(auth, address)
+	if err != nil {
+		return err
+	}
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	_, err = bind.WaitMined(timeoutCtx, client, tx)
+	if err != nil {
 		return err
 	}
 	fmt.Printf("%sYour REN bonds have been refunded to the operator account%s \n", GREEN, RESET)
@@ -196,6 +179,9 @@ func withdraw(ctx *cli.Context) error {
 		return ErrUnknownNetwork
 	}
 	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), bind.ContractBackend(conn.Client))
+	if err != nil {
+		return err
+	}
 	renBalance, err := tokenContract.BalanceOf(&bind.CallOpts{}, darknodeEthAddress)
 	if err != nil {
 		return err
@@ -283,4 +269,68 @@ func ethereumNetwork(network contract.Network) string {
 	default:
 		return ""
 	}
+}
+
+func connect(network contract.Network) (*ethclient.Client, *bindings.DarknodeRegistry, error) {
+	dnrAddr := common.HexToAddress(dnrAddress(network))
+	ethereumNet := ethereumNetwork(network)
+	client, err := ethclient.Dial(fmt.Sprintf("https://%v.infura.io", ethereumNet))
+	if err != nil {
+		return nil, nil, err
+	}
+	dnr, err := bindings.NewDarknodeRegistry(dnrAddr, client)
+	return client, dnr, err
+}
+
+func checkRegistered(dnr *bindings.DarknodeRegistry, network contract.Network, id identity.ID, address common.Address) error {
+	registered, err := dnr.IsRegistered(&bind.CallOpts{}, address)
+	if err != nil {
+		return err
+	}
+	if registered {
+		var url string
+		switch network {
+		case "testnet":
+			url = fmt.Sprintf("https://dcc-testnet.republicprotocol.com/darknode/%v?action=deregister", id)
+		case "mainnet":
+			url = fmt.Sprintf("https://dcc.republicprotocol.com/darknode/%v?action=deregister", id)
+		default:
+			return ErrUnknownNetwork
+		}
+
+		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
+		fmt.Printf("%sDeregister your darknode at %s%s\n", RED, url, RESET)
+
+		for i := 5; i >= 0; i-- {
+			time.Sleep(time.Second)
+			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
+		}
+		redirect, err := redirectCommand()
+		if err != nil {
+			return err
+		}
+		if err := run(redirect, url); err != nil {
+			return err
+		}
+		return fmt.Errorf("%s\nPlease try again after you fully deregister your node%s\n", RED, RESET)
+	}
+	return nil
+}
+
+func checkPendingStage(dnr *bindings.DarknodeRegistry, address common.Address) error {
+	pendingRegistration, err := dnr.IsPendingRegistration(&bind.CallOpts{}, address)
+	if err != nil {
+		return err
+	}
+	if pendingRegistration {
+		return fmt.Errorf("%sYour node is currently in pending registration stage, please deregister your node after next epoch shuffle%s\n", RED, RESET)
+	}
+	pendingDeregistration, err := dnr.IsPendingDeregistration(&bind.CallOpts{}, address)
+	if err != nil {
+		return err
+	}
+	if pendingDeregistration {
+		return fmt.Errorf("%sYour node is currently in pending deregistration stage, please wait for next epoch shuffle and try again%s\n", RED, RESET)
+	}
+	return nil
 }

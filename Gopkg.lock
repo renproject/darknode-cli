@@ -14,14 +14,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3639e0fa327a76bb39b5279696a7fd90584082785de52671de0cb5ae680cda0a"
+  digest = "1:777cd5e02fa5e4dbd84085af4634903d2f5e12141ca53a383dee7ebad1800f63"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
   pruneopts = "T"
-  revision = "aa2a42e13be68c4a95fe9e58003adaf63fe6476f"
+  revision = "8f049bdb8feb7d7d5f1a9b9cd854396112fb0c0e"
 
 [[projects]]
-  digest = "1:ba8c39344b864ac311ca85623b5f20893b9b43f77e8a0485aa6f9920eb2c28fd"
+  digest = "1:4b14daec315992b3128bfefc44182537c163a21233ba348a7749560a13772dff"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws/awserr",
@@ -30,16 +30,16 @@
     "internal/shareddefaults",
   ]
   pruneopts = "T"
-  revision = "cae66ecf52e0171f937f1fa80e12130fbb652474"
-  version = "v1.16.9"
+  revision = "81f3829f5a9d041041bdf56e55926691309d7699"
+  version = "v1.16.26"
 
 [[projects]]
   branch = "master"
-  digest = "1:74e6390b521e5f68be220af535e4122b246401bbd118a08a36cac84818bae4ad"
+  digest = "1:80c3d831cb5d93d8e585d7a99256b2009a72453506e6c5a1a36e1271f7d47127"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
   pruneopts = "T"
-  revision = "7d2daa5bfef28c5e282571bc06416516936115ee"
+  revision = "ed77733ec07dfc8a513741138419b8d9d3de9d2d"
 
 [[projects]]
   digest = "1:fed1f537c2f1269fe475a8556c393fe466641682d73ef8fd0491cd3aa1e47bad"
@@ -58,7 +58,7 @@
   version = "v1.7.1"
 
 [[projects]]
-  digest = "1:87fa9f2d71fd2516e6c0d906b7eb58886c8b4fcc6ee8cada0553a0e50bfeef3a"
+  digest = "1:b42be5a3601f833e0b9f2d6625d887ec1309764bfcac3d518f3db425dcd4ec5c"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     ".",
@@ -83,7 +83,6 @@
     "crypto/bn256/cloudflare",
     "crypto/bn256/google",
     "crypto/secp256k1",
-    "crypto/sha3",
     "ethclient",
     "ethdb",
     "event",
@@ -96,8 +95,8 @@
     "trie",
   ]
   pruneopts = "T"
-  revision = "24d727b6d6e2c0cde222fa12155c4a6db5caaf2e"
-  version = "v1.8.20"
+  revision = "9dc5d1a915ac0e0bd8429d6ac41df50eec91de5f"
+  version = "v1.8.21"
 
 [[projects]]
   digest = "1:4c183be9fd1680d917006bb4884c1ac3d00a6bd33b0d36c8439c8cbd011e5aac"
@@ -168,11 +167,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:445210ef1e723060b3ebeb691648b5090f154992ee35f7065b70a6a5a96a3bb8"
+  digest = "1:ccf646ee8a07f460c43e994bb9a79e594dc3636dca1b607c294b7df5b1624868"
   name = "github.com/minio/sha256-simd"
   packages = ["."]
   pruneopts = "T"
-  revision = "51976451ce1942acbb55707a983ed232fa027110"
+  revision = "cc1980cb03383b1d46f518232672584432d7532d"
 
 [[projects]]
   digest = "1:07c8d9601e95a4f8c2ff7c697db1974bf74abde8a0a0f09f736f53d9bc88095c"
@@ -184,19 +183,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5d6be87bfd3e8174362b611e416578a7b4db88ed57e964f40a2e0199dbb388e7"
+  digest = "1:b782eff9c054952dbbf7595b3772064f7567aec7fc69f4f398107ce330e407ff"
   name = "github.com/multiformats/go-multiaddr"
   packages = ["."]
   pruneopts = "T"
-  revision = "312b9db3552cf2045efb3ab5d10104c3ec8ff79d"
+  revision = "152990b98bf9dce961ca2aefb1002cd96cfff6cb"
 
 [[projects]]
   branch = "master"
-  digest = "1:d601b4930259bfbdb20e2b85dbecc660dc67aaa8fec94e1df3afad49e0bfc2df"
+  digest = "1:870888967337c579909b6017019b9f288325fab9417d398aeedf6172286e9b33"
   name = "github.com/multiformats/go-multihash"
   packages = ["."]
   pruneopts = "T"
-  revision = "1dbee63c8258e5714536b554eeabe0a1068b259a"
+  revision = "3cedc8477438947930aa0eb653e43f7d8c4feded"
 
 [[projects]]
   digest = "1:e5d0bd87abc2781d14e274807a470acd180f0499f8bf5bb18606e9ec22ad9de9"
@@ -207,12 +206,12 @@
   version = "v1.2"
 
 [[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "T"
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   branch = "master"
@@ -224,7 +223,7 @@
 
 [[projects]]
   branch = "develop"
-  digest = "1:fbbd94c0fb292a4f5b6ffe13d92e947654d0445ef6fff28e6ffe59a7287562c4"
+  digest = "1:e7c0477c26ab218fe02c82313def8041b1858891d4132b0fcc9b780b123af4ae"
   name = "github.com/republicprotocol/republic-go"
   packages = [
     "cmd/darknode/config",
@@ -241,7 +240,7 @@
     "stackint/asm",
   ]
   pruneopts = "T"
-  revision = "1b9ff1e3a9f127c25e62743b0c7befb3a72e0ea4"
+  revision = "acf8ea72d67d2da7aa9fecd000d3c73cde87c800"
 
 [[projects]]
   digest = "1:9787d2d3220cbfd444596afd03ab0abcf391df169b789fbe3eae27fa2e426cf6"
@@ -298,7 +297,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d470cb69884835b1800e93ceceb85afcf981ea647e61d99398a76af7a95bad6a"
+  digest = "1:eb5b910ca0953d88451895190c80fb2bbfb12b91ac73684200be391997eaa132"
   name = "golang.org/x/crypto"
   packages = [
     "blake2s",
@@ -315,26 +314,26 @@
     "ssh",
   ]
   pruneopts = "T"
-  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
+  revision = "ccddf3741a0cfcee0a62d34c18c2c5417a3761af"
 
 [[projects]]
   branch = "master"
-  digest = "1:31162299b46522ce13b7836d17341c88817e87874c15d9c755e22140feb2718b"
+  digest = "1:0ef79f0d58752e0511f9db8687005343854847f52a17d932bbab9bf82dc78fee"
   name = "golang.org/x/net"
   packages = ["websocket"]
   pruneopts = "T"
-  revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [[projects]]
   branch = "master"
-  digest = "1:3631df9157a563b9b7efe8bedae459a2d6a8db709826e2c0e26cec4f40d7d7a7"
+  digest = "1:a2d07861a206bba2d30f344651ab1c226d1c8aaeb1ebb928d5566d4f40467e25"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
     "unix",
   ]
   pruneopts = "T"
-  revision = "074acd46bca67915925527c07849494d115e7c43"
+  revision = "302c3dd5f1cc82baae8e44d9c3178e89b6e2b345"
 
 [[projects]]
   branch = "v2"
