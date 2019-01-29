@@ -180,7 +180,6 @@ func withdraw(ctx *cli.Context) error {
 	}
 	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), bind.ContractBackend(conn.Client))
 	if err != nil {
-		log.Println(1)
 		return err
 	}
 	renBalance, err := tokenContract.BalanceOf(&bind.CallOpts{}, darknodeEthAddress)
