@@ -1,11 +1,16 @@
 package main
 
 import (
+	"crypto/x509"
+	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"path"
 
 	"github.com/republicprotocol/co-go"
+	"github.com/republicprotocol/republic-go/cmd/darknode/config"
+	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/urfave/cli"
 )
 
@@ -46,10 +51,30 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 
 	// Check if we need to update the node config
 	if updateConfig {
+		// Read the config file
 		data, err := ioutil.ReadFile(path.Join(nodePath, "config.json"))
 		if err != nil {
 			return err
 		}
+		var cfg config.Config
+		err = json.Unmarshal(data, &cfg)
+		if err != nil {
+			return err
+		}
+
+		// Read ssh private key from `ssh_keypair` file and decode it into a rsa key
+		keyData, err := ioutil.ReadFile(path.Join(nodePath, "ssh_keypair"))
+		if err != nil {
+			return err
+		}
+		block, _ := pem.Decode(keyData)
+		key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return err
+		}
+
+		cfg.Keystore.RsaKey = crypto.NewRsaKey(key)
+
 		updateConfigScript := fmt.Sprintf(`echo '%s' > $HOME/.darknode/config.json`, string(data))
 		if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript); err != nil {
 			return err
