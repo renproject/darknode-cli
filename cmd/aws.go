@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"crypto/rsa"
+	"encoding/binary"
 	"math/rand"
 	"os"
 	"path"
@@ -78,8 +81,12 @@ func awsDeployment(ctx *cli.Context) error {
 	if err := runTerraform(nodePath); err != nil {
 		return err
 	}
+	rsaKey, err := bytesFromRsaPublicKey(config.Keystore.RsaKey.PublicKey)
+	if err != nil {
+		return err
+	}
 
-	return outputURL(nodePath, name, network, key.Marshal())
+	return outputURL(nodePath, name, network, rsaKey)
 }
 
 // awsCredentials tries to get the AWS credentials from the user input
@@ -147,4 +154,17 @@ func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKe
 	}
 
 	return t.Execute(tfFile, tf)
+}
+
+// bytesFromRsaPublicKey by using the Republic Protocol Keystore specification
+// for binary marshaling.
+func bytesFromRsaPublicKey(publicKey rsa.PublicKey) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	if err := binary.Write(buf, binary.BigEndian, int64(publicKey.E)); err != nil {
+		return []byte{}, err
+	}
+	if err := binary.Write(buf, binary.BigEndian, publicKey.N.Bytes()); err != nil {
+		return []byte{}, err
+	}
+	return buf.Bytes(), nil
 }

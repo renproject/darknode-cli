@@ -63,7 +63,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		}
 
 		// Read ssh private key from `ssh_keypair` file and decode it into a rsa key
-		keyData, err := ioutil.ReadFile(path.Join(nodePath, "ssh_keypair"))
+		keyData, err := ioutil.ReadFile(keyPairPath)
 		if err != nil {
 			return err
 		}
@@ -74,6 +74,10 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		}
 
 		cfg.Keystore.RsaKey = crypto.NewRsaKey(key)
+		data, err = json.MarshalIndent(cfg, "", "    ")
+		if err != nil {
+			return err
+		}
 
 		updateConfigScript := fmt.Sprintf(`echo '%s' > $HOME/.darknode/config.json`, string(data))
 		if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript); err != nil {

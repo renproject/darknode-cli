@@ -14,7 +14,7 @@ fi
 ostype="$(uname -s)"
 cputype="$(uname -m)"
 
-# Download darknode-deployer
+# Download the latest binary darknode
 if [ "$ostype" = 'Linux' -a "$cputype" = 'x86_64' ]; then
     curl -s 'https://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64' > ./bin/darknode
 elif [ "$ostype" = 'Darwin' -a "$cputype" = 'x86_64' ]; then
