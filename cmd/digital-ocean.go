@@ -156,7 +156,8 @@ func deployToDo(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = NewSshKeyPair(nodePath)
+	rsaKey := config.Keystore.RsaKey
+	err = WriteSshKey(rsaKey.PrivateKey, nodePath)
 	if err != nil {
 		return err
 	}
@@ -169,12 +170,12 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	rsaKey, err := bytesFromRsaPublicKey(config.Keystore.RsaKey.PublicKey)
+	rsaPubBytes, err := bytesFromRsaPublicKey(rsaKey.PublicKey)
 	if err != nil {
 		return err
 	}
 
-	return outputURL(nodePath, name, network, rsaKey)
+	return outputURL(nodePath, name, network, rsaPubBytes)
 }
 
 func doRegionAndDroplet(ctx *cli.Context) (string, string, error) {

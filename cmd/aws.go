@@ -69,24 +69,24 @@ func awsDeployment(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	key, err := NewSshKeyPair(nodePath)
-	if err != nil {
+	rsaKey := config.Keystore.RsaKey
+	if err := WriteSshKey(rsaKey.PrivateKey, nodePath); err != nil {
 		return err
 	}
 
 	// Generate terraform config and start deploying
-	if err := awsTerraformConfig(ctx, config, key, accessKey, secretKey, region, instance); err != nil {
+	if err := awsTerraformConfig(ctx, config, rsaKey.PrivateKey, accessKey, secretKey, region, instance); err != nil {
 		return err
 	}
 	if err := runTerraform(nodePath); err != nil {
 		return err
 	}
-	rsaKey, err := bytesFromRsaPublicKey(config.Keystore.RsaKey.PublicKey)
+	rsaPubBytes, err := bytesFromRsaPublicKey(rsaKey.PublicKey)
 	if err != nil {
 		return err
 	}
 
-	return outputURL(nodePath, name, network, rsaKey)
+	return outputURL(nodePath, name, network, rsaPubBytes)
 }
 
 // awsCredentials tries to get the AWS credentials from the user input
@@ -129,15 +129,19 @@ type awsTerraform struct {
 }
 
 // awsTerraformConfig generates the terraform config file for deploying to AWS.
-func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, region, instance string) error {
+func awsTerraformConfig(ctx *cli.Context, config config.Config, key *rsa.PrivateKey, accessKey, secretKey, region, instance string) error {
 	name := ctx.String("name")
 	nodePath := nodePath(name)
+	pubKey, err := ssh.NewPublicKey(&key.PublicKey)
+	if err != nil {
+		return err
+	}
 	tf := awsTerraform{
 		Name:          name,
 		Region:        region,
 		Address:       config.Address.String(),
 		InstanceType:  instance,
-		SshPubKey:     strings.TrimSpace(StringfySshPubkey(key)),
+		SshPubKey:     strings.TrimSpace(StringfySshPubkey(pubKey)),
 		SshPriKeyPath: path.Join(nodePath, "ssh_keypair"),
 		AccessKey:     accessKey,
 		SecretKey:     secretKey,

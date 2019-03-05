@@ -44,6 +44,7 @@ func updateNode(ctx *cli.Context) error {
 func updateSingleNode(name, branch string, updateConfig bool) error {
 	nodePath := nodePath(name)
 	keyPairPath := path.Join(nodePath, "ssh_keypair")
+	configPath := path.Join(nodePath, "config.json")
 	ip, err := getIp(nodePath)
 	if err != nil {
 		return err
@@ -51,8 +52,8 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 
 	// Check if we need to update the node config
 	if updateConfig {
-		// Read the config file
-		data, err := ioutil.ReadFile(path.Join(nodePath, "config.json"))
+		// Read the local config file
+		data, err := ioutil.ReadFile(configPath)
 		if err != nil {
 			return err
 		}
@@ -73,9 +74,13 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 			return err
 		}
 
+		// Replace the rsaKey with the one for SSHing.
 		cfg.Keystore.RsaKey = crypto.NewRsaKey(key)
 		data, err = json.MarshalIndent(cfg, "", "    ")
 		if err != nil {
+			return err
+		}
+		if err := ioutil.WriteFile(configPath, data, 0644); err != nil {
 			return err
 		}
 
