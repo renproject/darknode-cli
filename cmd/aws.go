@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"crypto/rsa"
-	"encoding/binary"
 	"math/rand"
 	"os"
 	"path"
@@ -73,20 +70,20 @@ func awsDeployment(ctx *cli.Context) error {
 	if err := WriteSshKey(rsaKey.PrivateKey, nodePath); err != nil {
 		return err
 	}
+	pubKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
+	if err != nil {
+		return err
+	}
 
 	// Generate terraform config and start deploying
-	if err := awsTerraformConfig(ctx, config, rsaKey.PrivateKey, accessKey, secretKey, region, instance); err != nil {
+	if err := awsTerraformConfig(ctx, config, pubKey, accessKey, secretKey, region, instance); err != nil {
 		return err
 	}
 	if err := runTerraform(nodePath); err != nil {
 		return err
 	}
-	rsaPubBytes, err := bytesFromRsaPublicKey(rsaKey.PublicKey)
-	if err != nil {
-		return err
-	}
 
-	return outputURL(nodePath, name, network, rsaPubBytes)
+	return outputURL(nodePath, name, network, pubKey.Marshal())
 }
 
 // awsCredentials tries to get the AWS credentials from the user input
@@ -129,19 +126,16 @@ type awsTerraform struct {
 }
 
 // awsTerraformConfig generates the terraform config file for deploying to AWS.
-func awsTerraformConfig(ctx *cli.Context, config config.Config, key *rsa.PrivateKey, accessKey, secretKey, region, instance string) error {
+func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, region, instance string) error {
 	name := ctx.String("name")
 	nodePath := nodePath(name)
-	pubKey, err := ssh.NewPublicKey(&key.PublicKey)
-	if err != nil {
-		return err
-	}
+
 	tf := awsTerraform{
 		Name:          name,
 		Region:        region,
 		Address:       config.Address.String(),
 		InstanceType:  instance,
-		SshPubKey:     strings.TrimSpace(StringfySshPubkey(pubKey)),
+		SshPubKey:     strings.TrimSpace(StringfySshPubkey(key)),
 		SshPriKeyPath: path.Join(nodePath, "ssh_keypair"),
 		AccessKey:     accessKey,
 		SecretKey:     secretKey,
@@ -158,17 +152,4 @@ func awsTerraformConfig(ctx *cli.Context, config config.Config, key *rsa.Private
 	}
 
 	return t.Execute(tfFile, tf)
-}
-
-// bytesFromRsaPublicKey by using the Republic Protocol Keystore specification
-// for binary marshaling.
-func bytesFromRsaPublicKey(publicKey rsa.PublicKey) ([]byte, error) {
-	buf := new(bytes.Buffer)
-	if err := binary.Write(buf, binary.BigEndian, int64(publicKey.E)); err != nil {
-		return []byte{}, err
-	}
-	if err := binary.Write(buf, binary.BigEndian, publicKey.N.Bytes()); err != nil {
-		return []byte{}, err
-	}
-	return buf.Bytes(), nil
 }
