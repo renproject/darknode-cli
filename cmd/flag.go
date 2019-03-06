@@ -71,7 +71,7 @@ var (
 	}
 	AwsInstanceFlag = cli.StringFlag{
 		Name:  "aws-instance",
-		Value: "t2.medium",
+		Value: "t3.small",
 		Usage: "An optional AWS EC2 instance type",
 	}
 	AwsElasticIpFlag = cli.StringFlag{
