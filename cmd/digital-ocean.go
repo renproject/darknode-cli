@@ -14,6 +14,7 @@ import (
 
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
+	"golang.org/x/crypto/ssh"
 )
 
 // Available regions on Digital Ocean.
@@ -156,7 +157,12 @@ func deployToDo(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	key, err := NewSshKeyPair(nodePath)
+	rsaKey := config.Keystore.RsaKey
+	err = WriteSshKey(rsaKey.PrivateKey, nodePath)
+	if err != nil {
+		return err
+	}
+	pubKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
 	if err != nil {
 		return err
 	}
@@ -169,7 +175,7 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputURL(nodePath, name, network, key.Marshal())
+	return outputURL(nodePath, name, network, pubKey.Marshal())
 }
 
 func doRegionAndDroplet(ctx *cli.Context) (string, string, error) {

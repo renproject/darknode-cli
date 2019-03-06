@@ -66,20 +66,24 @@ func awsDeployment(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	key, err := NewSshKeyPair(nodePath)
+	rsaKey := config.Keystore.RsaKey
+	if err := WriteSshKey(rsaKey.PrivateKey, nodePath); err != nil {
+		return err
+	}
+	pubKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
 	if err != nil {
 		return err
 	}
 
 	// Generate terraform config and start deploying
-	if err := awsTerraformConfig(ctx, config, key, accessKey, secretKey, region, instance); err != nil {
+	if err := awsTerraformConfig(ctx, config, pubKey, accessKey, secretKey, region, instance); err != nil {
 		return err
 	}
 	if err := runTerraform(nodePath); err != nil {
 		return err
 	}
 
-	return outputURL(nodePath, name, network, key.Marshal())
+	return outputURL(nodePath, name, network, pubKey.Marshal())
 }
 
 // awsCredentials tries to get the AWS credentials from the user input
@@ -125,6 +129,7 @@ type awsTerraform struct {
 func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, region, instance string) error {
 	name := ctx.String("name")
 	nodePath := nodePath(name)
+
 	tf := awsTerraform{
 		Name:          name,
 		Region:        region,
