@@ -69,6 +69,9 @@ var ErrUnknownDropletSize = fmt.Errorf("%sunknown droplet size%s", RED, RESET)
 // ErrInvalidEthereumAddress is returned when user gives an invalid Ethereum address.
 var ErrInvalidEthereumAddress = fmt.Errorf("%sinvalid Ethereum address%s", RED, RESET)
 
+// ErrInvalidSshKeyFile is returned when the ssh key file contains an invalid ssh key.
+var ErrInvalidSshKeyFile = fmt.Errorf("%sinvalid sshkey file%s", RED, RESET)
+
 // ErrFailedTx is returned when the transaction gets reverted on Ethereum.
 var ErrFailedTx = fmt.Errorf("%stransaction failed%s", RED, RESET)
 

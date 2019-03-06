@@ -69,6 +69,9 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 			return err
 		}
 		block, _ := pem.Decode(keyData)
+		if block == nil {
+			return ErrInvalidSshKeyFile
+		}
 		key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 		if err != nil {
 			return err
