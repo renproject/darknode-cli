@@ -113,7 +113,7 @@ func outputURL(nodeDir, name, network string, publicKey []byte) error {
 	switch network {
 	case "mainnet":
 		url = fmt.Sprintf("https://dcc.republicprotocol.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
-	case "testnet":
+	case "testnet", "kovan":
 		url = fmt.Sprintf("https://dcc-testnet.republicprotocol.com/darknode/%s?action=register&public_key=0x%s&name=%s", id, publicKeyHex, name)
 	}
 
