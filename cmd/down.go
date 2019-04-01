@@ -123,7 +123,7 @@ func withdraw(ctx *cli.Context) error {
 	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 Gwei
 
 	// Check REN balance first
-	renAddress := renAddress(config.Ethereum.Network)
+	renAddress := renAddress(network)
 	if renAddress == "" {
 		return ErrUnknownNetwork
 	}
@@ -145,20 +145,30 @@ func withdraw(ctx *cli.Context) error {
 		}
 		minedCtx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
-		receipt, err := bind.WaitMined(minedCtx, client.EthClient(), tx)
+		_, err = bind.WaitMined(minedCtx, client.EthClient(), tx)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%sYour REN has been withdrawn from your darknode to [%v]. TxHash: %v.%s\n", GREEN, receiverAddr.Hex(), receipt.TxHash.String(), RESET)
+		fmt.Printf("%sYour REN has been withdrawn from your darknode to [%v]. TxHash: %v.%s\n", GREEN, receiverAddr.Hex(), tx.Hash().Hex(), RESET)
 	}
 
-	transferCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ethCtx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	tx, err := account.Transfer(transferCtx, receiverAddr, nil, libeth.Fast, 0, true)
+
+	// Check the ETH balance
+	balance, err := account.BalanceAt(ethCtx, nil)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%sYour ETH has been withdrawn from your darknode to [%v]. TxHash: %v.%s\n", GREEN, receiverAddr.Hex(), tx.Hash().String(), RESET)
+	if balance.Cmp(big.NewInt(0)) == 0 {
+		return nil
+	}
+
+	tx, err := account.Transfer(ethCtx, receiverAddr, nil, libeth.Fast, 0, true)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%sYour ETH has been withdrawn from your darknode to [%v]. TxHash: %v.%s\n", GREEN, receiverAddr.Hex(), tx.Hash().Hex(), RESET)
 	return nil
 }
 
