@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"path"
 
@@ -16,7 +15,6 @@ func execScript(ctx *cli.Context) error {
 	tags := ctx.String("tags")
 	script := ctx.String("script")
 
-	log.Print("script = ", script)
 	if name == "" && tags == "" {
 		cli.ShowCommandHelp(ctx, "update")
 		return ErrEmptyNameAndTags

@@ -96,7 +96,7 @@ func BootstrapNodes(network string) []identity.MultiAddress {
 		// b6, _ := identity.NewMultiAddressFromString("/ip4/54.252.152.19/tcp/18514/republic/8MJXyfjYuVZDPAfDm63G1NH1khgb2A")
 
 		addresess = append(addresess, b1)
-	case "testnet":
+	case "testnet", "kovan":
 		b1, _ := identity.NewMultiAddressFromString("/ip4/18.211.224.194/tcp/18514/republic/8MJ7iKwcDxjndpD9EcXPgzKL9QJo2A")
 		b2, _ := identity.NewMultiAddressFromString("/ip4/52.53.120.119/tcp/18514/republic/8MGdWRSn51Bc7ievAAkZ6x1hFAiJjf")
 		b3, _ := identity.NewMultiAddressFromString("/ip4/52.53.120.119/tcp/18514/republic/8MGdWRSn51Bc7ievAAkZ6x1hFAiJjf")

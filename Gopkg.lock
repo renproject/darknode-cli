@@ -2,26 +2,26 @@
 
 
 [[projects]]
-  digest = "1:777f1f0fc92c6fb838ff214ef3b05160b513c262beb88fa342d7a50e797b9539"
+  digest = "1:c731e64b230aaf9b4693baa56c3337921189b802652ee3401cd4aedc1a2d2d16"
   name = "github.com/allegro/bigcache"
   packages = [
     ".",
     "queue",
   ]
   pruneopts = "T"
-  revision = "f31987a23e44c5121ef8c8b2f2ea2e8ffa37b068"
-  version = "v1.1.0"
+  revision = "84a0ff3f153cbd7e280a19029a864bb04b504e62"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:777cd5e02fa5e4dbd84085af4634903d2f5e12141ca53a383dee7ebad1800f63"
+  digest = "1:219b84f8c6b3456cd33a87e5ca3281f02a67595d8ccd5658204e041bacb9e9a4"
   name = "github.com/aristanetworks/goarista"
   packages = ["monotime"]
   pruneopts = "T"
-  revision = "8f049bdb8feb7d7d5f1a9b9cd854396112fb0c0e"
+  revision = "a123909ec740ba2ed43a293e3febaf7618aa67d5"
 
 [[projects]]
-  digest = "1:4b14daec315992b3128bfefc44182537c163a21233ba348a7749560a13772dff"
+  digest = "1:63c4df670f1d9c09ba7b16bf67089c144df1b5e5f66c59f47bcee7b3d1977c32"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws/awserr",
@@ -30,16 +30,16 @@
     "internal/shareddefaults",
   ]
   pruneopts = "T"
-  revision = "81f3829f5a9d041041bdf56e55926691309d7699"
-  version = "v1.16.26"
+  revision = "9000241da407010f1e20c6dcbf00d0cbc9255ff9"
+  version = "v1.19.4"
 
 [[projects]]
   branch = "master"
-  digest = "1:80c3d831cb5d93d8e585d7a99256b2009a72453506e6c5a1a36e1271f7d47127"
+  digest = "1:38279387128c2e74e2a316a5125784920cd6455b693f993e13f93eb11203463b"
   name = "github.com/btcsuite/btcd"
   packages = ["btcec"]
   pruneopts = "T"
-  revision = "ed77733ec07dfc8a513741138419b8d9d3de9d2d"
+  revision = "aa6e0f35703c1438cc45860ddc0c3f6e6c633c93"
 
 [[projects]]
   digest = "1:fed1f537c2f1269fe475a8556c393fe466641682d73ef8fd0491cd3aa1e47bad"
@@ -58,7 +58,7 @@
   version = "v1.7.1"
 
 [[projects]]
-  digest = "1:b42be5a3601f833e0b9f2d6625d887ec1309764bfcac3d518f3db425dcd4ec5c"
+  digest = "1:1530d06761f464b62ab3dfc2fa5b16303901d87ff219100a1447ba216d2e52be"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     ".",
@@ -73,6 +73,8 @@
     "common/prque",
     "consensus",
     "consensus/misc",
+    "contracts/ens",
+    "contracts/ens/contract",
     "core",
     "core/rawdb",
     "core/state",
@@ -95,8 +97,8 @@
     "trie",
   ]
   pruneopts = "T"
-  revision = "9dc5d1a915ac0e0bd8429d6ac41df50eec91de5f"
-  version = "v1.8.21"
+  revision = "c942700427557e3ff6de3aaf6b916e2f056c1ec2"
+  version = "v1.8.23"
 
 [[projects]]
   digest = "1:4c183be9fd1680d917006bb4884c1ac3d00a6bd33b0d36c8439c8cbd011e5aac"
@@ -115,39 +117,42 @@
   version = "v1.8.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:6027b20c168728321bd99ad01f35118eded457b01c03e647a84833ab331f2f5b"
+  digest = "1:f37c069fadbaa889f79aea9cd463d225000a0d26f1e7423f14c0cd58fbc5c597"
   name = "github.com/golang/snappy"
   packages = ["."]
   pruneopts = "T"
-  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
+  revision = "2a8bb927dd31d8daada140a5d09578521ce5c36a"
+  version = "v0.0.1"
 
 [[projects]]
-  digest = "1:236d7e1bdb50d8f68559af37dbcf9d142d56b431c9b2176d41e2a009b664cda8"
+  digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
   name = "github.com/google/uuid"
   packages = ["."]
   pruneopts = "T"
-  revision = "9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8"
-  version = "v1.1.0"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:6e7f344f0759e7bd98e5d373e3149b5fca4132261c241777a1c8e57176f1fe05"
+  digest = "1:a0df06fe95141a259ff0765ee99c6ecf954b7565a7adcf7c34271e5f351bc64c"
   name = "github.com/gxed/hashland"
-  packages = ["keccakpg"]
+  packages = [
+    "keccakpg",
+    "murmur3",
+  ]
   pruneopts = "T"
-  revision = "d9f6b97f8db22dd1e090fd0bbbe98f09cc7dd0a8"
+  revision = "a72cc0875a1e95edd309d3134bc7c11bf2d7360b"
+  version = "v0.0.1"
 
 [[projects]]
-  digest = "1:8ec8d88c248041a6df5f6574b87bc00e7e0b493881dad2e7ef47b11dc69093b5"
+  digest = "1:d15ee511aa0f56baacc1eb4c6b922fa1c03b38413b6be18166b996d82a0156ea"
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
     "simplelru",
   ]
   pruneopts = "T"
-  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
-  version = "v0.5.0"
+  revision = "7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c"
+  version = "v0.5.1"
 
 [[projects]]
   digest = "1:fa3a7dc0a780fb19838fb96d4e18c0b9a019d9bb618798308d7b6ca48fcb9876"
@@ -156,6 +161,14 @@
   pruneopts = "T"
   revision = "6237cf65f3a6f7111cd8a42be3590df99a66bc7d"
   version = "1.0.0"
+
+[[projects]]
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
 
 [[projects]]
   branch = "master"
@@ -167,35 +180,35 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ccf646ee8a07f460c43e994bb9a79e594dc3636dca1b607c294b7df5b1624868"
+  digest = "1:04d69739a5e01a32391a952b4243c1308fb875b9ad7302355eb37bbdb8c3e70b"
   name = "github.com/minio/sha256-simd"
   packages = ["."]
   pruneopts = "T"
-  revision = "cc1980cb03383b1d46f518232672584432d7532d"
+  revision = "3557f3d43a123835ffa5846e4d055146e773d52e"
 
 [[projects]]
-  digest = "1:07c8d9601e95a4f8c2ff7c697db1974bf74abde8a0a0f09f736f53d9bc88095c"
+  digest = "1:e5f582b211c2ebe976f888293a457e6036fb03c0d3db7263516384523364f634"
   name = "github.com/mr-tron/base58"
   packages = ["base58"]
   pruneopts = "T"
-  revision = "89529c6904fcd077434931b4eac8b4b2f0991baf"
-  version = "v1.1.0"
+  revision = "6598572f05537592acb5a609ff53c4c7fbba7a3e"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:b782eff9c054952dbbf7595b3772064f7567aec7fc69f4f398107ce330e407ff"
+  digest = "1:a0049505f6d54193a4fdda2cb710ae0e3b3c91e61893386cabd58d59ff661d07"
   name = "github.com/multiformats/go-multiaddr"
   packages = ["."]
   pruneopts = "T"
-  revision = "152990b98bf9dce961ca2aefb1002cd96cfff6cb"
+  revision = "ce21123d5172669bbf37a166078bc5f9d345ec2f"
 
 [[projects]]
   branch = "master"
-  digest = "1:870888967337c579909b6017019b9f288325fab9417d398aeedf6172286e9b33"
+  digest = "1:c0c110a1ec1325acd5bd84eb25e0877421262802d14d5bf8238bdc62d05b586d"
   name = "github.com/multiformats/go-multihash"
   packages = ["."]
   pruneopts = "T"
-  revision = "3cedc8477438947930aa0eb653e43f7d8c4feded"
+  revision = "2ca70e715b6950a9382097b770a3f44fd570d388"
 
 [[projects]]
   digest = "1:e5d0bd87abc2781d14e274807a470acd180f0499f8bf5bb18606e9ec22ad9de9"
@@ -215,11 +228,53 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:572a577922bb7a0db8144d9682eedf3fff8e5ec1b65587ad750c46f6b71f2b34"
+  name = "github.com/renproject/libeth-go"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "8ff82bee6c22ffd330223dac4384081961645f6d"
+
+[[projects]]
+  branch = "master"
   digest = "1:9d7bd9312d2dcfcabdc85f41095ab66127312603f83483be8475947b5e62b657"
   name = "github.com/republicprotocol/co-go"
   packages = ["."]
   pruneopts = "T"
   revision = "4e299fdb0e808f64667498735da03fdc2e0e84c9"
+
+[[projects]]
+  branch = "master"
+  digest = "1:1b53ace0ce4b7483e7f6491c36f908f0601fd55448086ac95a77038f7d3b993f"
+  name = "github.com/republicprotocol/darknode-go"
+  packages = [
+    "adapter/ethcontract",
+    "adapter/ethcontract/bindings",
+    "adapter/ethcontract/dnr",
+    "cmd/darknode/config",
+    "core/crypter",
+  ]
+  pruneopts = "T"
+  revision = "b1183a4333ceb15c372818dcd4d38067cdbcdbf3"
+
+[[projects]]
+  branch = "experiment/one-shot"
+  digest = "1:a9ff84c1af2c3819d18a5690042b5ba309923e30a5b0526d5798f100fe4dfb16"
+  name = "github.com/republicprotocol/ren-go"
+  packages = [
+    "foundation/addr",
+    "foundation/epoch",
+    "foundation/pod",
+  ]
+  pruneopts = "T"
+  revision = "172f0b16858136d4d81d327be37c2dbf51ee61b5"
+
+[[projects]]
+  branch = "develop"
+  digest = "1:e90095f22f1a92407f065c02c597ac9c66867b04af5306fbd31deef0d5410871"
+  name = "github.com/republicprotocol/renp2p-go"
+  packages = ["core/peer"]
+  pruneopts = "T"
+  revision = "29b6e186849593bf71fd4ea34a5cfb76f6f142c2"
 
 [[projects]]
   branch = "develop"
@@ -259,16 +314,15 @@
   version = "v1.6.0"
 
 [[projects]]
-  digest = "1:919bb3aa6d9d0b67648c219fa4925312bc3c2872da19e818fa769e9c97a2b643"
-  name = "github.com/spaolacci/murmur3"
+  digest = "1:e943eb8262b5644f4b5808d6b092df55df6f0961219fb19f49401f0df0cc625e"
+  name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "T"
-  revision = "9f5d223c60793748f04a9d5b4b4eacddfc1f755d"
-  version = "v1.1"
+  revision = "dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4"
+  version = "v1.4.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:7b17050757aaa2f52fcc582125d7abaf5fc2ff273bf023da0c4f98e6f2ebed5f"
+  digest = "1:0259dc37735eccf1715a97e74309c6d8579b64ab297df21bf647b2672c8fdc11"
   name = "github.com/syndtr/goleveldb"
   packages = [
     "leveldb",
@@ -285,7 +339,8 @@
     "leveldb/util",
   ]
   pruneopts = "T"
-  revision = "b001fa50d6b27f3f0bb175a87d0cb55426d0a0ae"
+  revision = "9d007e481048296f09f59bd19bb7ae584563cd95"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:a4ef215bd846f9407d095f526879cb232330e1e7a748c70e384f775a6a64fd3e"
@@ -297,7 +352,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:eb5b910ca0953d88451895190c80fb2bbfb12b91ac73684200be391997eaa132"
+  digest = "1:287367cdf1d4ad1b717dcc43a31f500eb36a2bdfc1ad3305fc023e58e1ece269"
   name = "golang.org/x/crypto"
   packages = [
     "blake2s",
@@ -312,28 +367,30 @@
     "scrypt",
     "sha3",
     "ssh",
+    "ssh/terminal",
   ]
   pruneopts = "T"
-  revision = "ccddf3741a0cfcee0a62d34c18c2c5417a3761af"
+  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
 
 [[projects]]
   branch = "master"
-  digest = "1:0ef79f0d58752e0511f9db8687005343854847f52a17d932bbab9bf82dc78fee"
+  digest = "1:95b2a8f83570762e6211c5d5823840d64e04f85fec8adc32735f6b702c858872"
   name = "golang.org/x/net"
   packages = ["websocket"]
   pruneopts = "T"
-  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
+  revision = "63eda1eb0650888965ead1296efd04d0b2b61128"
 
 [[projects]]
   branch = "master"
-  digest = "1:a2d07861a206bba2d30f344651ab1c226d1c8aaeb1ebb928d5566d4f40467e25"
+  digest = "1:92d28915fed72feacdea31a00dbe77b86eca8e0b4530ce125442119d4af0ae6b"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
     "unix",
+    "windows",
   ]
   pruneopts = "T"
-  revision = "302c3dd5f1cc82baae8e44d9c3178e89b6e2b345"
+  revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
 
 [[projects]]
   branch = "v2"
@@ -350,13 +407,16 @@
     "github.com/aws/aws-sdk-go/aws/credentials",
     "github.com/ethereum/go-ethereum/accounts/abi/bind",
     "github.com/ethereum/go-ethereum/common",
-    "github.com/ethereum/go-ethereum/core/types",
-    "github.com/ethereum/go-ethereum/ethclient",
     "github.com/jbenet/go-base58",
+    "github.com/renproject/libeth-go",
     "github.com/republicprotocol/co-go",
+    "github.com/republicprotocol/darknode-go/adapter/ethcontract",
+    "github.com/republicprotocol/darknode-go/adapter/ethcontract/bindings",
+    "github.com/republicprotocol/darknode-go/adapter/ethcontract/dnr",
+    "github.com/republicprotocol/darknode-go/cmd/darknode/config",
+    "github.com/republicprotocol/ren-go/foundation/addr",
     "github.com/republicprotocol/republic-go/cmd/darknode/config",
     "github.com/republicprotocol/republic-go/contract",
-    "github.com/republicprotocol/republic-go/contract/bindings",
     "github.com/republicprotocol/republic-go/crypto",
     "github.com/republicprotocol/republic-go/identity",
     "github.com/republicprotocol/republic-go/logger",

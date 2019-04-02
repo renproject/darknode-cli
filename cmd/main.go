@@ -19,7 +19,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "2.2.8"
+	app.Version = "2.2.9"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
@@ -82,13 +82,6 @@ func main() {
 			Flags: []cli.Flag{TagsFlag},
 			Action: func(c *cli.Context) error {
 				return listAllNodes(c)
-			},
-		},
-		{
-			Name:  "refund",
-			Usage: "refund the bond to the operator account. The darknode needs to be fully deregistered to be refunded.",
-			Action: func(c *cli.Context) error {
-				return refund(c)
 			},
 		},
 		{
