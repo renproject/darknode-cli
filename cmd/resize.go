@@ -71,6 +71,13 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 }
 
 func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
+	// Mark the droplet as tainted for recreating the droplet
+	taint := fmt.Sprintf("cd %v && terraform taint digitalocean_droplet.darknode", nodePath)
+	err := run("bash", "-c", taint)
+	if err != nil {
+		return err
+	}
+
 	// Replace with the new size in the `main.tf` file
 	reg, err := regexp.Compile(`variable "size" \{\s+default = ".+"\s\}`)
 	if err != nil {
@@ -82,28 +89,14 @@ func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 		return err
 	}
 
-	// Mark the droplet as tainted for recreating the droplet
-	taint := fmt.Sprintf("cd %v && terraform taint digitalocean_droplet.darknode", nodePath)
-	err = run("bash", "-c", taint)
-	if err != nil {
-		return err
-	}
-
 	// Start running terraform
 	fmt.Printf("\n%sResizing dark nodes ... %s\n", RESET, RESET)
 	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", nodePath)
 	err = run("bash", "-c", apply)
 	if err != nil {
-		// revert the `main.tf` file if fail to resize the droplet
-		defer func() {
-			if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
-				fmt.Println("fail to revert the change to `main.tf` file")
-			}
-		}()
-		return err
+		if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
+			fmt.Println("fail to revert the change to `main.tf` file")
+		}
 	}
-
-	// Update ip address to the multiAddress.out file
-	update := fmt.Sprintf("cd %v && terraform output multiaddress > multiAddress.out", nodePath)
-	return run("bash", "-c", update)
+	return err
 }
