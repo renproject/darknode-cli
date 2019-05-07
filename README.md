@@ -60,7 +60,7 @@ You can also specify the region and instance type you want to use for the Darkno
 ```sh
 darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
 ``` 
-
+The default instance type is `t3.small` and region will be random.
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
 You can also associate the darknode to an elastic IP by providing the `EIP-ALLOCATION-ID` of the elastic IP. 
@@ -86,7 +86,7 @@ You can also specify the region and droplet size you want to use for the Darknod
 darknode up --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
 ``` 
 
-The default droplet size is `s-4vcpu-8gb` and region will be random. 
+The default droplet size is `s-2vcpu-2gb` and region will be random. 
 Be aware some region and droplet size are not available to all users.
 
 You can find all available regions and droplet size slug by using the digital ocean [API](https://developers.digitalocean.com/documentation/v2/#regions).
@@ -108,6 +108,25 @@ darknode destroy my-first-darknode --force
 ```
 
 We do not recommend using the `--force` argument unless you are developing custom tools that manage your Darknodes automatically.
+
+### Resize the darknode 
+
+To resize the instance type your darknode is using, open a terminal and run :
+```sh
+darknode resize YOUR-DARKNODE-NAME NEW_INSTANCE_TYPE
+```
+
+For AWS, you'll need to replace the `NEW_INSTANCE_TYPE` field with AWS EC2 intance type , i.e. `t3.micro`, `t2.medium`. 
+```sh
+darknode resize YOUR-DARKNODE-NAME t3.small
+```
+You can find all available instance types at [AWS](https://aws.amazon.com/ec2/instance-types).
+
+For digital ocean, you'll need to replace the `NEW_INSTANCE_TYPE` field with digital ocean droplet slug, i.e. `s-1vcpu-2gb`, `s-1vcpu-1gb`.
+```sh
+darknode resize YOUR-DARKNODE-NAME s-1vcpu-2gb
+``` 
+This usually takes a bit longer than AWS as it's recreating the instance. You can find droplet slugs info from [Digital Ocean Standard plans](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) and [DigitalOcean API Slugs](https://slugs.do-api.dev/) 
 
 
 ### List all Darknodes
