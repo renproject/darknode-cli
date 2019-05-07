@@ -72,6 +72,9 @@ var ErrInvalidEthereumAddress = fmt.Errorf("%sinvalid Ethereum address%s", RED, 
 // ErrInvalidSshKeyFile is returned when the ssh key file contains an invalid ssh key.
 var ErrInvalidSshKeyFile = fmt.Errorf("%sinvalid sshkey file%s", RED, RESET)
 
+// ErrInvalidInstanceSize is returned when the given instance size is invalid.
+var ErrInvalidInstanceSize = fmt.Errorf("%sinvalid instance size%s", RED, RESET)
+
 // ErrFailedTx is returned when the transaction gets reverted on Ethereum.
 var ErrFailedTx = fmt.Errorf("%stransaction failed%s", RED, RESET)
 

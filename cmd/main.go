@@ -92,6 +92,15 @@ func main() {
 				return withdraw(c)
 			},
 		},
+		{
+			Name:  "resize",
+			Usage: "resize the instance type",
+			Flags: []cli.Flag{},
+			Action: func(c *cli.Context) error {
+				return resize(c)
+			},
+		},
+
 		// {
 		// 	Name:  "exec",
 		// 	Usage: "Execute script on nodes",
