@@ -19,7 +19,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "2.2.9"
+	app.Version = "2.2.10"
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
@@ -92,6 +92,15 @@ func main() {
 				return withdraw(c)
 			},
 		},
+		{
+			Name:  "resize",
+			Usage: "resize the instance type",
+			Flags: []cli.Flag{},
+			Action: func(c *cli.Context) error {
+				return resize(c)
+			},
+		},
+
 		// {
 		// 	Name:  "exec",
 		// 	Usage: "Execute script on nodes",

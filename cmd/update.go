@@ -121,5 +121,5 @@ func sshNode(ctx *cli.Context) error {
 	}
 	keyPairPath := nodePath + "/ssh_keypair"
 
-	return run("ssh", "-i", keyPairPath, "darknode@"+ip)
+	return run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no")
 }
