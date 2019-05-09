@@ -109,24 +109,24 @@ darknode destroy my-first-darknode --force
 
 We do not recommend using the `--force` argument unless you are developing custom tools that manage your Darknodes automatically.
 
-### Resize the darknode 
+### Resize a Darknode 
 
-To resize the instance type your darknode is using, open a terminal and run :
+To resize the instance type your Darknode is using, open a terminal and run:
 ```sh
 darknode resize YOUR-DARKNODE-NAME NEW_INSTANCE_TYPE
 ```
 
-For AWS, you'll need to replace the `NEW_INSTANCE_TYPE` field with AWS EC2 intance type , i.e. `t3.micro`, `t2.medium`. 
+If you are using AWS, you will need to replace the `NEW_INSTANCE_TYPE` field with the AWS EC2 instance type you wish to use, e.g. `t3.micro` or `t2.medium`."
 ```sh
 darknode resize YOUR-DARKNODE-NAME t3.small
 ```
 You can find all available instance types at [AWS](https://aws.amazon.com/ec2/instance-types).
 
-For digital ocean, you'll need to replace the `NEW_INSTANCE_TYPE` field with digital ocean droplet slug, i.e. `s-1vcpu-2gb`, `s-1vcpu-1gb`.
+If you are using DigitalOcean, you will need to replace the `NEW_INSTANCE_TYPE` field with the DigitalOcean droplet slug you wish to use, e.g. `s-1vcpu-2gb` or `s-1vcpu-1gb`.
 ```sh
 darknode resize YOUR-DARKNODE-NAME s-1vcpu-2gb
 ``` 
-This usually takes a bit longer than AWS as it's recreating the instance. You can find droplet slugs info from [Digital Ocean Standard plans](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) and [DigitalOcean API Slugs](https://slugs.do-api.dev/) 
+This may take longer than AWS as it recreates the instance. You can find all available droplet slugs at [Digital Ocean Standard plans](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) and [DigitalOcean API Slugs](https://slugs.do-api.dev/) 
 
 
 ### List all Darknodes
@@ -185,15 +185,6 @@ and now run:
 ```sh
 darknode update my-first-darknode --config
 ``` 
-
-### Refund your Darknode
-
-To refund the bond of your darknode after deregistering, open a terminal and run:
-
-```sh
-darknode refund YOUR-DARKNODE-NAME
-``` 
-This will refund the 100,000 REN to the darknode operator address (the one you used to register the darknode).
 
 ### Withdraw balance from the Darknode
 
