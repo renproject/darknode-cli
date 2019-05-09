@@ -60,7 +60,7 @@ You can also specify the region and instance type you want to use for the Darkno
 ```sh
 darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region eu-west-1 --aws-instance t2.small
 ``` 
-The default instance type is `t3.small` and region will be random.
+The default instance type is `t3.micro` and region will be random.
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
 You can also associate the darknode to an elastic IP by providing the `EIP-ALLOCATION-ID` of the elastic IP. 
@@ -86,7 +86,7 @@ You can also specify the region and droplet size you want to use for the Darknod
 darknode up --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
 ``` 
 
-The default droplet size is `s-2vcpu-2gb` and region will be random. 
+The default droplet size is `s-1vcpu-1gb` and region will be random. 
 Be aware some region and droplet size are not available to all users.
 
 You can find all available regions and droplet size slug by using the digital ocean [API](https://developers.digitalocean.com/documentation/v2/#regions).

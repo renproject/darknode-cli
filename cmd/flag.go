@@ -72,7 +72,7 @@ var (
 	AwsInstanceFlag = cli.StringFlag{
 		Name:  "aws-instance",
 		Value: "t3.micro",
-		Usage: "An optional AWS EC2 instance type (default: t3.small)",
+		Usage: "An optional AWS EC2 instance type (default: t3.micro)",
 	}
 	AwsElasticIpFlag = cli.StringFlag{
 		Name:  "aws-elastic-ip",
@@ -103,6 +103,6 @@ var (
 	DoSizeFlag = cli.StringFlag{
 		Name:  "do-droplet",
 		Value: "s-1vcpu-1gb",
-		Usage: "An optional digital ocean droplet size (default: s-2vcpu-2gb)",
+		Usage: "An optional digital ocean droplet size (default: s-1vcpu-1gb)",
 	}
 )
