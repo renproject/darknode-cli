@@ -24,6 +24,8 @@ This will download the required binaries and templates and install them to the `
 
 ## Updating the tool
 
+**Before updating the Darknode-CLI, please make sure you do not have the CLI running in any terminal.**
+
 To update your Darknode CLI, open a terminal and run:
 
 ```sh
