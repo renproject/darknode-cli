@@ -128,7 +128,9 @@ If you are using DigitalOcean, you will need to replace the `NEW_INSTANCE_TYPE` 
 ```sh
 darknode resize YOUR-DARKNODE-NAME s-1vcpu-2gb
 ``` 
-This may take longer than AWS as it recreates the instance. You can find all available droplet slugs at [Digital Ocean Standard plans](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) and [DigitalOcean API Slugs](https://slugs.do-api.dev/) 
+This may take longer than AWS as it recreates the instance. You can find all available droplet slugs at [Digital Ocean Standard plans](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) and [DigitalOcean API Slugs](https://slugs.do-api.dev/)
+
+> If you accidentally try to resize to a invalid instance, the darknode will be stopped. You need to run the command again with a valid instance type to restart the darknode. 
 
 
 ### List all Darknodes
