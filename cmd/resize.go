@@ -84,9 +84,6 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 }
 
 func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
-	validateDroplet()
-
-
 	// Mark the droplet as tainted for recreating the droplet
 	taint := fmt.Sprintf("cd %v && terraform taint digitalocean_droplet.darknode", nodePath)
 	err := run("bash", "-c", taint)
@@ -116,6 +113,7 @@ func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 			if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
 				fmt.Println("fail to revert the change to `main.tf` file")
 			}
+			fmt.Printf("%sDarknode has been stoped when trying to resizing to a invalid instance type, please try resizing again with a valid instance type%s\n", RED, RESET)
 		}()
 	}
 	return err
