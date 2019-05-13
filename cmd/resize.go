@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"path"
@@ -41,10 +42,21 @@ func resize(ctx *cli.Context) error {
 }
 
 func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
-	reg, err := regexp.Compile(`variable "instance_type" \{\s+default = ".+"\s\}`)
+	reg, err := regexp.Compile(`variable "instance_type" \{\s+default = "(?P<instance>.+)"\s\}`)
 	if err != nil {
 		return err
 	}
+
+	// Check if user tries to resize to the same instance type
+	match:=  reg.FindStringSubmatch(string(tfFile))
+	if match == nil || len(match) < 1 {
+		return errors.New("invalid main.tf file ")
+	}
+	if match[1] == newSize {
+		return errors.New("you can't resize to the same instance type")
+	}
+
+	// Update the main.tf file.
 	replacement := fmt.Sprintf("variable \"instance_type\" {\n  default = \"%v\"\n}", newSize)
 	newTF := reg.ReplaceAll(tfFile, []byte(replacement))
 	if err := ioutil.WriteFile(tfPath, newTF, 0644); err != nil {
@@ -61,6 +73,7 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 			if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
 				fmt.Println("fail to revert the change to `main.tf` file")
 			}
+			fmt.Printf("%sDarknode has been stoped when trying to resizing to a invalid instance type, please try resizing again with a valid instance type%s\n", RED, RESET)
 		}()
 		return err
 	}
@@ -71,11 +84,14 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 }
 
 func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
+	validateDroplet()
+
+
 	// Mark the droplet as tainted for recreating the droplet
 	taint := fmt.Sprintf("cd %v && terraform taint digitalocean_droplet.darknode", nodePath)
 	err := run("bash", "-c", taint)
 	if err != nil {
-		return err
+		fmt.Println("[warning] fail to taint the darknode which might not be exist.")
 	}
 
 	// Replace with the new size in the `main.tf` file
@@ -83,6 +99,8 @@ func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 	if err != nil {
 		return err
 	}
+
+	// Update the main.tf file.
 	replacement := fmt.Sprintf("variable \"size\" {\n\tdefault = \"%v\"\n}", newSize)
 	newTF := reg.ReplaceAll(tfFile, []byte(replacement))
 	if err := ioutil.WriteFile(tfPath, newTF, 0644); err != nil {
@@ -94,9 +112,11 @@ func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", nodePath)
 	err = run("bash", "-c", apply)
 	if err != nil {
-		if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
-			fmt.Println("fail to revert the change to `main.tf` file")
-		}
+		defer func() {
+			if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
+				fmt.Println("fail to revert the change to `main.tf` file")
+			}
+		}()
 	}
 	return err
 }
