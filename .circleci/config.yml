@@ -25,7 +25,6 @@ commands:
             - run:
                   name: Download dependencies
                   command: |
-                      echo "machine github.com login ${GITHUB_USERNAME} password ${GITHUB_TOKEN}" > ~/.netrc
                       if [ ! -d ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor ]; then
                           dep ensure -v
                       else
@@ -89,7 +88,7 @@ workflows:
     version: 2.1
     build:
         jobs:
-            - deploy:
-                filters:
-                    branches:
-                        only: master
+            - deploy
+#                filters:
+#                    branches:
+#                        only: master
