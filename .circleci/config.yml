@@ -17,10 +17,10 @@ commands:
     dep_ensure:
         description: Installing dependencies
         steps:
-#            - restore_cache:
-#                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
-#                  paths:
-#                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
+            - restore_cache:
+                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
+                  paths:
+                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
             - core/install_dep
             - run:
                   name: Download dependencies
@@ -30,10 +30,10 @@ commands:
                       else
                           echo "Dependencies were restored from cache."
                       fi
-#            - save_cache:
-#                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
-#                  paths:
-#                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
+            - save_cache:
+                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
+                  paths:
+                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
     install_xgo:
         description: Installing x-go cross compilation tool
         steps:
@@ -89,6 +89,6 @@ workflows:
     build:
         jobs:
             - deploy
-#                filters:
-#                    branches:
-#                        only: master
+                filters:
+                    branches:
+                        only: master
