@@ -8,7 +8,7 @@
 
 [[constraint]]
   name = "github.com/republicprotocol/darknode-go"
-  branch = "master"
+  revision = "b1183a"
 
 [[constraint]]
   name = "github.com/republicprotocol/co-go"
