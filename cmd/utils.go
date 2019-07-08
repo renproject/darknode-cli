@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -212,4 +213,10 @@ func redirectCommand() (string, error) {
 	default:
 		return "", ErrUnsupportedOS
 	}
+}
+
+// try to update the config and not care about successfully or not .
+func updateTerraformConfig(path string) {
+	check := fmt.Sprintf("cd %v && terraform 0.12upgrade --yes", path)
+	exec.Command("bash", "-c", check).Run() // ignore the error
 }

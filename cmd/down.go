@@ -79,7 +79,11 @@ func destroyNode(ctx *cli.Context) error {
 	}
 	fmt.Printf("%sDestroying your darknode ...%s\n", RESET, RESET)
 
-	destroy := fmt.Sprintf("cd %v && terraform 0.12upgrade --yes && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
+	// Try updating the terraform config if it's from an old version
+	updateTerraformConfig(nodePath)
+
+	// Destroy the instance through terrafrom
+	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
 	return run("bash", "-c", destroy)
 }
 
