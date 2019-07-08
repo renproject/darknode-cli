@@ -65,7 +65,7 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 
 	// Start running terraform
 	fmt.Printf("\n%sResizing dark nodes ... %s\n", RESET, RESET)
-	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", nodePath)
+	apply := fmt.Sprintf("cd %v && terraform 0.12upgrade --yes && terraform apply -auto-approve -no-color", nodePath)
 	err = run("bash", "-c", apply)
 	if err != nil {
 		// revert the `main.tf` file if fail to resize the droplet
@@ -85,7 +85,7 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 
 func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 	// Mark the droplet as tainted for recreating the droplet
-	taint := fmt.Sprintf("cd %v && terraform taint digitalocean_droplet.darknode", nodePath)
+	taint := fmt.Sprintf("cd %v && terraform 0.12upgrade --yes && terraform taint digitalocean_droplet.darknode", nodePath)
 	err := run("bash", "-c", taint)
 	if err != nil {
 		fmt.Println("[warning] fail to taint the darknode which might not be exist.")
