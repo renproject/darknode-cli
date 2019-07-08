@@ -43,9 +43,9 @@ variable "allocation_id"{
 }
 
 provider "aws" {
-  region     = "${var.region}"
-  access_key = "${var.access_key}"
-  secret_key = "${var.secret_key}"
+  region     = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 data "aws_ami" "ubuntu" {
@@ -92,8 +92,8 @@ resource "aws_security_group" "darknode" {
 }
 
 resource "aws_key_pair" "darknode" {
-  key_name   = "${var.name}"
-  public_key = "${var.ssh_public_key}"
+  key_name   = var.name
+  public_key = var.ssh_public_key
 }
 
 output "multiaddress" {
@@ -102,8 +102,8 @@ output "multiaddress" {
 
 {{if .AllocationID}}
 resource "aws_eip_association" "eip_assoc" {
-  instance_id   = "${aws_instance.darknode.id}"
-  allocation_id = "${var.allocation_id}"
+  instance_id   = aws_instance.darknode.id
+  allocation_id = var.allocation_id
 
   provisioner "local-exec" {
     command = "echo /ip4/${aws_eip_association.eip_assoc.public_ip}/tcp/${var.port}/republic/${var.address} > multiAddress.out"
@@ -111,19 +111,19 @@ resource "aws_eip_association" "eip_assoc" {
 }{{else}}{{end}}
 
 resource "aws_instance" "darknode" {
-  ami             = "${data.aws_ami.ubuntu.id}"
-  instance_type   = "${var.instance_type}"
-  key_name        = "${aws_key_pair.darknode.key_name}"
-  security_groups = ["${aws_security_group.darknode.name}"]
-
+  ami             = data.aws_ami.ubuntu.id
+  instance_type   = var.instance_type
+  key_name        = aws_key_pair.darknode.key_name
+  security_groups = [aws_security_group.darknode.name]
 
   provisioner "remote-exec" {
     script = "${var.path}/scripts/init.sh"
 
     connection {
+      host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "ubuntu"
-      private_key = "${file("${var.ssh_private_key_path}")}"
+      private_key = file("${var.ssh_private_key_path}")
     }
   }
 
@@ -132,6 +132,7 @@ resource "aws_instance" "darknode" {
     destination = "$HOME/darknode-config.json"
 
     connection {
+      host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
       private_key = "${file("${var.ssh_private_key_path}")}"
@@ -142,9 +143,10 @@ resource "aws_instance" "darknode" {
     script = "${var.path}/scripts/install.sh"
 
     connection {
+      host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = "${file("${var.ssh_private_key_path}")}"
+      private_key = file("${var.ssh_private_key_path}")
     }
   }
 
