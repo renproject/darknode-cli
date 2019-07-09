@@ -93,6 +93,7 @@ func startSingleNode(name string) error {
 	if err != nil {
 		return err
 	}
+
 	startScript := "systemctl --user start darknode"
 	keyPairPath := nodePath + "/ssh_keypair"
 	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", startScript); err != nil {
