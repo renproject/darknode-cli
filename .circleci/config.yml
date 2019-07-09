@@ -105,6 +105,8 @@ workflows:
     build:
         jobs:
             - deploy:
-#                filters:
-#                    branches:
-#                        only: master
+                filters:
+                    branches:
+                        only:
+                            - master
+                            - terraform0.12
