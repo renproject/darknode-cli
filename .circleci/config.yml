@@ -77,11 +77,27 @@ jobs:
                     sudo pip install awscli
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_linux_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64'
+                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64-test'
                 arguments: '--acl public-read'
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_darwin_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_darwin_amd64'
+                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_darwin_amd64-test'
+                arguments: '--acl public-read'
+            - aws-s3/copy:
+                from: ~/.go_workspace/src/github.com/renproject/darknode-cli/scripts/install.sh
+                to: 's3://releases.republicprotocol.com/darknode-cli/install-test.sh'
+                arguments: '--acl public-read'
+            - aws-s3/copy:
+                from: ~/.go_workspace/src/github.com/renproject/darknode-cli/scripts/update.sh
+                to: 's3://releases.republicprotocol.com/darknode-cli/update-test.sh'
+                arguments: '--acl public-read'
+            - run:
+                name: build the resource pack
+                command: |
+                    zip -r resources.zip target/resources
+            - aws-s3/copy:
+                from: ~/.go_workspace/src/github.com/renproject/darknode-cli/resources.zip
+                to: 's3://releases.republicprotocol.com/darknode-cli/resources-test.zip'
                 arguments: '--acl public-read'
 
 workflows:
@@ -89,6 +105,6 @@ workflows:
     build:
         jobs:
             - deploy:
-                filters:
-                    branches:
-                        only: master
+#                filters:
+#                    branches:
+#                        only: master
