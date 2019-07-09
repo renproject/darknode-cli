@@ -77,19 +77,19 @@ jobs:
                     sudo pip install awscli
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_linux_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64-test'
+                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64'
                 arguments: '--acl public-read'
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_darwin_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_darwin_amd64-test'
+                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_darwin_amd64'
                 arguments: '--acl public-read'
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/scripts/install.sh
-                to: 's3://releases.republicprotocol.com/darknode-cli/install-test.sh'
+                to: 's3://releases.republicprotocol.com/darknode-cli/install.sh'
                 arguments: '--acl public-read'
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/scripts/update.sh
-                to: 's3://releases.republicprotocol.com/darknode-cli/update-test.sh'
+                to: 's3://releases.republicprotocol.com/darknode-cli/update.sh'
                 arguments: '--acl public-read'
             - run:
                 name: build the resource pack
@@ -99,7 +99,7 @@ jobs:
                     mv resources.zip ../
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/resources.zip
-                to: 's3://releases.republicprotocol.com/darknode-cli/resources-test.zip'
+                to: 's3://releases.republicprotocol.com/darknode-cli/resources.zip'
                 arguments: '--acl public-read'
 
 workflows:
@@ -111,4 +111,3 @@ workflows:
                     branches:
                         only:
                             - master
-                            - terraform0.12
