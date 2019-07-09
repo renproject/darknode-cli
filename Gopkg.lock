@@ -243,7 +243,6 @@
   revision = "4e299fdb0e808f64667498735da03fdc2e0e84c9"
 
 [[projects]]
-  branch = "master"
   digest = "1:1b53ace0ce4b7483e7f6491c36f908f0601fd55448086ac95a77038f7d3b993f"
   name = "github.com/republicprotocol/darknode-go"
   packages = [
@@ -254,7 +253,7 @@
     "core/crypter",
   ]
   pruneopts = "T"
-  revision = "b1183a4333ceb15c372818dcd4d38067cdbcdbf3"
+  revision = "b1183a"
 
 [[projects]]
   branch = "experiment/one-shot"
