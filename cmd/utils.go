@@ -67,28 +67,6 @@ func getID(nodeDirectory string) (string, error) {
 	return multi.ValueForProtocol(identity.RepublicCode)
 }
 
-// getNodesByTag return the names of the nodes having the given tag.
-func getNodesByTag(tag string) ([]string, error) {
-	files, err := ioutil.ReadDir(Directory + "/darknodes")
-	if err != nil {
-		return nil, err
-	}
-	nodes := make([]string, 0)
-
-	for _, f := range files {
-		tagFile := path.Join(Directory, "darknodes", f.Name(), "tags.out")
-		tags, err := ioutil.ReadFile(tagFile)
-		if err != nil {
-			continue
-		}
-		if strings.Contains(string(tags), tag) {
-			nodes = append(nodes, f.Name())
-		}
-	}
-
-	return nodes, nil
-}
-
 // getNodesByTags return the names of the nodes having the given tags.
 func getNodesByTags(tags string) ([]string, error) {
 	files, err := ioutil.ReadDir(Directory + "/darknodes")
