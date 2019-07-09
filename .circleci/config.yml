@@ -94,7 +94,8 @@ jobs:
             - run:
                 name: build the resource pack
                 command: |
-                    zip -r resources.zip target/resources
+                    cd target/resources
+                    zip -r resources.zip resources
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/resources.zip
                 to: 's3://releases.republicprotocol.com/darknode-cli/resources-test.zip'
