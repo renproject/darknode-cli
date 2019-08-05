@@ -27,7 +27,7 @@ func execScript(ctx *cli.Context) error {
 
 		errs := make([]error, len(nodes))
 		co.ForAll(nodes, func(i int) {
-			errs[i] = execSingleNode(name, script)
+			errs[i] = execSingleNode(nodes[i], script)
 		})
 
 		return handleErrs(errs)

@@ -185,7 +185,6 @@ func run(name string, args ...string) error {
 
 // remoteRun runs the script to darknode with provided name.
 func remoteRun(name, script string) error {
-
 	// Parse the ssh private key
 	key, err := ParsePrivateKey(name)
 	if err != nil {
