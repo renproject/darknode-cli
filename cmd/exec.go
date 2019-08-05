@@ -1,8 +1,7 @@
 package main
 
 import (
-	"os"
-	"path"
+	"io/ioutil"
 
 	"github.com/republicprotocol/co-go"
 	"github.com/urfave/cli"
@@ -38,22 +37,14 @@ func execScript(ctx *cli.Context) error {
 }
 
 // execScript execute a bash script on a single darknode.
-func execSingleNode(name, script string) error {
-	if script == "" {
+func execSingleNode(name, scriptFile string) error {
+	if scriptFile == "" {
 		return ErrEmptyFilePath
 	}
-	nodeDirectory := nodePath(name)
-	keyPairPath := nodeDirectory + "/ssh_keypair"
-	ip, err := getIp(nodeDirectory)
+	script, err := ioutil.ReadFile(scriptFile)
 	if err != nil {
 		return err
 	}
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	filePath := path.Join(cwd, script)
 
-	// todo : why this not working?
-	return run("ssh", "-i", keyPairPath, "darknode@"+ip, "'bash -s'", "", filePath)
+	return remoteRun(name, string(script))
 }

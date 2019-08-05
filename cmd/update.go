@@ -45,10 +45,6 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 	nodePath := nodePath(name)
 	keyPairPath := path.Join(nodePath, "ssh_keypair")
 	configPath := path.Join(nodePath, "config.json")
-	ip, err := getIp(nodePath)
-	if err != nil {
-		return err
-	}
 
 	// Check if we need to update the node config
 	if updateConfig {
@@ -88,21 +84,21 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		}
 
 		updateConfigScript := fmt.Sprintf(`echo '%s' > $HOME/.darknode/config.json`, string(data))
-		if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", updateConfigScript); err != nil {
+		if err := remoteRun(name, updateConfigScript); err != nil {
 			return err
 		}
 
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
-	udpate, err := ioutil.ReadFile(path.Join(Directory, "scripts", "update.sh"))
+	update, err := ioutil.ReadFile(path.Join(Directory, "scripts", "update.sh"))
 	if err != nil {
 		return err
 	}
-	err = run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", string(udpate))
-	if err != nil {
+	if err := remoteRun(name, string(update)); err != nil {
 		return err
 	}
+
 	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s \n", GREEN, name, branch, RESET)
 	return nil
 }
