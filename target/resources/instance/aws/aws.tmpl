@@ -124,6 +124,7 @@ resource "aws_instance" "darknode" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = "${file("${var.ssh_private_key_path}")}"
+      host        = self.public_ip
     }
   }
 
@@ -135,6 +136,7 @@ resource "aws_instance" "darknode" {
       type        = "ssh"
       user        = "darknode"
       private_key = "${file("${var.ssh_private_key_path}")}"
+      host        = self.public_ip
     }
   }
 
@@ -145,6 +147,7 @@ resource "aws_instance" "darknode" {
       type        = "ssh"
       user        = "darknode"
       private_key = "${file("${var.ssh_private_key_path}")}"
+      host        = self.public_ip
     }
   }
 
