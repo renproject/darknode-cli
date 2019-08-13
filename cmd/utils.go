@@ -216,6 +216,7 @@ func remoteRun(name, script string) error {
 	}
 	defer session.Close()
 	session.Stdout = os.Stdout
+	session.Stderr = os.Stderr
 	return session.Run(script)
 }
 
