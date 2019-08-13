@@ -7,6 +7,7 @@ import (
 	"crypto/sha1"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"math/big"
 )
 
@@ -149,4 +150,23 @@ func RsaPublicKeyFromBytes(data []byte) (rsa.PublicKey, error) {
 		E: int(e),
 		N: big.NewInt(0).SetBytes(n),
 	}, nil
+}
+
+func unmarshalBigIntsFromMap(m map[string]json.RawMessage, k string) ([]*big.Int, error) {
+	bigInts := []*big.Int{}
+	if val, ok := m[k]; ok {
+		vals := []json.RawMessage{}
+		if err := json.Unmarshal(val, &vals); err != nil {
+			return bigInts, err
+		}
+		for _, val := range vals {
+			bytes := []byte{}
+			if err := json.Unmarshal(val, &bytes); err != nil {
+				return bigInts, err
+			}
+			bigInts = append(bigInts, big.NewInt(0).SetBytes(bytes))
+		}
+		return bigInts, nil
+	}
+	return bigInts, fmt.Errorf("%s is nil", k)
 }

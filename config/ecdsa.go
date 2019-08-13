@@ -241,3 +241,36 @@ func RecoverAddress(data []byte, signature []byte) (string, error) {
 	}
 	return key.Address(), nil
 }
+
+func unmarshalBigIntFromMap(m map[string]json.RawMessage, k string) (*big.Int, error) {
+	if val, ok := m[k]; ok {
+		bytes := []byte{}
+		if err := json.Unmarshal(val, &bytes); err != nil {
+			return nil, err
+		}
+		return big.NewInt(0).SetBytes(bytes), nil
+	}
+	return nil, fmt.Errorf("%s is nil", k)
+}
+
+func unmarshalStringFromMap(m map[string]json.RawMessage, k string) (string, error) {
+	if val, ok := m[k]; ok {
+		str := ""
+		if err := json.Unmarshal(val, &str); err != nil {
+			return "", err
+		}
+		return str, nil
+	}
+	return "", fmt.Errorf("%s is nil", k)
+}
+
+func unmarshalIntFromMap(m map[string]json.RawMessage, k string) (int, error) {
+	if val, ok := m[k]; ok {
+		i := 0
+		if err := json.Unmarshal(val, &i); err != nil {
+			return 0, err
+		}
+		return i, nil
+	}
+	return 0, fmt.Errorf("%s is nil", k)
+}
