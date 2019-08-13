@@ -14,11 +14,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/renproject/libeth-go"
-	"github.com/republicprotocol/darknode-go/adapter/ethcontract"
-	"github.com/republicprotocol/darknode-go/adapter/ethcontract/bindings"
-	"github.com/republicprotocol/darknode-go/adapter/ethcontract/dnr"
-	"github.com/republicprotocol/darknode-go/cmd/darknode/config"
-	"github.com/republicprotocol/ren-go/foundation/addr"
+	"github.com/republicprotocol/darknode-cli/bindings"
+	"github.com/republicprotocol/darknode-cli/config"
 	"github.com/urfave/cli"
 )
 
@@ -38,7 +35,10 @@ func destroyNode(ctx *cli.Context) error {
 		return err
 	}
 	network := config.Ethereum.Network
-	address := addr.New(config.Address)
+	ethAddr, err := config.EthereumAdress()
+	if err != nil {
+		return err
+	}
 
 	// Connect to Ethereum
 	_, dnr, err := connect(network)
@@ -47,17 +47,18 @@ func destroyNode(ctx *cli.Context) error {
 	}
 
 	// Check if the node is registered
-	if err := checkRegistered(dnr, network, address); err != nil {
+	if err := checkRegistered(dnr, network, config); err != nil {
 		return err
 	}
 	// Check if the node is in pending registration/deregistration stage
-	if err := checkPendingStage(dnr, address); err != nil {
+	if err := checkPendingStage(dnr, config); err != nil {
 		return err
 	}
+
 	// Check if the darknode has been refunded
 	context, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	refunded, err := dnr.Refunded(context, address)
+	refunded, err := dnr.IsRefunded(&bind.CallOpts{Context: context}, ethAddr)
 	if err != nil {
 		return err
 	}
@@ -110,7 +111,7 @@ func withdraw(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	account, err := libeth.NewAccount(client, config.Keystore.EcdsaKey.PrivateKey)
+	account, err := libeth.NewAccount(client, config.Keystore.Ecdsa.PrivateKey)
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,7 @@ func withdraw(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
+	auth := bind.NewKeyedTransactor(config.Keystore.Ecdsa.PrivateKey)
 	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 Gwei
 
 	// Check REN balance first
@@ -127,7 +128,7 @@ func withdraw(ctx *cli.Context) error {
 	if renAddress == "" {
 		return ErrUnknownNetwork
 	}
-	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), bind.ContractBackend(client.EthClient()))
+	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), client.EthClient())
 	if err != nil {
 		return err
 	}
@@ -172,7 +173,7 @@ func withdraw(ctx *cli.Context) error {
 	return nil
 }
 
-// renAddress on different testnet
+// renAddress on different network
 func renAddress(network string) string {
 	switch network {
 	case "mainnet":
@@ -184,12 +185,24 @@ func renAddress(network string) string {
 	}
 }
 
-func connect(network string) (libeth.Client, dnr.Caller, error) {
+// renAddress on different network
+func dnrAddress(network string) common.Address {
+	switch network {
+	case "mainnet":
+		return common.HexToAddress("0x34bd421C7948Bc16f826Fd99f9B785929b121633")
+	case "kovan", "testnet":
+		return common.HexToAddress("0x75Fa8349fc9C7C640A4e9F1A1496fBB95D2Dc3d5")
+	default:
+		panic(fmt.Sprintf("unknown network %v", network))
+	}
+}
+
+func connect(network string) (libeth.Client, *bindings.DarknodeRegistry, error) {
 	client, err := libeth.NewMercuryClient(network, "dcc")
 	if err != nil {
 		return libeth.Client{}, nil, err
 	}
-	contract, err := ethcontract.NewCaller(client).DarknodeRegistry()
+	contract, err := bindings.NewDarknodeRegistry(dnrAddress(network), client.EthClient())
 	if err != nil {
 		return libeth.Client{}, nil, err
 	}
@@ -197,11 +210,15 @@ func connect(network string) (libeth.Client, dnr.Caller, error) {
 	return client, contract, nil
 }
 
-func checkRegistered(dnr dnr.Caller, network string, address addr.Addr) error {
+func checkRegistered(dnr *bindings.DarknodeRegistry, network string, config config.Config) error {
+	ethAddr, err := config.EthereumAdress()
+	if err != nil {
+		return err
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	registered, err := dnr.IsRegistered(ctx, address)
+	registered, err := dnr.IsRegistered(&bind.CallOpts{Context: ctx}, ethAddr)
 	if err != nil {
 		return err
 	}
@@ -209,9 +226,9 @@ func checkRegistered(dnr dnr.Caller, network string, address addr.Addr) error {
 		var url string
 		switch network {
 		case "testnet", "kovan":
-			url = fmt.Sprintf("https://dcc-testnet.republicprotocol.com/darknode/%v?action=deregister", address.String())
+			url = fmt.Sprintf("https://dcc-testnet.republicprotocol.com/darknode/%v?action=deregister", config.Address)
 		case "mainnet":
-			url = fmt.Sprintf("https://dcc.republicprotocol.com/darknode/%v?action=deregister", address.String())
+			url = fmt.Sprintf("https://dcc.republicprotocol.com/darknode/%v?action=deregister", config.Address)
 		default:
 			return ErrUnknownNetwork
 		}
@@ -235,10 +252,15 @@ func checkRegistered(dnr dnr.Caller, network string, address addr.Addr) error {
 	return nil
 }
 
-func checkPendingStage(dnr dnr.Caller, address addr.Addr) error {
+func checkPendingStage(dnr *bindings.DarknodeRegistry, config config.Config) error {
+	ethAddr, err := config.EthereumAdress()
+	if err != nil {
+		return err
+	}
+
 	reCtx, reCancel := context.WithTimeout(context.Background(), time.Minute)
 	defer reCancel()
-	pendingRegistration, err := dnr.PendingRegistration(reCtx, address)
+	pendingRegistration, err := dnr.IsPendingRegistration(&bind.CallOpts{Context: reCtx}, ethAddr)
 	if err != nil {
 		return err
 	}
@@ -248,12 +270,13 @@ func checkPendingStage(dnr dnr.Caller, address addr.Addr) error {
 
 	deCtx, deCancel := context.WithTimeout(context.Background(), time.Minute)
 	defer deCancel()
-	pendingDeregistration, err := dnr.PendingDeregistration(deCtx, address)
+	pendingDeregistration, err := dnr.IsPendingDeregistration(&bind.CallOpts{Context: deCtx}, ethAddr)
 	if err != nil {
 		return err
 	}
 	if pendingDeregistration {
 		return fmt.Errorf("%sYour node is currently in pending deregistration stage, please wait for next epoch shuffle and try again%s\n", RED, RESET)
 	}
+
 	return nil
 }
