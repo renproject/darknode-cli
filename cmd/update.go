@@ -32,7 +32,7 @@ func updateNode(ctx *cli.Context) error {
 			return err
 		}
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		co.ParForAll(nodes, func(i int) {
 			errs[i] = updateSingleNode(nodes[i], branch, updateConfig)
 		})
 		return handleErrs(errs)

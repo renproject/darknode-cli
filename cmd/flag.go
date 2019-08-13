@@ -41,6 +41,10 @@ var (
 		Name:  "address",
 		Usage: "Ethereum address you want to withdraw the tokens to.",
 	}
+	FileFlag = cli.StringFlag{
+		Name:  "file",
+		Usage: "path of the script file to run by the darknode",
+	}
 	UpdateConfigFlag = cli.BoolFlag{
 		Name:  "config, c",
 		Usage: "An optional configuration file used to update the configuration",

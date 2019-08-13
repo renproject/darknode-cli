@@ -98,7 +98,7 @@ func switchNode(ctx *cli.Context, cmd string) error {
 			return err
 		}
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		co.ParForAll(nodes, func(i int) {
 			errs[i] = f(nodes[i])
 		})
 		return handleErrs(errs)
@@ -118,7 +118,7 @@ func startNode(name string) error {
 
 // stopNode stops a single node or a set of nodes by its tags.
 func stopNode(name string) error {
-	err := remoteRun(name, StartDarknode)
+	err := remoteRun(name, StopDarknode)
 	if err == nil {
 		fmt.Printf("%s[%s] has been turned off.%s \n", GREEN, name, RESET)
 	}
