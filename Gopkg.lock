@@ -240,6 +240,17 @@
 
 [[projects]]
   branch = "develop"
+  digest = "1:fc53d345af9254c887621a8926615095ba7892e500b183eab7e0655a09ea8d61"
+  name = "github.com/republicprotocol/darknode-cli"
+  packages = [
+    "bindings",
+    "config",
+  ]
+  pruneopts = "T"
+  revision = "8ec89e14ad792b2cdb2464cc8ca55b5f1febbed5"
+
+[[projects]]
+  branch = "develop"
   digest = "1:e7c0477c26ab218fe02c82313def8041b1858891d4132b0fcc9b780b123af4ae"
   name = "github.com/republicprotocol/republic-go"
   packages = [
@@ -369,6 +380,8 @@
     "github.com/multiformats/go-multihash",
     "github.com/renproject/libeth-go",
     "github.com/renproject/phi",
+    "github.com/republicprotocol/darknode-cli/bindings",
+    "github.com/republicprotocol/darknode-cli/config",
     "github.com/republicprotocol/republic-go/cmd/darknode/config",
     "github.com/republicprotocol/republic-go/contract",
     "github.com/republicprotocol/republic-go/crypto",
