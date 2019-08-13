@@ -7,14 +7,6 @@
   branch = "develop"
 
 [[constraint]]
-  name = "github.com/republicprotocol/darknode-go"
-  revision = "b1183a"
-
-[[constraint]]
-  name = "github.com/republicprotocol/co-go"
-  branch = "master"
-
-[[constraint]]
   name = "github.com/urfave/cli"
   version = "1.20.0"
 

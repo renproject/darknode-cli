@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/republicprotocol/co-go"
+	"github.com/renproject/phi"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/republicprotocol/republic-go/crypto"
 	"github.com/urfave/cli"
@@ -32,7 +32,7 @@ func updateNode(ctx *cli.Context) error {
 			return err
 		}
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		phi.ParForAll(nodes, func(i int) {
 			errs[i] = updateSingleNode(nodes[i], branch, updateConfig)
 		})
 		return handleErrs(errs)

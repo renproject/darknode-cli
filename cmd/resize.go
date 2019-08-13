@@ -48,7 +48,7 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 	}
 
 	// Check if user tries to resize to the same instance type
-	match:=  reg.FindStringSubmatch(string(tfFile))
+	match := reg.FindStringSubmatch(string(tfFile))
 	if match == nil || len(match) < 1 {
 		return errors.New("invalid main.tf file ")
 	}

@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/republicprotocol/co-go"
+	"github.com/renproject/phi"
 	"github.com/republicprotocol/republic-go/identity"
 	"github.com/urfave/cli"
 )
@@ -77,7 +77,7 @@ func startNode(ctx *cli.Context) error {
 			return err
 		}
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		phi.ParForAll(nodes, func(i int) {
 			errs[i] = startSingleNode(nodes[i])
 		})
 		return handleErrs(errs)
@@ -118,7 +118,7 @@ func stopNode(ctx *cli.Context) error {
 			return err
 		}
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		phi.ParForAll(nodes, func(i int) {
 			errs[i] = stopSingleNode(nodes[i])
 		})
 		return handleErrs(errs)
