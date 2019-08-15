@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
@@ -132,11 +133,17 @@ type gcpTerraform struct {
 	AllocationID   string
 }
 
-func Deploy(ctx *cli.Context) error {
+func deployToGCP(ctx *cli.Context) error {
 	zone := strings.ToLower(ctx.String("gcp-zone"))
 	machine_type := strings.ToLower(ctx.String("gcp-machine-type"))
+
+	log.Println("zone: " + zone)
 	if zone == "" {
 		zone = gcpZones[rand.Intn(len(gcpZones))]
+	}
+
+	if machine_type == "" {
+		machine_type = "n1-standard-1"
 	}
 
 	credentialPath, err := gcpCredentials(ctx)
@@ -183,17 +190,21 @@ func Deploy(ctx *cli.Context) error {
 	return outputURL(nodePath, name, network, pubKey.Marshal())
 }
 
-func gcpCredentials(ctx *cli.Context) (string,error) {
+func gcpCredentials(ctx *cli.Context) (string, error) {
 	jsonPath := ctx.String("gcp-credentials")
 	//check if file exists
 	data, err := ioutil.ReadFile(jsonPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	creds, err := google.CredentialsFromJSON(ctx, data, "https://www.googleapis.com/auth/bigquery")
-	if err != nil {
-		log.Fatal(err)
+
+	googleCtx := context.Background()
+	_, credErr := google.CredentialsFromJSON(googleCtx, data, "https://www.googleapis.com/auth/compute	")
+	if credErr != nil {
+		log.Fatal(credErr)
 	}
+	log.Println("valid credentials found on path " + jsonPath)
+	return jsonPath, nil
 
 }
 
@@ -208,7 +219,7 @@ func gcpTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKe
 		MachineType:    machine_type,
 		SshPubKey:      strings.TrimSpace(StringfySshPubkey(key)),
 		SshPriKeyPath:  path.Join(nodePath, "ssh_keypair"),
-		credentialPath: credentialPath
+		credentialPath: credentialPath,
 		Port:           config.Port,
 		Path:           Directory,
 		AllocationID:   ctx.String("aws-elastic-ip"),

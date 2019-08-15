@@ -106,3 +106,19 @@ var (
 		Usage: "An optional digital ocean droplet size (default: s-1vcpu-1gb)",
 	}
 )
+
+var (
+	GcpFlag = cli.BoolFlag{
+		Name:  "gcp",
+		Usage: "Google Cloud Platform will be used to provision the Darknode",
+	}
+	GcpZoneFlag = cli.StringFlag{
+		Name:  "gcp-zone",
+		Usage: "An optional Google Cloud Zone (default: random)",
+	}
+
+	GcpCredFlag = cli.StringFlag{
+		Name:  "gcp-credentials",
+		Usage: "Service Account credential file (JSON) to be used",
+	}
+)

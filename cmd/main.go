@@ -30,6 +30,7 @@ func main() {
 				NameFlag, TagsFlag, KeystoreFlag, PassphraseFlag, NetworkFlag, ConfigFlag,
 				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag, AwsProfileFlag,
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
+				GcpFlag,GcpZoneFlag,GcpCredFlag,
 			},
 			Action: func(c *cli.Context) error {
 				return deployNode(c)
