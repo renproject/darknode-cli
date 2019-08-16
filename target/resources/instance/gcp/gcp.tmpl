@@ -23,6 +23,24 @@ variable "credential_file" {
   default = "{{.Credentials}}"
 }
 
+variable "ssh_public_key" {
+  default = "{{.SshPubKey}}"
+}
+
+variable "ssh_private_key_path" {
+  default = "{{.SshPriKeyPath}}"
+}
+
+variable "port" {
+  default = "{{.Port}}"
+}
+
+variable "path" {
+  default = "{{.Path}}"
+}
+
+
+
 provider "google" {
   credentials = "${file("${var.credential_file}")}"
   project     = "${var.project}"
@@ -43,12 +61,12 @@ output "instance_ip" {
 *******************/
 
 resource "google_compute_network" "darknode_network" {
-  name = "darknode-network"
+  name = "${var.name}-vpc"
 }
 
 resource "google_compute_firewall" "darknode_ping" {
   network     = "${google_compute_network.darknode_network.name}"
-  name        = "darknode-ping"
+  name        = "${var.name}-ping"
   description = "Allow inbound PING traffic"
 
   allow {
@@ -61,7 +79,7 @@ resource "google_compute_firewall" "darknode_ping" {
 
 resource "google_compute_firewall" "darknode_ssh" {
   network     = "${google_compute_network.darknode_network.name}"
-  name        = "darknode-ssh"
+  name        = "${var.name}-ssh"
   description = "Allow inbound SSH traffic"
 
   allow {
@@ -75,7 +93,7 @@ resource "google_compute_firewall" "darknode_ssh" {
 
 resource "google_compute_firewall" "darknode_republic_protocol" {
   network     = "${google_compute_network.darknode_network.name}"
-  name        = "darknode-republic-protocol"
+  name        = "${var.name}-republic-protocol"
   description = "Allow inbound Republic Protocol traffic"
 
   allow {
@@ -88,7 +106,8 @@ resource "google_compute_firewall" "darknode_republic_protocol" {
 }
 
 resource "google_compute_address" "darkode_public_ip" {
-  name = "darknode-public-ip"
+//TODO add random number for multiple nodes
+  name = "${var.name}-public-ip"
 }
 
 /***********
@@ -101,7 +120,7 @@ data "google_compute_image" "base_image" {
 }
 
 resource "google_compute_disk" "darknode_disk" {
-  name  = "darknode-disk"
+  name  = "${var.name}-disk"
   image = "${data.google_compute_image.base_image.self_link}"
   size  = 100
   type  = "pd-ssd"
@@ -138,4 +157,42 @@ resource "google_compute_instance" "darknode_vm" {
   }
 
   tags = ["darknode"]
+
+  provisioner "remote-exec" {
+    script = "${var.path}/scripts/init.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = "${file("${var.ssh_private_key_path}")}"
+      host        = self.network_interface.0.access_config.0.nat_ip
+    }
+  }
+
+  provisioner "file" {
+    source      = "${var.path}/darknodes/${var.name}/config.json"
+    destination = "$HOME/darknode-config.json"
+
+    connection {
+      type        = "ssh"
+      user        = "darknode"
+      private_key = "${file("${var.ssh_private_key_path}")}"
+      host        = self.network_interface.0.access_config.0.nat_ip
+    }
+  }
+
+  provisioner "remote-exec" {
+    script = "${var.path}/scripts/install.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "darknode"
+      private_key = "${file("${var.ssh_private_key_path}")}"
+      host        = self.network_interface.0.access_config.0.nat_ip
+    }
+  }
+
+  provisioner "local-exec" {
+    command = "echo /ip4/${google_compute_address.darkode_public_ip.address}/tcp/${var.port}/republic/${var.address} > multiAddress.out"
+  }
 }

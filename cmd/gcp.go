@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -119,8 +120,8 @@ var gcpMachineTypes = []string{
 	"n1-ultramem-80",
 }
 
-// awsTerraform contains all the fields needed to generate a terraform config file
-// so that we can deploy the node on AWS.
+// gcpTerraform contains all the fields needed to generate a terraform config file
+// so that we can deploy the node on GCP.
 type gcpTerraform struct {
 	Name          string
 	Zone          string
@@ -160,7 +161,7 @@ func deployToGCP(ctx *cli.Context) error {
 	}
 
 	// Create node main.directory
-	name := ctx.String("name")
+	name := ctx.String("name") + strconv.Itoa(rand.Intn(1000))
 	tags := ctx.String("tags")
 	if err := mkdir(name, tags); err != nil {
 		return err
