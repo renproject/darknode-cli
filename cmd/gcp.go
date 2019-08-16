@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/republicprotocol/republic-go/cmd/darknode/config"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/option"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -121,21 +122,22 @@ var gcpMachineTypes = []string{
 // awsTerraform contains all the fields needed to generate a terraform config file
 // so that we can deploy the node on AWS.
 type gcpTerraform struct {
-	Name           string
-	Zone           string
-	Address        string
-	MachineType    string
-	SshPubKey      string
-	SshPriKeyPath  string
-	credentialPath string
-	Port           string
-	Path           string
-	AllocationID   string
+	Name          string
+	Zone          string
+	Project       string
+	Address       string
+	MachineType   string
+	SshPubKey     string
+	SshPriKeyPath string
+	Credentials   string
+	Port          string
+	Path          string
+	AllocationID  string
 }
 
 func deployToGCP(ctx *cli.Context) error {
-	zone := strings.ToLower(ctx.String("gcp-zone"))
-	machine_type := strings.ToLower(ctx.String("gcp-machine-type"))
+	zone := strings.ToLower(ctx.String(GcpZoneLabel))
+	machine_type := strings.ToLower(ctx.String(GcpMachineLabel))
 
 	log.Println("zone: " + zone)
 	if zone == "" {
@@ -143,10 +145,10 @@ func deployToGCP(ctx *cli.Context) error {
 	}
 
 	if machine_type == "" {
-		machine_type = "n1-standard-1"
+		machine_type = GcpMachineDefaultLabel
 	}
 
-	credentialPath, err := gcpCredentials(ctx)
+	credentialPath, projectId, err := gcpCredentials(ctx)
 	if err != nil {
 		return err
 	}
@@ -179,8 +181,22 @@ func deployToGCP(ctx *cli.Context) error {
 		return err
 	}
 
+	tf := gcpTerraform{
+		Name:          name,
+		Zone:          zone,
+		Project:       projectId,
+		Address:       config.Address.String(),
+		MachineType:   machine_type,
+		SshPubKey:     strings.TrimSpace(StringfySshPubkey(pubKey)),
+		SshPriKeyPath: path.Join(nodePath, "ssh_keypair"),
+		Credentials:   credentialPath,
+		Port:          config.Port,
+		Path:          Directory,
+		AllocationID:  ctx.String("aws-elastic-ip"),
+	}
+
 	// Generate terraform config and start deploying
-	if err := gcpTerraformConfig(ctx, config, pubKey, credentialPath, zone, machine_type); err != nil {
+	if err := gcpTerraformConfig(ctx, &tf); err != nil {
 		return err
 	}
 	if err := runTerraform(nodePath); err != nil {
@@ -190,8 +206,8 @@ func deployToGCP(ctx *cli.Context) error {
 	return outputURL(nodePath, name, network, pubKey.Marshal())
 }
 
-func gcpCredentials(ctx *cli.Context) (string, error) {
-	jsonPath := ctx.String("gcp-credentials")
+func gcpCredentials(ctx *cli.Context) (string, string, error) {
+	jsonPath := ctx.String(GcpCredLabel)
 	//check if file exists
 	data, err := ioutil.ReadFile(jsonPath)
 	if err != nil {
@@ -199,38 +215,42 @@ func gcpCredentials(ctx *cli.Context) (string, error) {
 	}
 
 	googleCtx := context.Background()
-	_, credErr := google.CredentialsFromJSON(googleCtx, data, "https://www.googleapis.com/auth/compute	")
+	creds, credErr := google.CredentialsFromJSON(googleCtx, data, "https://www.googleapis.com/auth/cloud-platform")
 	if credErr != nil {
 		log.Fatal(credErr)
 	}
+
+	//TODO add documentation to enable https://console.developers.google.com/apis/library/cloudresourcemanager.googleapis.com
+	cloudresourcemanagerService, err := cloudresourcemanager.NewService(googleCtx, option.WithCredentials(creds))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resource := creds.ProjectID
+
+	rb := &cloudresourcemanager.TestIamPermissionsRequest{
+		Permissions: []string{"compute.instances.create", "compute.networks.create", "compute.firewalls.create"}, ForceSendFields: nil, NullFields: nil,
+	}
+	resp, err := cloudresourcemanagerService.Projects.TestIamPermissions(resource, rb).Context(googleCtx).Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(resp.Permissions) < 3 {
+		log.Fatal("insufficient permissions on Google Cloud. Please grant the service account the Compute Admin role.")
+	}
 	log.Println("valid credentials found on path " + jsonPath)
-	return jsonPath, nil
+	return jsonPath, creds.ProjectID, nil
 
 }
 
-func gcpTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, credentialPath, zone, machine_type string) error {
-	name := ctx.String("name")
-	nodePath := nodePath(name)
-
-	tf := gcpTerraform{
-		Name:           name,
-		Zone:           zone,
-		Address:        config.Address.String(),
-		MachineType:    machine_type,
-		SshPubKey:      strings.TrimSpace(StringfySshPubkey(key)),
-		SshPriKeyPath:  path.Join(nodePath, "ssh_keypair"),
-		credentialPath: credentialPath,
-		Port:           config.Port,
-		Path:           Directory,
-		AllocationID:   ctx.String("aws-elastic-ip"),
-	}
+func gcpTerraformConfig(ctx *cli.Context, tf *gcpTerraform) error {
 
 	templateFile := path.Join(Directory, "instance", "gcp", "gcp.tmpl")
-	t := template.Must(template.New("aws.tmpl").Funcs(template.FuncMap{}).ParseFiles(templateFile))
-	tfFile, err := os.Create(path.Join(nodePath, "main.tf"))
+	t := template.Must(template.New("gcp.tmpl").Funcs(template.FuncMap{}).ParseFiles(templateFile))
+	tfFile, err := os.Create(path.Join(nodePath(tf.Name), "main.tf"))
 	if err != nil {
 		return err
 	}
 
-	return t.Execute(tfFile, tf)
+	return t.Execute(tfFile, &tf)
 }

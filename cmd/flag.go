@@ -107,18 +107,32 @@ var (
 	}
 )
 
+const (
+	GcpFlagLabel           string = "gcp"
+	GcpZoneLabel           string = "gcp-zone"
+	GcpCredLabel           string = "gcp-credentials"
+	GcpMachineLabel        string = "gcp-machine-type"
+	GcpMachineDefaultLabel string = "n1-standard-1"
+)
+
 var (
 	GcpFlag = cli.BoolFlag{
-		Name:  "gcp",
+		Name:  GcpFlagLabel,
 		Usage: "Google Cloud Platform will be used to provision the Darknode",
 	}
 	GcpZoneFlag = cli.StringFlag{
-		Name:  "gcp-zone",
+		Name:  GcpZoneLabel,
 		Usage: "An optional Google Cloud Zone (default: random)",
 	}
 
 	GcpCredFlag = cli.StringFlag{
-		Name:  "gcp-credentials",
+		Name:  GcpCredLabel,
 		Usage: "Service Account credential file (JSON) to be used",
+	}
+
+	GcpMachineFlag = cli.StringFlag{
+		Name:  GcpMachineLabel,
+		Value: GcpMachineDefaultLabel,
+		Usage: "The machine type to be used.",
 	}
 )
