@@ -54,6 +54,13 @@ You can specify in which [Compute Engine Zone](https://cloud.google.com/compute/
 ```sh
 darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLOADED_JSON_FILE --gcp-zone europe-west1-b
 ```
+### Choosing a machine type
+
+You can specify which [Machine Type](https://cloud.google.com/compute/docs/machine-types) you deploy your node with the --gcp-machine-type flag. If omitted, n1-standard-1 is selected.
+
+```sh
+darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLOADED_JSON_FILE --gcp-machine-type f1-micro
+```
 
 ## Keeping up to date
 
