@@ -56,7 +56,7 @@ darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLO
 ```
 ### Choosing a machine type
 
-You can specify which [Machine Type](https://cloud.google.com/compute/docs/machine-types) you deploy your node with the --gcp-machine-type flag. If omitted, n1-standard-1 is selected.
+You can specify with which [Machine Type](https://cloud.google.com/compute/docs/machine-types) you deploy your node with the --gcp-machine-type flag. If omitted, n1-standard-1 is selected.
 
 ```sh
 darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLOADED_JSON_FILE --gcp-machine-type f1-micro
