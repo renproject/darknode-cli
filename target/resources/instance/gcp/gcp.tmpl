@@ -38,9 +38,6 @@ variable "port" {
 variable "path" {
   default = "{{.Path}}"
 }
-
-
-
 provider "google" {
   credentials = "${file("${var.credential_file}")}"
   project     = "${var.project}"
@@ -52,9 +49,9 @@ output "instance_ip" {
   value       = "${google_compute_instance.darknode_vm.network_interface.0.access_config.0.nat_ip}"
 }
 
-#output "multiaddress" {
-#  value = "/ip4/${aws_instance.darknode.public_ip}/tcp/18514/republic/${var.address}"
-#}
+output "multiaddress" {
+ value = "/ip4/${google_compute_instance.darknode_vm.network_interface.0.access_config.0.nat_ip}/tcp/18514/republic/${var.address}"
+}
 
 /*******************
 **** NETWORKING ****
@@ -106,7 +103,6 @@ resource "google_compute_firewall" "darknode_republic_protocol" {
 }
 
 resource "google_compute_address" "darkode_public_ip" {
-//TODO add random number for multiple nodes
   name = "${var.name}-public-ip"
 }
 
@@ -133,8 +129,6 @@ resource "google_compute_instance" "darknode_vm" {
   #disable during dev - prevents easy iterations
   #deletion_protection = true
 
-  metadata_startup_script = "echo 'hello' > test.txt"
-
   boot_disk {
     source = "${google_compute_disk.darknode_disk.self_link}"
   }
@@ -158,6 +152,10 @@ resource "google_compute_instance" "darknode_vm" {
 
   tags = ["darknode"]
 
+  metadata = {
+    ssh-keys = "ubuntu:${var.ssh_public_key}\ndarknode:${var.ssh_public_key}"
+  }
+
   provisioner "remote-exec" {
     script = "${var.path}/scripts/init.sh"
 
@@ -169,7 +167,7 @@ resource "google_compute_instance" "darknode_vm" {
     }
   }
 
-  provisioner "file" {
+    provisioner "file" {
     source      = "${var.path}/darknodes/${var.name}/config.json"
     destination = "$HOME/darknode-config.json"
 
@@ -191,8 +189,7 @@ resource "google_compute_instance" "darknode_vm" {
       host        = self.network_interface.0.access_config.0.nat_ip
     }
   }
-
   provisioner "local-exec" {
-    command = "echo /ip4/${google_compute_address.darkode_public_ip.address}/tcp/${var.port}/republic/${var.address} > multiAddress.out"
+    command = "echo /ip4/${google_compute_instance.darknode_vm.network_interface.0.access_config.0.nat_ip}/tcp/${var.port}/republic/${var.address} > multiAddress.out"
   }
 }
