@@ -221,7 +221,6 @@ func gcpCredentials(ctx *cli.Context) (string, string, error) {
 		log.Fatal(credErr)
 	}
 
-	//TODO add documentation to enable https://console.developers.google.com/apis/library/cloudresourcemanager.googleapis.com
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(googleCtx, option.WithCredentials(creds))
 	if err != nil {
 		log.Fatal(err)

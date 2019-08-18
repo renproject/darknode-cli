@@ -12,6 +12,11 @@ To jump straight into running your first Darknode on AWS, checkout our [Getting 
  
 Checkout the instructions for [Creating a Personal Access Token](https://github.com/republicprotocol/darknode-cli#digital-ocean) on Digital Ocean.
 
+## Getting Started on Google Cloud Platform
+ 
+Checkout the instructions for [getting started on GCP](docs/gcp/getting-started-on-gcp.md).
+
+
 ## Installing the tool
 
 To download and install the Darknode CLI, open a terminal and run:
