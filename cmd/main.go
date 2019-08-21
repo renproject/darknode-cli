@@ -27,9 +27,14 @@ func main() {
 			Name:  "up",
 			Usage: "Deploy a new Darknode",
 			Flags: []cli.Flag{
+				//General
 				NameFlag, TagsFlag, KeystoreFlag, PassphraseFlag, NetworkFlag, ConfigFlag,
+				//Amazon
 				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag, AwsProfileFlag,
+				//Digital Ocean
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
+				//Google Cloud
+				GcpFlag,GcpZoneFlag,GcpCredFlag,
 			},
 			Action: func(c *cli.Context) error {
 				return deployNode(c)
