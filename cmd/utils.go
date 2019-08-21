@@ -66,6 +66,30 @@ func getID(nodeDirectory string) (string, error) {
 	return multi.ValueForProtocol(identity.RepublicCode)
 }
 
+// getProvider returns the provider of a darknode instance.
+func getProvider(name string) (Provider, error) {
+	// Validate the name
+	nodePath, err := validateDarknodeName(name)
+	if err != nil {
+		return "", err
+	}
+
+	// Get main.tf file
+	filePath := path.Join(nodePath, "main.tf")
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+
+	// Check if it's aws or digital ocean
+	if strings.Contains(string(data), `provider "aws"`) {
+		return AWS, nil
+	} else if strings.Contains(string(data), `provider "digitalocean"`) {
+		return DIGITAL_OCEAN, nil
+	}
+	return "", ErrUnknownProvider
+}
+
 // getNodesByTags return the names of the nodes having the given tags.
 func getNodesByTags(tags string) ([]string, error) {
 	files, err := ioutil.ReadDir(Directory + "/darknodes")
