@@ -14,13 +14,14 @@ func execScript(ctx *cli.Context) error {
 	name := ctx.Args().First()
 	tags := ctx.String("tags")
 	file := ctx.String("file")
+	useSudo := ctx.Bool("sudo")
 	script := ctx.String("script")
 
 	if name == "" && tags == "" {
 		cli.ShowCommandHelp(ctx, "exec")
 		return ErrEmptyNameAndTags
 	} else if name != "" && tags == "" {
-		return execSingleNode(name, file, script)
+		return execSingleNode(name, file, script, useSudo)
 	} else if name == "" && tags != "" {
 		nodes, err := getNodesByTags(tags)
 		if err != nil {
@@ -29,7 +30,7 @@ func execScript(ctx *cli.Context) error {
 
 		errs := make([]error, len(nodes))
 		co.ParForAll(nodes, func(i int) {
-			errs[i] = execSingleNode(nodes[i], file, script)
+			errs[i] = execSingleNode(nodes[i], file, script, useSudo)
 		})
 
 		return handleErrs(errs)
@@ -39,17 +40,21 @@ func execScript(ctx *cli.Context) error {
 }
 
 // execScript execute a bash script on a single darknode.
-func execSingleNode(name, file, script string) error {
-	if file != ""{
+func execSingleNode(name, file, script string, useSudo bool) error {
+	user := "darknode"
+	if useSudo {
+		user = "root"
+	}
+	if file != "" {
 		script, err := ioutil.ReadFile(file)
 		if err != nil {
 			return err
 		}
-		return remoteRun(name, string(script))
+		return remoteUserRun(name, string(script), user)
 	}
 
 	if script != "" {
-		return remoteRun(name, script)
+		return remoteUserRun(name, script, user)
 	}
 
 	return errors.New("please provide a script file or scripts to run ")

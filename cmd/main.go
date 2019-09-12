@@ -111,7 +111,7 @@ func main() {
 		{
 			Name:  "exec",
 			Usage: "Execute script on nodes",
-			Flags: []cli.Flag{TagsFlag, ScriptFlag, FileFlag},
+			Flags: []cli.Flag{TagsFlag, ScriptFlag, FileFlag, SudoFlag},
 			Action: func(c *cli.Context) error {
 				return execScript(c)
 			},

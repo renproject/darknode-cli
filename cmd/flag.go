@@ -53,6 +53,10 @@ var (
 		Name:  "force, f",
 		Usage: "Force destruction without interactive prompts",
 	}
+	SudoFlag = cli.BoolFlag{
+		Name:  "sudo",
+		Usage: "Force commands to be run using sudo",
+	}
 )
 
 // AWS flags

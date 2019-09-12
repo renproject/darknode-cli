@@ -185,13 +185,17 @@ func run(name string, args ...string) error {
 
 // remoteRun runs the script to darknode with provided name.
 func remoteRun(name, script string) error {
+	return remoteUserRun(name, script, "darknode")
+}
+
+func remoteUserRun(name, script string, user string) error {
 	// Parse the ssh private key
 	key, err := ParsePrivateKey(name)
 	if err != nil {
 		return err
 	}
 	config := ssh.ClientConfig{
-		User: "darknode",
+		User: user,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(key),
 		},
