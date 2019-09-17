@@ -105,7 +105,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s \n", GREEN, name, branch, RESET)
+	fmt.Printf("%s[%s] has been updated to the latest version.%s \n", GREEN, name, RESET)
 	return nil
 }
 
