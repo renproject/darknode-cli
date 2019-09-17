@@ -14,6 +14,12 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Location of the update script
+const updateScriptLocation = "/home/darknode/.darknode/bin/update.sh"
+
+// The command to execute to trigger an update. We use the -f to force an update.
+var updateCommand = fmt.Sprintf("/bin/bash %s -f", updateScriptLocation)
+
 // updateNode updates the Darknode to the latest release. It can also be used
 // to update the config file of the darknode.
 func updateNode(ctx *cli.Context) error {
@@ -95,11 +101,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
-	udpate, err := ioutil.ReadFile(path.Join(Directory, "scripts", "update.sh"))
-	if err != nil {
-		return err
-	}
-	err = run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", string(udpate))
+	err = run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", updateCommand)
 	if err != nil {
 		return err
 	}
