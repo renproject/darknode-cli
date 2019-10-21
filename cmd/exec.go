@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/republicprotocol/co-go"
 	"github.com/urfave/cli"
@@ -52,7 +52,7 @@ func execSingleNode(name, script string) error {
 	if err != nil {
 		return err
 	}
-	filePath := path.Join(cwd, script)
+	filePath := filepath.Join(cwd, script)
 
 	// todo : why this not working?
 	return run("ssh", "-i", keyPairPath, "darknode@"+ip, "'bash -s'", "", filePath)

@@ -7,7 +7,7 @@ import (
 	"math"
 	"math/big"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -33,7 +33,7 @@ func destroyNode(ctx *cli.Context) error {
 
 	// Read the node config
 	nodePath := nodePath(name)
-	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
+	config, err := config.NewConfigFromJSONFile(filepath.Join(nodePath, "config.json"))
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func withdraw(ctx *cli.Context) error {
 	}
 
 	// Read config of the specified darknode
-	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
+	config, err := config.NewConfigFromJSONFile(filepath.Join(nodePath, "config.json"))
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
-	"path"
+	"path/filepath"
 
 	"github.com/republicprotocol/co-go"
 	"github.com/republicprotocol/republic-go/cmd/darknode/config"
@@ -43,8 +43,8 @@ func updateNode(ctx *cli.Context) error {
 
 func updateSingleNode(name, branch string, updateConfig bool) error {
 	nodePath := nodePath(name)
-	keyPairPath := path.Join(nodePath, "ssh_keypair")
-	configPath := path.Join(nodePath, "config.json")
+	keyPairPath := filepath.Join(nodePath, "ssh_keypair")
+	configPath := filepath.Join(nodePath, "config.json")
 	ip, err := getIp(nodePath)
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func updateSingleNode(name, branch string, updateConfig bool) error {
 		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
 	}
 
-	udpate, err := ioutil.ReadFile(path.Join(Directory, "scripts", "update.sh"))
+	udpate, err := ioutil.ReadFile(filepath.Join(Directory, "scripts", "update.sh"))
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -25,7 +25,7 @@ func resize(ctx *cli.Context) error {
 	}
 
 	// Get main.tf file
-	filePath := path.Join(nodePath, "main.tf")
+	filePath := filepath.Join(nodePath, "main.tf")
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 	}
 
 	// Check if user tries to resize to the same instance type
-	match:=  reg.FindStringSubmatch(string(tfFile))
+	match := reg.FindStringSubmatch(string(tfFile))
 	if match == nil || len(match) < 1 {
 		return errors.New("invalid main.tf file ")
 	}

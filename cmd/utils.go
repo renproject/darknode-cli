@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -16,11 +16,11 @@ import (
 )
 
 // Directory is the directory address of the cli and all darknodes data.
-var Directory = path.Join(os.Getenv("HOME"), ".darknode")
+var Directory = filepath.Join(os.Getenv("HOME"), ".darknode")
 
 // nodePath return the absolute directory of the node.
 func nodePath(name string) string {
-	return path.Join(Directory, "darknodes", name)
+	return filepath.Join(Directory, "darknodes", name)
 }
 
 // StringInSlice checks whether the string is in the slice
@@ -75,7 +75,7 @@ func getNodesByTags(tags string) ([]string, error) {
 	ts := strings.Split(strings.TrimSpace(tags), ",")
 	nodes := make([]string, 0)
 	for _, f := range files {
-		tagFile := path.Join(Directory, "darknodes", f.Name(), "tags.out")
+		tagFile := filepath.Join(Directory, "darknodes", f.Name(), "tags.out")
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/republicprotocol/darknode-cli/darknode"
 	"github.com/urfave/cli"
 )
 
@@ -102,7 +103,7 @@ func runTerraform(nodeDirectory string) error {
 
 // outputURL writes success message and the URL for registering the node
 // to the terminal.
-func outputURL(nodeDir, name, network string, publicKey []byte) error {
+func outputURL(nodeDir, name string, network darknode.Network, publicKey []byte) error {
 	id, err := getID(nodeDir)
 	if err != nil {
 		return err

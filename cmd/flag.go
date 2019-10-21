@@ -16,22 +16,10 @@ var (
 		Name:  "script",
 		Usage: "path of the script file you want to run",
 	}
-	KeystoreFlag = cli.StringFlag{
-		Name:  "keystore",
-		Usage: "An optional keystore `file` that will be used for the Darknode",
-	}
-	PassphraseFlag = cli.StringFlag{
-		Name:  "passphrase",
-		Usage: "An optional `secret` for decrypting the keystore file",
-	}
-	ConfigFlag = cli.StringFlag{
-		Name:  "config",
-		Usage: "An optional configuration `file` for the Darknode",
-	}
 	NetworkFlag = cli.StringFlag{
 		Name:  "network",
-		Value: "mainnet",
-		Usage: "Darkpool network of your node (default: mainnet)",
+		Value: "chaosnet",
+		Usage: "Darkpool network of your node (default: chaosnet)",
 	}
 	BranchFlag = cli.StringFlag{
 		Name:  "branch, b",

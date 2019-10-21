@@ -8,11 +8,11 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path"
-	"strings"
+	"path/filepath"
 	"text/template"
 
-	"github.com/republicprotocol/republic-go/cmd/darknode/config"
+	"github.com/republicprotocol/darknode-cli/darknode"
+	"github.com/republicprotocol/darknode-cli/darknode/addr"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
 )
@@ -138,10 +138,9 @@ func deployToDo(ctx *cli.Context) error {
 		return err
 	}
 
-	network := ctx.String("network")
-	network = strings.ToLower(network)
-	if network != "testnet" && network != "mainnet" {
-		return ErrUnknownNetwork
+	network, err := darknode.NewNetwork(ctx.String("network"))
+	if err != nil {
+		return err
 	}
 
 	// Create node directory
@@ -157,7 +156,7 @@ func deployToDo(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	rsaKey := config.Keystore.RsaKey
+	rsaKey := config.Keystore.Rsa
 	err = WriteSshKey(rsaKey.PrivateKey, nodePath)
 	if err != nil {
 		return err
@@ -268,25 +267,26 @@ func availableRegions(ctx *cli.Context) ([]Region, error) {
 }
 
 // generateDoTFConfig generates the terraform config file for deploying to DO.
-func generateDoTFConfig(ctx *cli.Context, config config.Config, region, size string) error {
+func generateDoTFConfig(ctx *cli.Context, config darknode.Config, region, size string) error {
 	name := ctx.String("name")
 	token := ctx.String("do-token")
 	nodePath := nodePath(name)
+	id := addr.FromPublicKey(config.Keystore.Ecdsa.PublicKey)
 
 	tf := doTerraform{
 		Name:    name,
 		Token:   token,
 		Region:  region,
-		Address: config.Address.String(),
+		Address: id.String(),
 		Size:    size,
 		Path:    Directory,
-		PubKey:  path.Join(nodePath, "ssh_keypair.pub"),
-		PvtKey:  path.Join(nodePath, "ssh_keypair"),
+		PubKey:  filepath.Join(nodePath, "ssh_keypair.pub"),
+		PvtKey:  filepath.Join(nodePath, "ssh_keypair"),
 	}
 
-	templateFile := path.Join(Directory, "instance", "do", "do.tmpl")
+	templateFile := filepath.Join(Directory, "instance", "do", "do.tmpl")
 	t := template.Must(template.New("do.tmpl").Funcs(template.FuncMap{}).ParseFiles(templateFile))
-	tfFile, err := os.Create(path.Join(nodePath, "main.tf"))
+	tfFile, err := os.Create(filepath.Join(nodePath, "main.tf"))
 	if err != nil {
 		return err
 	}

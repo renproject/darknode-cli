@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:df416aef14f1103aea76c44be36073f8765565aba08e8acb37cde8c15f28bf33"
+  name = "github.com/AndreasBriese/bbloom"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "46b345b51c9667fcbaad862a370d73bd7aa802b6"
+
+[[projects]]
   digest = "1:c731e64b230aaf9b4693baa56c3337921189b802652ee3401cd4aedc1a2d2d16"
   name = "github.com/allegro/bigcache"
   packages = [
@@ -56,6 +64,37 @@
   pruneopts = "T"
   revision = "cbaa98ba5575e67703b32b4b19f73c91f3c4159e"
   version = "v1.7.1"
+
+[[projects]]
+  digest = "1:0845ab6fab77878de970dc911ed574849ba9bfdf1c1bd486b39f7e5055b70c8c"
+  name = "github.com/dgraph-io/badger"
+  packages = [
+    ".",
+    "options",
+    "pb",
+    "skl",
+    "table",
+    "y",
+  ]
+  pruneopts = "T"
+  revision = "2fa005c9d4bf695277ab5214c1fbce3735b9562a"
+  version = "v1.6.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6e8109ce247a59ab1eeb5330166c12735f6590de99c9647b6162d11518d32c9a"
+  name = "github.com/dgryski/go-farm"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "6a90982ecee230ff6cba02d5bd386acc030be9d3"
+
+[[projects]]
+  digest = "1:f176f62e48b0b01d0c6c424176fb258b382c4651050de0e0b37b29dda56d9e0c"
+  name = "github.com/dustin/go-humanize"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:1530d06761f464b62ab3dfc2fa5b16303901d87ff219100a1447ba216d2e52be"
@@ -115,6 +154,22 @@
   pruneopts = "T"
   revision = "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a"
   version = "v1.8.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:eb1e41685d29c31cf9175cc8ac4c7c53c5c05fdc9f01e30c17846acae9740b52"
+  name = "github.com/golang/groupcache"
+  packages = ["lru"]
+  pruneopts = "T"
+  revision = "404acd9df4cc9859d64fb9eed42e5c026187287a"
+
+[[projects]]
+  digest = "1:ee6b8c03e5ab6cf9628a3c538430d007f8534483dc46c7ff5955a4359d5ef865"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  pruneopts = "T"
+  revision = "6c65a5562fc06764971b7c5d05c76c75e84bdbf7"
+  version = "v1.3.2"
 
 [[projects]]
   digest = "1:f37c069fadbaa889f79aea9cd463d225000a0d26f1e7423f14c0cd58fbc5c597"
@@ -187,6 +242,28 @@
   revision = "3557f3d43a123835ffa5846e4d055146e773d52e"
 
 [[projects]]
+  branch = "master"
+  digest = "1:88d57bade8b21591184e5c219559060ceeb3748ac9edbf37cb3caa5e2b373e2b"
+  name = "github.com/mmcloughlin/avo"
+  packages = [
+    "attr",
+    "build",
+    "buildtags",
+    "gotypes",
+    "internal/prnt",
+    "internal/stack",
+    "ir",
+    "operand",
+    "pass",
+    "printer",
+    "reg",
+    "src",
+    "x86",
+  ]
+  pruneopts = "T"
+  revision = "15d6a9a17e5386cb169227dd4dea9a23100a5029"
+
+[[projects]]
   digest = "1:e5f582b211c2ebe976f888293a457e6036fb03c0d3db7263516384523364f634"
   name = "github.com/mr-tron/base58"
   packages = ["base58"]
@@ -227,12 +304,79 @@
   version = "v0.8.1"
 
 [[projects]]
+  digest = "1:4d84aa0bc8997b55224705f0b18b48822ac7ad932f72e9c28904f77051309eab"
+  name = "github.com/renproject/aw"
+  packages = [
+    ".",
+    "broadcast",
+    "cast",
+    "dht",
+    "handshake",
+    "multicast",
+    "pingpong",
+    "protocol",
+    "tcp",
+  ]
+  pruneopts = "T"
+  revision = "3658259d674c7bb274bed73fd1a530a5517d8837"
+  version = "v0.2.4"
+
+[[projects]]
+  digest = "1:781e0d9e938fea25e6c6d62e871ce36eed4ecc23f32abc0a3f3a68db379e91fe"
+  name = "github.com/renproject/kv"
+  packages = [
+    ".",
+    "badgerdb",
+    "cache/lru",
+    "cache/ttl",
+    "codec",
+    "db",
+    "leveldb",
+    "memdb",
+  ]
+  pruneopts = "T"
+  revision = "efa8beb95f6f349dd05938d8cc07dd07e2ce4ea2"
+  version = "v1.0.4"
+
+[[projects]]
   branch = "master"
   digest = "1:572a577922bb7a0db8144d9682eedf3fff8e5ec1b65587ad750c46f6b71f2b34"
   name = "github.com/renproject/libeth-go"
   packages = ["."]
   pruneopts = "T"
   revision = "8ff82bee6c22ffd330223dac4384081961645f6d"
+
+[[projects]]
+  digest = "1:f79249d48feddcb0bb4f34101493ada0c191eefdc185ea52040a578204614c6d"
+  name = "github.com/renproject/phi"
+  packages = [
+    ".",
+    "co",
+    "task",
+  ]
+  pruneopts = "T"
+  revision = "51f586bc48167749fb69b9e4933569eefcde98a3"
+  version = "v0.1.0"
+
+[[projects]]
+  digest = "1:3bed39a656b7f569a8b89da21df2b5b4092083d18c6731333518d49170677c18"
+  name = "github.com/renproject/rzl"
+  packages = [
+    "algebra/field",
+    "algebra/shamir",
+    "asm/value",
+  ]
+  pruneopts = "T"
+  revision = "ab016cd6727ab6702c4b623427cb386d8322bee0"
+  version = "v0.1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:cddd1390f415964ef7c9cf00b917400db09d429d85d80a69cab0afe66aad8c47"
+  name = "github.com/renproject/secp256k1-go"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "6ec0bd83b6d406e045b82dedbf6a589c5f1f0d3d"
 
 [[projects]]
   branch = "master"
@@ -375,7 +519,11 @@
   branch = "master"
   digest = "1:95b2a8f83570762e6211c5d5823840d64e04f85fec8adc32735f6b702c858872"
   name = "golang.org/x/net"
-  packages = ["websocket"]
+  packages = [
+    "internal/timeseries",
+    "trace",
+    "websocket",
+  ]
   pruneopts = "T"
   revision = "63eda1eb0650888965ead1296efd04d0b2b61128"
 
@@ -392,6 +540,25 @@
   revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
 
 [[projects]]
+  branch = "master"
+  digest = "1:6ddd99a130e1a3d6044bfa5ed6b79f43a367901c0ffbc2dfcf86f9c859069c2f"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/typeutil",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/semver",
+    "internal/span",
+  ]
+  pruneopts = "T"
+  revision = "ed542cd5b28ad1b474f8ff7ca112cad2c3ac2dc8"
+
+[[projects]]
   branch = "v2"
   digest = "1:3d3f9391ab615be8655ae0d686a1564f3fec413979bb1aaf018bac1ec1bb1cc7"
   name = "gopkg.in/natefinch/npipe.v2"
@@ -404,10 +571,17 @@
   analyzer-version = 1
   input-imports = [
     "github.com/aws/aws-sdk-go/aws/credentials",
+    "github.com/btcsuite/btcd/btcec",
     "github.com/ethereum/go-ethereum/accounts/abi/bind",
     "github.com/ethereum/go-ethereum/common",
+    "github.com/ethereum/go-ethereum/crypto",
+    "github.com/ethereum/go-ethereum/crypto/secp256k1",
     "github.com/jbenet/go-base58",
+    "github.com/multiformats/go-multiaddr",
+    "github.com/multiformats/go-multihash",
+    "github.com/renproject/aw",
     "github.com/renproject/libeth-go",
+    "github.com/renproject/rzl/asm/value",
     "github.com/republicprotocol/co-go",
     "github.com/republicprotocol/darknode-go/adapter/ethcontract",
     "github.com/republicprotocol/darknode-go/adapter/ethcontract/bindings",
@@ -415,11 +589,10 @@
     "github.com/republicprotocol/darknode-go/cmd/darknode/config",
     "github.com/republicprotocol/ren-go/foundation/addr",
     "github.com/republicprotocol/republic-go/cmd/darknode/config",
-    "github.com/republicprotocol/republic-go/contract",
     "github.com/republicprotocol/republic-go/crypto",
     "github.com/republicprotocol/republic-go/identity",
-    "github.com/republicprotocol/republic-go/logger",
     "github.com/urfave/cli",
+    "golang.org/x/crypto/sha3",
     "golang.org/x/crypto/ssh",
   ]
   solver-name = "gps-cdcl"

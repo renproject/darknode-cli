@@ -1,14 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/republicprotocol/republic-go/cmd/darknode/config"
+	"github.com/republicprotocol/darknode-cli/darknode"
+	"github.com/republicprotocol/darknode-cli/darknode/addr"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
 )
@@ -47,10 +50,9 @@ func awsDeployment(ctx *cli.Context) error {
 		return err
 	}
 
-	network := ctx.String("network")
-	network = strings.ToLower(network)
-	if network != "testnet" && network != "mainnet" {
-		return ErrUnknownNetwork
+	network, err := darknode.NewNetwork(ctx.String("network"))
+	if err != nil {
+		return err
 	}
 
 	// Create node directory
@@ -66,7 +68,7 @@ func awsDeployment(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	rsaKey := config.Keystore.RsaKey
+	rsaKey := config.Keystore.Rsa
 	if err := WriteSshKey(rsaKey.PrivateKey, nodePath); err != nil {
 		return err
 	}
@@ -74,6 +76,9 @@ func awsDeployment(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// fixme : remove this
+	time.Sleep(time.Hour)
 
 	// Generate terraform config and start deploying
 	if err := awsTerraformConfig(ctx, config, pubKey, accessKey, secretKey, region, instance); err != nil {
@@ -126,27 +131,28 @@ type awsTerraform struct {
 }
 
 // awsTerraformConfig generates the terraform config file for deploying to AWS.
-func awsTerraformConfig(ctx *cli.Context, config config.Config, key ssh.PublicKey, accessKey, secretKey, region, instance string) error {
+func awsTerraformConfig(ctx *cli.Context, config darknode.Config, key ssh.PublicKey, accessKey, secretKey, region, instance string) error {
 	name := ctx.String("name")
 	nodePath := nodePath(name)
+	id := addr.FromPublicKey(config.Keystore.Ecdsa.PublicKey)
 
 	tf := awsTerraform{
 		Name:          name,
 		Region:        region,
-		Address:       config.Address.String(),
+		Address:       id.String(),
 		InstanceType:  instance,
 		SshPubKey:     strings.TrimSpace(StringfySshPubkey(key)),
-		SshPriKeyPath: path.Join(nodePath, "ssh_keypair"),
+		SshPriKeyPath: filepath.Join(nodePath, "ssh_keypair"),
 		AccessKey:     accessKey,
 		SecretKey:     secretKey,
-		Port:          config.Port,
+		Port:          fmt.Sprintf("%v", config.Port),
 		Path:          Directory,
 		AllocationID:  ctx.String("aws-elastic-ip"),
 	}
 
-	templateFile := path.Join(Directory, "instance", "aws", "aws.tmpl")
+	templateFile := filepath.Join(Directory, "instance", "aws", "aws.tmpl")
 	t := template.Must(template.New("aws.tmpl").Funcs(template.FuncMap{}).ParseFiles(templateFile))
-	tfFile, err := os.Create(path.Join(nodePath, "main.tf"))
+	tfFile, err := os.Create(filepath.Join(nodePath, "main.tf"))
 	if err != nil {
 		return err
 	}
