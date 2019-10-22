@@ -9,7 +9,7 @@ orbs:
 
 _defaults: &defaults
     docker:
-        -   image: circleci/golang:1.11
+        -   image: circleci/golang:1.12
 
 jobs:
     deploy:
@@ -29,7 +29,9 @@ jobs:
             - run:
                 name: Build binaries
                 command: |
-                    go build -o darknode_linux_amd64 ./cmd
+                    go build -o "darknode_linux_amd64_{$CIRCLE_BRANCH}" ./cmd
+                    ls
+                    mv darknode_linux_amd64_master darknode_linux_amd64
             - run:
                 name: install AWS CLI
                 command: |
@@ -37,7 +39,7 @@ jobs:
                     sudo pip install awscli
             - aws-s3/copy:
                 from: darknode_linux_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64_new'
+                to: 's3://releases.republicprotocol.com/darknode-cli/'
                 arguments: '--acl public-read'
 
 workflows:
