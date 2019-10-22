@@ -9,9 +9,6 @@ orbs:
 
 _defaults: &defaults
     machine: true
-    working_directory: ~/.go_workspace/src/github.com/renproject/darknode-cli
-    environment:
-        GOPATH: /home/circleci/.go_workspace
 
 jobs:
     deploy:
@@ -32,8 +29,6 @@ jobs:
                 name: install tools
                 command: |
                     go vet ./...
-                    go get -u github.com/onsi/ginkgo/ginkgo
-                    go get -u github.com/onsi/gomega/...
             - save_cache:
                 key: go-mod-v3-{{ checksum "go.sum" }}
                 paths:
@@ -48,7 +43,7 @@ jobs:
                     sudo apt install python-pip python-dev
                     sudo pip install awscli
             - aws-s3/copy:
-                from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_linux_amd64
+                from: darknode_linux_amd64
                 to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64_new'
                 arguments: '--acl public-read'
 
