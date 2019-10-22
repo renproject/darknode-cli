@@ -30,7 +30,6 @@ jobs:
                 name: Build binaries
                 command: |
                     go build -o "darknode_linux_amd64_$CIRCLE_BRANCH" ./cmd
-                    mv darknode_linux_amd64_master darknode_linux_amd64 2>/dev/null
             - run:
                 name: install AWS CLI
                 command: |
@@ -45,9 +44,4 @@ workflows:
     version: 2.1
     build:
         jobs:
-            - deploy:
-                filters:
-                    branches:
-                        only:
-                            - master
-                            - config
+            - deploy
