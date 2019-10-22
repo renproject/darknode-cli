@@ -2,13 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/republicprotocol/darknode-cli/darknode"
-	"github.com/republicprotocol/darknode-cli/darknode/addr"
-	"github.com/urfave/cli"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/cloudresourcemanager/v1"
-	"google.golang.org/api/option"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -17,6 +10,14 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/republicprotocol/darknode-cli/darknode"
+	"github.com/republicprotocol/darknode-cli/darknode/addr"
+	"github.com/urfave/cli"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/option"
 )
 
 //TODO list from API call to stay up to date - https://www.googleapis.com/compute/v1/projects/{PROJECT}/zones

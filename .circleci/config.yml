@@ -13,41 +13,6 @@ _defaults: &defaults
     environment:
         GOPATH: /home/circleci/.go_workspace
 
-commands:
-    dep_ensure:
-        description: Installing dependencies
-        steps:
-            - restore_cache:
-                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
-                  paths:
-                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
-            - core/install_dep
-            - run:
-                  name: Download dependencies
-                  command: |
-                      if [ ! -d ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor ]; then
-                          dep ensure -v
-                      else
-                          echo "Dependencies were restored from cache."
-                      fi
-            - save_cache:
-                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
-                  paths:
-                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
-    install_xgo:
-        description: Installing x-go cross compilation tool
-        steps:
-            - run:
-                name: Building Docker image
-                command: |
-                    docker pull karalabe/xgo-latest
-            - run:
-                name: Installing xgo
-                command: |
-                    mkdir -p $GOPATH/src
-                    mkdir -p $GOPATH/bin
-                    go get -v github.com/karalabe/xgo
-
 jobs:
     deploy:
         <<: *defaults
@@ -61,15 +26,22 @@ jobs:
                     sudo rm -rf /usr/local/go
                     sudo mv go /usr/local
                     go version
-            - dep_ensure
-            - install_xgo
+            - restore_cache:
+                key: go-mod-v3-{{ checksum "go.sum" }}
+            - run:
+                name: install tools
+                command: |
+                    go vet ./...
+                    go get -u github.com/onsi/ginkgo/ginkgo
+                    go get -u github.com/onsi/gomega/...
+            - save_cache:
+                key: go-mod-v3-{{ checksum "go.sum" }}
+                paths:
+                    - "~/go"
             - run:
                 name: Build binaries
                 command: |
-                    xgo --targets=darwin-10.10/amd64 ./cmd
-                    xgo --targets=linux/amd64 ./cmd
-                    mv cmd-darwin-10.10-amd64 darknode_darwin_amd64
-                    mv cmd-linux-amd64 darknode_linux_amd64
+                    go build -o darknode_linux_amd64 ./cmd
             - run:
                 name: install AWS CLI
                 command: |
@@ -77,11 +49,7 @@ jobs:
                     sudo pip install awscli
             - aws-s3/copy:
                 from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_linux_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64'
-                arguments: '--acl public-read'
-            - aws-s3/copy:
-                from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_darwin_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_darwin_amd64'
+                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64_new'
                 arguments: '--acl public-read'
 
 workflows:
@@ -91,4 +59,6 @@ workflows:
             - deploy:
                 filters:
                     branches:
-                        only: master
+                        only:
+                            - master
+                            - config
