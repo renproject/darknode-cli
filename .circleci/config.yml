@@ -29,16 +29,14 @@ jobs:
             - run:
                 name: Build binaries
                 command: |
-                    go build -o "darknode_linux_amd64_{$CIRCLE_BRANCH}" ./cmd
-                    ls
-                    mv darknode_linux_amd64_master darknode_linux_amd64
+                    go build -o "darknode_linux_amd64_$CIRCLE_BRANCH" ./cmd
             - run:
                 name: install AWS CLI
                 command: |
                     sudo apt install python-pip python-dev
                     sudo pip install awscli
             - aws-s3/copy:
-                from: darknode_linux_amd64
+                from: darknode_linux_amd64*
                 to: 's3://releases.republicprotocol.com/darknode-cli/'
                 arguments: '--acl public-read'
 
