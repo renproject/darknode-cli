@@ -8,21 +8,14 @@ orbs:
     aws-s3: circleci/aws-s3@1.0.0
 
 _defaults: &defaults
-    machine: true
+    docker:
+        -   image: circleci/golang:1.11
 
 jobs:
     deploy:
         <<: *defaults
         steps:
             - checkout
-            - run:
-                name: install golang
-                command: |
-                    wget https://dl.google.com/go/go1.12.2.linux-amd64.tar.gz
-                    sudo tar -xf go1.12.2.linux-amd64.tar.gz
-                    sudo rm -rf /usr/local/go
-                    sudo mv go /usr/local
-                    go version
             - restore_cache:
                 key: go-mod-v3-{{ checksum "go.sum" }}
             - run:
