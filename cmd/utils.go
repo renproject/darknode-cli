@@ -9,10 +9,12 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jbenet/go-base58"
 	"github.com/republicprotocol/republic-go/identity"
+	"golang.org/x/crypto/ssh"
 )
 
 // Directory is the directory address of the cli and all darknodes data.
@@ -203,6 +205,43 @@ func run(name string, args ...string) error {
 		return err
 	}
 	return cmd.Wait()
+}
+
+// remoteRun runs the script to darknode with provided name.
+func remoteRun(name, script string) error {
+	// Parse the ssh private key
+	key, err := ParsePrivateKey(name)
+	if err != nil {
+		return err
+	}
+	config := ssh.ClientConfig{
+		User: "darknode",
+		Auth: []ssh.AuthMethod{
+			ssh.PublicKeys(key),
+		},
+		Timeout:         10 * time.Second,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	// Connect to the instance using ssh
+	ip, err := getIp(nodePath(name))
+	if err != nil {
+		return err
+	}
+	client, err := ssh.Dial("tcp", ip+":22", &config)
+	if err != nil {
+		return err
+	}
+
+	// Create a new session to run the script
+	session, err := client.NewSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+	session.Stdout = os.Stdout
+	session.Stderr = os.Stderr
+	return session.Run(script)
 }
 
 func redirectCommand() (string, error) {

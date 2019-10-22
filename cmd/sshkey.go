@@ -23,7 +23,9 @@ func WriteSshKey(rsaKey *rsa.PrivateKey, directory string) error {
 		Bytes:   priKeyBytes,
 	}
 	privatePEM := pem.EncodeToMemory(&privBlock)
-	ioutil.WriteFile(keyPairPath, privatePEM, 0600)
+	if err := ioutil.WriteFile(keyPairPath, privatePEM, 0600); err != nil {
+		return err
+	}
 
 	// Write the public key to file
 	publicRsaKey, err := ssh.NewPublicKey(&rsaKey.PublicKey)
@@ -39,4 +41,14 @@ func StringfySshPubkey(key ssh.PublicKey) string {
 	pubKeyBytes := ssh.MarshalAuthorizedKey(key)
 
 	return string(pubKeyBytes)
+}
+
+func ParsePrivateKey(name string) (ssh.Signer, error) {
+	keyFile := nodePath(name) + "/ssh_keypair"
+
+	sshKey, err := ioutil.ReadFile(keyFile)
+	if err != nil {
+		return nil, err
+	}
+	return ssh.ParsePrivateKey(sshKey)
 }

@@ -4,7 +4,7 @@
 version: 2.1
 
 orbs:
-    core: ren/circleci-orbs@dev:first
+    core: ren/core@0.0.1
     aws-s3: circleci/aws-s3@1.0.0
 
 _defaults: &defaults

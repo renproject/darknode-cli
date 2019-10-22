@@ -10,6 +10,13 @@ import (
 	"github.com/urfave/cli"
 )
 
+var (
+	// StartDarknode is command which will start the darknode service
+	StartDarknode   = "systemctl --user start darknode"
+	StopDarknode    = "systemctl --user stop darknode"
+	RestartDarknode = "systemctl --user restart darknode"
+)
+
 // listAllNodes will list basic info of all the deployed darknodes.
 // You can filter the results by the tags.
 func listAllNodes(ctx *cli.Context) error {
@@ -66,15 +73,29 @@ func listAllNodes(ctx *cli.Context) error {
 	return fmt.Errorf("%scannot find any node%s", RED, RESET)
 }
 
-// startNode starts a single node or a set of nodes by its tags.
-func startNode(ctx *cli.Context) error {
+// switchNode provide commands for basic operations to the darknode service.
+func switchNode(ctx *cli.Context, cmd string) error {
 	tags := ctx.String("tags")
 	name := ctx.Args().First()
 
+	// Get the function we want to run depends on the command.
+	var f func(string) error
+	switch cmd {
+	case "start":
+		f = startNode
+	case "stop":
+		f = stopNode
+	case "restart":
+		f = restartNode
+	default:
+		panic(fmt.Sprintf("invalid switch command = %v", cmd))
+	}
+
+	// Execute the operation on a single node or a set of nodes.
 	if tags == "" && name == "" {
 		return ErrEmptyNodeName
 	} else if tags == "" && name != "" {
-		return startSingleNode(name)
+		return f(name)
 	} else if tags != "" && name == "" {
 		nodes, err := getNodesByTags(tags)
 		if err != nil {
@@ -82,7 +103,7 @@ func startNode(ctx *cli.Context) error {
 		}
 		errs := make([]error, len(nodes))
 		phi.ParForAll(nodes, func(i int) {
-			errs[i] = startSingleNode(nodes[i])
+			errs[i] = startNode(nodes[i])
 		})
 		return handleErrs(errs)
 	}
@@ -90,63 +111,29 @@ func startNode(ctx *cli.Context) error {
 	return ErrNameAndTags
 }
 
-// startSingleNode starts a single node by its name
-func startSingleNode(name string) error {
-	nodePath := nodePath(name)
-	ip, err := getIp(nodePath)
-	if err != nil {
-		return err
+// startNode starts a single node.
+func startNode(name string) error {
+	err := remoteRun(name, StartDarknode)
+	if err == nil {
+		fmt.Printf("%s[%s] has been turned on.%s \n", GREEN, name, RESET)
 	}
-	startScript := "systemctl --user start darknode"
-	keyPairPath := nodePath + "/ssh_keypair"
-	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", startScript); err != nil {
-		return err
-	}
-	fmt.Printf("%s[%s] has been turned on.%s \n", GREEN, name, RESET)
-
-	return nil
+	return err
 }
 
 // stopNode stops a single node or a set of nodes by its tags.
-func stopNode(ctx *cli.Context) error {
-	tags := ctx.String("tags")
-	name := ctx.Args().First()
-
-	if tags == "" && name == "" {
-		return ErrEmptyNodeName
-	} else if tags == "" && name != "" {
-		return stopSingleNode(name)
-	} else if tags != "" && name == "" {
-		nodes, err := getNodesByTags(tags)
-		if err != nil {
-			return err
-		}
-		errs := make([]error, len(nodes))
-		phi.ParForAll(nodes, func(i int) {
-			errs[i] = stopSingleNode(nodes[i])
-		})
-		return handleErrs(errs)
+func stopNode(name string) error {
+	err := remoteRun(name, StopDarknode)
+	if err == nil {
+		fmt.Printf("%s[%s] has been turned off.%s \n", GREEN, name, RESET)
 	}
-
-	return ErrNameAndTags
+	return err
 }
 
-// stopSingleNode stops a single node by its name
-func stopSingleNode(name string) error {
-	if name == "" {
-		return ErrEmptyNodeName
+// stopNode stops a single node or a set of nodes by its tags.
+func restartNode(name string) error {
+	err := remoteRun(name, RestartDarknode)
+	if err == nil {
+		fmt.Printf("%s[%s] has been restarted.%s \n", GREEN, name, RESET)
 	}
-	nodePath := nodePath(name)
-	ip, err := getIp(nodePath)
-	if err != nil {
-		return err
-	}
-	stopScript := "systemctl --user stop darknode"
-	keyPairPath := nodePath + "/ssh_keypair"
-	if err := run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no", stopScript); err != nil {
-		return err
-	}
-
-	fmt.Printf("%s[%s] has been turned off.%s \n", GREEN, name, RESET)
-	return nil
+	return err
 }

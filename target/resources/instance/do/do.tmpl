@@ -31,31 +31,33 @@ variable "pvt_key" {
 }
 
 provider "digitalocean" {
-  token = "${var.do_token}"
+  token = var.do_token
 }
 
 resource "digitalocean_ssh_key" "darknode" {
-  name       = "${var.name}"
-  public_key = "${file("${var.pub_key}")}"
+   name       = var.name
+   public_key = file(var.pub_key)
 }
 
 resource "digitalocean_droplet" "darknode" {
-  provider = "digitalocean"
-  image = "ubuntu-18-04-x64"
-  name = "${var.name}"
-  region = "${var.region}"
-  size = "${var.size}"
-  ssh_keys = [
-    "${digitalocean_ssh_key.darknode.id}"
+  provider   = digitalocean
+  image      = "ubuntu-18-04-x64"
+  name       = var.name
+  region     = var.region
+  size       = var.size
+  monitoring = true
+  ssh_keys   = [
+    digitalocean_ssh_key.darknode.id
   ]
 
   provisioner "remote-exec" {
     script = "${var.path}/scripts/init.sh"
 
     connection {
+      host        = self.ipv4_address
       type        = "ssh"
       user        = "root"
-      private_key = "${file("${var.pvt_key}")}"
+      private_key = file(var.pvt_key)
     }
   }
 
@@ -64,9 +66,10 @@ resource "digitalocean_droplet" "darknode" {
     destination = "$HOME/darknode-config.json"
 
     connection {
-      type = "ssh"
-      user = "darknode"
-      private_key = "${file("${var.pvt_key}")}"
+      host        = self.ipv4_address
+      type        = "ssh"
+      user        = "darknode"
+      private_key = file(var.pvt_key)
     }
   }
 
@@ -74,9 +77,10 @@ resource "digitalocean_droplet" "darknode" {
     script = "${var.path}/scripts/install.sh"
 
     connection {
-      type = "ssh"
-      user = "darknode"
-      private_key = "${file("${var.pvt_key}")}"
+      host        = self.ipv4_address
+      type        = "ssh"
+      user        = "darknode"
+      private_key = file(var.pvt_key)
     }
   }
 

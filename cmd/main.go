@@ -63,17 +63,25 @@ func main() {
 		{
 			Name:  "start",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "Start one of your Darknodes from a suspended state",
+			Usage: "Start a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
-				return startNode(c)
+				return switchNode(c, "start")
 			},
 		},
 		{
 			Name:  "stop",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "Stop one of your Darknodes by putting it into a suspended state",
+			Usage: "Stop a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
-				return stopNode(c)
+				return switchNode(c, "stop")
+			},
+		},
+		{
+			Name:  "restart",
+			Flags: []cli.Flag{TagsFlag},
+			Usage: "Restart a single Darknode or a set of Darknodes by its tag",
+			Action: func(c *cli.Context) error {
+				return switchNode(c, "restart")
 			},
 		},
 		{
@@ -100,15 +108,14 @@ func main() {
 				return resize(c)
 			},
 		},
-
-		// {
-		// 	Name:  "exec",
-		// 	Usage: "Execute script on nodes",
-		// 	Flags: []cli.Flag{TagsFlag, ScriptFlag},
-		// 	Action: func(c *cli.Context) error {
-		// 		return execScript(c)
-		// 	},
-		// },
+		{
+			Name:  "exec",
+			Usage: "Execute script on nodes",
+			Flags: []cli.Flag{TagsFlag, ScriptFlag, FileFlag},
+			Action: func(c *cli.Context) error {
+				return execScript(c)
+			},
+		},
 	}
 
 	// Show error message and display the help page for the app
