@@ -40,7 +40,7 @@ func execScript(ctx *cli.Context) error {
 
 // execScript execute a bash script on a single darknode.
 func execSingleNode(name, file, script string) error {
-	if file != ""{
+	if file != "" {
 		script, err := ioutil.ReadFile(file)
 		if err != nil {
 			return err

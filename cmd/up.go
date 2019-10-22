@@ -18,10 +18,11 @@ type Provider string
 const (
 	AWS           Provider = "aws"
 	DIGITAL_OCEAN Provider = "do"
+	GCP           Provider = "gcp"
 )
 
 // Providers have all the cloud service providers currently supported.
-var Providers = []Provider{AWS, DIGITAL_OCEAN}
+var Providers = []Provider{AWS, DIGITAL_OCEAN, GCP}
 
 // deployNode deploys node to the given cloud provider.
 func deployNode(ctx *cli.Context) error {
@@ -35,6 +36,8 @@ func deployNode(ctx *cli.Context) error {
 		return awsDeployment(ctx)
 	case DIGITAL_OCEAN:
 		return deployToDo(ctx)
+	case GCP:
+		return deployToGCP(ctx)
 	default:
 		return ErrUnknownProvider
 	}
