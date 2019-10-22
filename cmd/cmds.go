@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/republicprotocol/co-go"
+	"github.com/renproject/phi"
 	"github.com/republicprotocol/republic-go/identity"
 	"github.com/urfave/cli"
 )
@@ -47,14 +47,18 @@ func listAllNodes(ctx *cli.Context) error {
 		if err != nil {
 			continue
 		}
+		prov, err := getProvider(nodesNames[i])
+		if err != nil {
+			continue
+		}
 
-		nodes = append(nodes, []string{nodesNames[i], address, ip, string(tags), ethAddress.Hex()})
+		nodes = append(nodes, []string{nodesNames[i], address, ip, string(prov), string(tags), ethAddress.Hex()})
 	}
 
 	if len(nodes) > 0 {
-		fmt.Printf("%-20s | %-30s | %-15s | %-20s | %-45s \n", "name", "Address", "ip", "tags", "Ethereum Address")
+		fmt.Printf("%-20s | %-30s | %-15s | %-10s | %-20s | %-45s \n", "name", "Address", "ip", "provider", "tags", "Ethereum Address")
 		for i := range nodes {
-			fmt.Printf("%-20s | %-30s | %-15s | %-20s | %-45s\n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3], nodes[i][4])
+			fmt.Printf("%-20s | %-30s | %-15s | %-10s | %-20s | %-45s\n", nodes[i][0], nodes[i][1], nodes[i][2], nodes[i][3], nodes[i][4], nodes[i][5])
 		}
 		return nil
 	}
@@ -77,7 +81,7 @@ func startNode(ctx *cli.Context) error {
 			return err
 		}
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		phi.ParForAll(nodes, func(i int) {
 			errs[i] = startSingleNode(nodes[i])
 		})
 		return handleErrs(errs)
@@ -118,7 +122,7 @@ func stopNode(ctx *cli.Context) error {
 			return err
 		}
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		phi.ParForAll(nodes, func(i int) {
 			errs[i] = stopSingleNode(nodes[i])
 		})
 		return handleErrs(errs)

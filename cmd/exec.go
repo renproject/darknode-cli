@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/republicprotocol/co-go"
+	"github.com/renproject/phi"
 	"github.com/urfave/cli"
 )
 
@@ -27,7 +27,7 @@ func execScript(ctx *cli.Context) error {
 		}
 
 		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
+		phi.ParForAll(nodes, func(i int) {
 			errs[i] = execSingleNode(name, script)
 		})
 

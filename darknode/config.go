@@ -3,6 +3,8 @@ package darknode
 import (
 	"encoding/json"
 	"math/big"
+	"os"
+	"path/filepath"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/ethereum/go-ethereum/common"
@@ -33,6 +35,31 @@ type Config struct {
 	HomeDir     *string         `json:"homeDir"`
 	SentryDSN   *string         `json:"sentryDSN"`
 	PeerOptions *aw.PeerOptions `json:"peerOptions"`
+}
+
+// NewConfigFromJSONFile parses a json file that contains the config
+// options specified by Config.
+func NewConfigFromJSONFile(filename string) (Config, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return Config{}, err
+	}
+	defer file.Close()
+
+	conf := Config{}
+	if err := json.NewDecoder(file).Decode(&conf); err != nil {
+		return Config{}, err
+	}
+
+	if conf.HomeDir == nil {
+		homeDir := filepath.Join(os.Getenv("HOME"), ".darknode")
+		conf.HomeDir = &homeDir
+	}
+	if conf.PeerOptions == nil {
+		conf.PeerOptions = &aw.PeerOptions{}
+	}
+
+	return conf, nil
 }
 
 // The ECDSADistKeyShare is a temporary object used to store a Shamir's secret
