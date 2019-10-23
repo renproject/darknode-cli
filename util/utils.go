@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/multiformats/go-multiaddr"
 	"github.com/republicprotocol/republic-go/identity"
 	"golang.org/x/crypto/ssh"
 )
@@ -51,7 +52,7 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
-// Ip parses the ip address from a bytes representation of multiAddress.
+// IP parses the ip address from a bytes representation of multiAddress.
 func IP(name string) (string, error) {
 	// FIXME : instead read from the multiAddress file, ssh into the node and run command to get the ip address
 	path := filepath.Join(NodePath(name), "multiAddress.out")
@@ -64,7 +65,7 @@ func IP(name string) (string, error) {
 		return "", err
 	}
 
-	return multi.ValueForProtocol(identity.IP4Code)
+	return multi.ValueForProtocol(multiaddr.P_IP4)
 }
 
 // ID parses the ID address from a bytes representation of

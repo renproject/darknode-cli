@@ -16,10 +16,10 @@ type Rsa struct {
 // performance.
 func RandomRsaPrivKey() (Rsa, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	privateKey.Precompute()
 	if err != nil {
 		return Rsa{}, err
 	}
+	privateKey.Precompute()
 	return Rsa{
 		PrivateKey: privateKey,
 	}, nil

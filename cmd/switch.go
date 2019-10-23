@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 
 	"github.com/renproject/phi"
+	"github.com/republicprotocol/darknode-cli/cmd/provider"
+	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/republicprotocol/republic-go/identity"
 	"github.com/urfave/cli"
 )
@@ -35,43 +38,35 @@ func switchNode(ctx *cli.Context, cmd string) error {
 		panic(fmt.Sprintf("invalid switch command = %v", cmd))
 	}
 
-	// Execute the operation on a single node or a set of nodes.
-	if tags == "" && name == "" {
-		return ErrEmptyNodeName
-	} else if tags == "" && name != "" {
-		return remoteRun(name, script)
-	} else if tags != "" && name == "" {
-		nodes, err := getNodesByTags(tags)
-		if err != nil {
-			return err
-		}
-		errs := make([]error, len(nodes))
-		phi.ParForAll(nodes, func(i int) {
-			errs[i] = remoteRun(nodes[i], script)
-		})
-		return handleErrs(errs)
+	// Parse the names of the node we want to operate
+	nodes, err := util.ParseNodesFromNameAndTags(name, tags)
+	if err != nil {
+		return err
 	}
-
-	return ErrNameAndTags
+	errs := make([]error, len(nodes))
+	phi.ParForAll(nodes, func(i int) {
+		errs[i] = util.RemoteRun(nodes[i], script)
+	})
+	return util.HandleErrs(errs)
 }
 
 // listAllNodes will list basic info of all the deployed darknodes.
 // You can filter the results by the tags.
 func listAllNodes(ctx *cli.Context) error {
 	tags := ctx.String("tags")
-	nodesNames, err := getNodesByTags(tags)
+	nodesNames, err := util.GetNodesByTags(tags)
 	if err != nil {
 		return err
 	}
 
 	nodes := make([][]string, 0)
 	for i := range nodesNames {
-		tagFile := fmt.Sprintf("%v/darknodes/%v/tags.out", Directory, nodesNames[i])
+		tagFile := filepath.Join(util.NodePath(nodesNames[i]), "tags.out")
 		tags, err := ioutil.ReadFile(tagFile)
 		if err != nil {
 			continue
 		}
-		addressFile := fmt.Sprintf("%v/darknodes/%v/multiAddress.out", Directory, nodesNames[i])
+		addressFile := filepath.Join(util.NodePath(nodesNames[i]), "multiAddress.out")
 		data, err := ioutil.ReadFile(addressFile)
 		if err != nil {
 			continue
@@ -88,16 +83,14 @@ func listAllNodes(ctx *cli.Context) error {
 		if err != nil {
 			continue
 		}
-		ethAddress, err := republicAddressToEthAddress(address)
-		if err != nil {
-			continue
-		}
-		prov, err := getProvider(nodesNames[i])
+		// FIXME : GET THE CORRECT ETHEREUM ADDRESS
+		ethAddress := "0xThisIsAnEthereumAddress"
+		prov, err := provider.GetProvider(nodesNames[i])
 		if err != nil {
 			continue
 		}
 
-		nodes = append(nodes, []string{nodesNames[i], address, ip, string(prov), string(tags), ethAddress.Hex()})
+		nodes = append(nodes, []string{nodesNames[i], address, ip, string(prov), string(tags), ethAddress})
 	}
 
 	if len(nodes) > 0 {
@@ -108,5 +101,5 @@ func listAllNodes(ctx *cli.Context) error {
 		return nil
 	}
 
-	return fmt.Errorf("%scannot find any node%s", RED, RESET)
+	return util.RedError("cannot find any node")
 }

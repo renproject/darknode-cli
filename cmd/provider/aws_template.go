@@ -2,13 +2,10 @@ package provider
 
 import (
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 	"text/template"
 
 	"github.com/republicprotocol/darknode-cli/util"
-	"golang.org/x/crypto/ssh"
 )
 
 type awsTerraform struct {
@@ -22,17 +19,17 @@ type awsTerraform struct {
 	ConfigPath    string
 }
 
-// awsTerraformConfig generates the terraform config file for deploying to AWS.
-func (p providerAws) awsTerraformConfig(name, region, instance string, key ssh.PublicKey) error {
+// tfConfig generates the terraform config file for deploying to AWS.
+func (p providerAws) tfConfig(name, region, instance string) error {
 	tf := awsTerraform{
 		Name:          name,
 		Region:        region,
 		InstanceType:  instance,
-		SshPubKey:     strings.TrimSpace(util.StringfySshPubkey(key)),
-		SshPriKeyPath: path.Join(util.NodePath(name), "ssh_keypair"),
+		SshPubKey:     filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
+		SshPriKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair"),
 		AccessKey:     p.accessKey,
 		SecretKey:     p.secretKey,
-		ConfigPath:    path.Join(util.NodePath(name), "config.json"),
+		ConfigPath:    filepath.Join(util.NodePath(name), "config.json"),
 	}
 
 	t, err := template.New("aws").Parse(awsTemplate)
@@ -59,11 +56,11 @@ variable "instance_type" {
   default = "{{.InstanceType}}"
 }
 
-variable "ssh_public_key" {
+variable "public_key_path" {
   default = "{{.SshPubKey}}"
 }
 
-variable "ssh_private_key_path" {
+variable "private_key_path" {
   default = "{{.SshPriKeyPath}}"
 }
 
@@ -130,7 +127,7 @@ resource "aws_security_group" "darknode" {
 
 resource "aws_key_pair" "darknode" {
   key_name   = var.name
-  public_key = var.ssh_public_key
+  public_key = file(var.public_key_path)
 }
 
 resource "aws_instance" "darknode" {
@@ -152,7 +149,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("${var.ssh_private_key_path}")
+      private_key = file("${var.private_key_path}")
     }
   }
 
@@ -164,7 +161,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = "${file("${var.ssh_private_key_path}")}"
+      private_key = "${file("${var.private_key_path}")}"
     }
   }
 
@@ -172,13 +169,18 @@ resource "aws_instance" "darknode" {
 	inline = [
 		"curl https://releases.renproject.io/darknode-cli/install.sh -sSf | sh"
 	]
+
     connection {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = file("${var.ssh_private_key_path}")
+      private_key = file("${var.private_key_path}")
     }
   }
+}
+
+output "multiaddress" {
+  value = "/ip4/${aws_instance.darknode.public_ip}/tcp/18514/ren/${var.address}"
 }`
 
 // {{if .AllocationID}}

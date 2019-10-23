@@ -12,7 +12,7 @@ import (
 )
 
 // NewKey generates a new ssh key and write it to the given path.
-func NewKey(name string) (ssh.PublicKey, error) {
+func NewKey(name string) error {
 	path := NodePath(name)
 	priKeyPath := filepath.Join(path, "ssh_keypair")
 	pubKeyPath := filepath.Join(path, "ssh_keypair.pub")
@@ -20,11 +20,11 @@ func NewKey(name string) (ssh.PublicKey, error) {
 	// Generate a random RSA key for ssh
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	key.Precompute()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Write the private key to file
@@ -36,21 +36,17 @@ func NewKey(name string) (ssh.PublicKey, error) {
 	}
 	privatePEM := pem.EncodeToMemory(&privBlock)
 	if err := ioutil.WriteFile(priKeyPath, privatePEM, 0600); err != nil {
-		return nil, err
+		return err
 	}
 
 	// Write the public key to file
 	publicRsaKey, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
 
-	pubKey, err := ssh.NewPublicKey(&key.PublicKey)
-	if err != nil {
-		return nil, err
-	}
-	return pubKey, ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
+	return ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
 }
 
 func StringfySshPubkey(key ssh.PublicKey) string {

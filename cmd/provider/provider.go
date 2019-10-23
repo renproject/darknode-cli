@@ -11,7 +11,6 @@ import (
 	"github.com/republicprotocol/darknode-cli/darknode"
 	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
-	"golang.org/x/crypto/ssh"
 )
 
 // ErrEmptyNodeName is returned when user doesn't provide the node name.
@@ -19,6 +18,12 @@ var ErrEmptyNodeName = errors.New("node name cannot be empty")
 
 // ErrUnknownProvider is returned when user tries to deploy a darknode with an unknown cloud provider.
 var ErrUnknownProvider = errors.New("unknown cloud provider")
+
+// ErrUnsupportedInstanceType is returned when the selected instance type cannot be created to user account.
+var ErrInstanceTypeNotAvailable = errors.New("selected instance type is not available")
+
+// ErrRegionNotAvailable is returned when the selected region is not available to user account.
+var ErrRegionNotAvailable = errors.New("selected region is not available")
 
 var (
 	NameAws = "aws"
@@ -69,27 +74,25 @@ func GetProvider(name string) (string, error) {
 }
 
 // initialise all files needed by deploying a new node
-func initNode(name, tags string, network darknode.Network) (ssh.PublicKey, error) {
+func initNode(name, tags string, network darknode.Network) error {
 	if err := util.InitNodeDirectory(name, tags); err != nil {
-		return nil, err
+		return err
 	}
-	sshPubKey, err := util.NewKey(name)
-	if err != nil {
-		return nil, err
+	if err := util.NewKey(name); err != nil {
+		return err
 	}
 
 	// Generate a new config and write to a file.
 	config, err := darknode.NewConfig(network)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	configData, err := json.MarshalIndent(config, "", "    ")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	configPath := filepath.Join(util.NodePath(name), "config.json")
-	err = ioutil.WriteFile(configPath, configData, 0600)
-	return sshPubKey, err
+	return ioutil.WriteFile(configPath, configData, 0600)
 }
 
 func runTerraform(name string) error {
@@ -105,7 +108,7 @@ func runTerraform(name string) error {
 }
 
 // outputURL writes success message and the URL for registering the node to the terminal.
-func outputURL(name string, network darknode.Network, pubKey ssh.PublicKey) error {
+func outputURL(name string, network darknode.Network) error {
 	// id, err := util.ID(name)
 	// if err != nil {
 	// 	return err

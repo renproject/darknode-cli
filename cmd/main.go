@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
 	"os"
 	"time"
 
+	"github.com/google/go-github/github"
+	"github.com/hashicorp/go-version"
+	"github.com/republicprotocol/darknode-cli/cmd/provider"
+	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 
@@ -19,7 +24,10 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "2.2.11"
+	app.Version = "2.3.0"
+
+	// Fetch latest release and check if our version is bebind.
+	checkUpdates(app.Version)
 
 	// Define sub-commands
 	app.Commands = []cli.Command{
@@ -27,17 +35,21 @@ func main() {
 			Name:  "up",
 			Usage: "Deploy a new Darknode",
 			Flags: []cli.Flag{
-				//General
+				// General
 				NameFlag, TagsFlag, NetworkFlag,
-				//Amazon
+				// AWS
 				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag, AwsProfileFlag,
-				//Digital Ocean
+				// Digital Ocean
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
-				//Google Cloud
+				// Google Cloud Platform
 				GcpFlag, GcpZoneFlag, GcpCredFlag,
 			},
 			Action: func(c *cli.Context) error {
-				return deployNode(c)
+				p, err := provider.ParseProvider(c)
+				if err != nil {
+					return err
+				}
+				return p.Deploy(c)
 			},
 		},
 		{
@@ -52,7 +64,7 @@ func main() {
 		{
 			Name:  "update",
 			Usage: "Update your Darknodes to the latest software and configuration",
-			Flags: []cli.Flag{TagsFlag, BranchFlag, UpdateConfigFlag},
+			Flags: []cli.Flag{TagsFlag, UpdateConfigFlag},
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
 			},
@@ -68,7 +80,7 @@ func main() {
 		{
 			Name:  "start",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "Start a single Darknode or a set of Darknodes by its tag",
+			Usage: "ActionStart a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
 				return switchNode(c, "start")
 			},
@@ -76,7 +88,7 @@ func main() {
 		{
 			Name:  "stop",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "Stop a single Darknode or a set of Darknodes by its tag",
+			Usage: "ActionStop a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
 				return switchNode(c, "stop")
 			},
@@ -84,14 +96,14 @@ func main() {
 		{
 			Name:  "restart",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "Restart a single Darknode or a set of Darknodes by its tag",
+			Usage: "ActionRestart a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
 				return switchNode(c, "restart")
 			},
 		},
 		{
 			Name:  "list",
-			Usage: "List all of your Darknodes",
+			Usage: "List informations of all of your Darknodes",
 			Flags: []cli.Flag{TagsFlag},
 			Action: func(c *cli.Context) error {
 				return listAllNodes(c)
@@ -99,7 +111,7 @@ func main() {
 		},
 		{
 			Name:  "withdraw",
-			Usage: "withdraw all the ETH and REN the darknode address holds",
+			Usage: "Withdraw all the ETH and REN the darknode address holds",
 			Flags: []cli.Flag{AddressFlag},
 			Action: func(c *cli.Context) error {
 				return withdraw(c)
@@ -107,7 +119,7 @@ func main() {
 		},
 		{
 			Name:  "resize",
-			Usage: "resize the instance type",
+			Usage: "Resize the instance type of a specific darknode",
 			Flags: []cli.Flag{},
 			Action: func(c *cli.Context) error {
 				return resize(c)
@@ -115,7 +127,7 @@ func main() {
 		},
 		{
 			Name:  "exec",
-			Usage: "Execute script on nodes",
+			Usage: "Execute script on Darknodes",
 			Flags: []cli.Flag{TagsFlag, ScriptFlag, FileFlag},
 			Action: func(c *cli.Context) error {
 				return execScript(c)
@@ -125,15 +137,51 @@ func main() {
 
 	// Show error message and display the help page for the app
 	app.CommandNotFound = func(c *cli.Context, command string) {
-		cli.ShowAppHelp(c)
-		fmt.Fprintf(c.App.Writer, "%scommand %q not found%s.\n", RED, command, RESET)
+		if err := cli.ShowAppHelp(c); err != nil {
+			panic(err)
+		}
+		util.RedPrintln(fmt.Sprintf("command %q not found", command))
 	}
 
-	// Start the app
+	// ActionStart the app
 	err := app.Run(os.Args)
 	if err != nil {
 		// Remove the timestamp for error message
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 		log.Fatal(err)
+	}
+}
+
+// checkUpdates fetches the latest release of `darknode-cli` from github and compare the versions. It warns the user if
+// current version is older than the latest release.
+func checkUpdates(curVer string) {
+
+	// Get latest release
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client := github.NewClient(nil)
+	release, _, err := client.Repositories.GetLatestRelease(ctx, "renproject", "darknode-cli")
+	if err != nil {
+		util.RedPrintln(fmt.Sprintf("cannot check latest release, err = %v", err))
+		return
+	}
+
+	// Compare versions
+	versionCurrent, err := version.NewVersion(curVer)
+	if err != nil {
+		util.RedPrintln(fmt.Sprintf("cannot parse current software version, err = %v", err))
+		return
+	}
+	versionLatest, err := version.NewVersion(release.GetTagName())
+	if err != nil {
+		util.RedPrintln(fmt.Sprintf("cannot parse latest software version, err = %v", err))
+		return
+	}
+
+	// Warn user they're using a older version.
+	if versionCurrent.LessThan(versionLatest) {
+		util.RedPrintln(fmt.Sprintf("You are running %v", curVer))
+		util.RedPrintln(fmt.Sprintf("A new release is available (%v)", release.GetTagName()))
+		util.RedPrintln("You can update with `darknode update` command")
 	}
 }

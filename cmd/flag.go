@@ -1,6 +1,9 @@
 package main
 
-import "github.com/urfave/cli"
+import (
+	"github.com/republicprotocol/darknode-cli/cmd/provider"
+	"github.com/urfave/cli"
+)
 
 // General flags
 var (
@@ -20,10 +23,6 @@ var (
 		Name:  "network",
 		Value: "chaosnet",
 		Usage: "Darkpool network of your node (default: chaosnet)",
-	}
-	BranchFlag = cli.StringFlag{
-		Name:  "branch, b",
-		Usage: "Release `branch` used to update the software",
 	}
 	AddressFlag = cli.StringFlag{
 		Name:  "address",
@@ -46,7 +45,7 @@ var (
 // AWS flags
 var (
 	AwsFlag = cli.BoolFlag{
-		Name:  "aws",
+		Name:  provider.NameAws,
 		Usage: "AWS will be used to provision the Darknode",
 	}
 	AwsAccessKeyFlag = cli.StringFlag{
@@ -79,52 +78,42 @@ var (
 
 // Digital ocean flags
 var (
-	// Digital Ocean flags
 	DoFlag = cli.BoolFlag{
-		Name:  "do",
+		Name:  provider.NameDo,
 		Usage: "Digital Ocean will be used to provision the Darknode",
 	}
 	DoTokenFlag = cli.StringFlag{
 		Name:  "do-token",
-		Usage: "Digital ocean API token for programmatic access",
+		Usage: "Digital Ocean API token for programmatic access",
 	}
 	DoRegionFlag = cli.StringFlag{
 		Name:  "do-region",
-		Usage: "An optional digital ocean region (default: random)",
+		Usage: "An optional Digital Ocean region (default: random)",
 	}
 	DoSizeFlag = cli.StringFlag{
 		Name:  "do-droplet",
 		Value: "s-1vcpu-1gb",
-		Usage: "An optional digital ocean droplet size (default: s-1vcpu-1gb)",
+		Usage: "An optional Digital Ocean droplet size (default: s-1vcpu-1gb)",
 	}
 )
 
-const (
-	GcpFlagLabel           string = "gcp"
-	GcpZoneLabel           string = "gcp-zone"
-	GcpCredLabel           string = "gcp-credentials"
-	GcpMachineLabel        string = "gcp-machine-type"
-	GcpMachineDefaultLabel string = "n1-standard-1"
-)
-
+// Google cloud platform flags
 var (
 	GcpFlag = cli.BoolFlag{
-		Name:  GcpFlagLabel,
+		Name:  provider.NameGcp,
 		Usage: "Google Cloud Platform will be used to provision the Darknode",
 	}
-	GcpZoneFlag = cli.StringFlag{
-		Name:  GcpZoneLabel,
-		Usage: "An optional Google Cloud Zone (default: random)",
-	}
-
 	GcpCredFlag = cli.StringFlag{
-		Name:  GcpCredLabel,
+		Name:  "gcp-credentials",
 		Usage: "Service Account credential file (JSON) to be used",
 	}
-
 	GcpMachineFlag = cli.StringFlag{
-		Name:  GcpMachineLabel,
-		Value: GcpMachineDefaultLabel,
-		Usage: "The machine type to be used.",
+		Name:  "gcp-machine",
+		Value: "n1-standard-1",
+		Usage: "An optional Google Cloud machine type (default: n1-standard-1)",
+	}
+	GcpZoneFlag = cli.StringFlag{
+		Name:  "gcp-zone",
+		Usage: "An optional Google Cloud Zone (default: random)",
 	}
 )

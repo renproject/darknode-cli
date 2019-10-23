@@ -1,16 +1,13 @@
 package main
 
 import (
-	"crypto/x509"
-	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"time"
 
 	"github.com/renproject/phi"
-	"github.com/republicprotocol/republic-go/cmd/darknode/config"
-	"github.com/republicprotocol/republic-go/crypto"
+	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 
@@ -18,88 +15,39 @@ import (
 // to update the config file of the darknode.
 func updateNode(ctx *cli.Context) error {
 	name := ctx.Args().First()
-	updateConfig := ctx.Bool("config")
 	tags := ctx.String("tags")
-	branch := ctx.String("branch")
+	updateConfig := ctx.Bool("config")
 
-	if tags == "" && name == "" {
-		return ErrEmptyNodeName
-	} else if tags == "" && name != "" {
-		return updateSingleNode(name, branch, updateConfig)
-	} else if tags != "" && name == "" {
-		nodes, err := getNodesByTags(tags)
-		if err != nil {
-			return err
-		}
-		errs := make([]error, len(nodes))
-		phi.ParForAll(nodes, func(i int) {
-			errs[i] = updateSingleNode(nodes[i], branch, updateConfig)
-		})
-		return handleErrs(errs)
+	nodes, err := util.ParseNodesFromNameAndTags(name, tags)
+	if err != nil {
+		return err
 	}
-
-	return ErrNameAndTags
+	errs := make([]error, len(nodes))
+	phi.ParForAll(nodes, func(i int) {
+		errs[i] = updateSingleNode(nodes[i], updateConfig)
+	})
+	return util.HandleErrs(errs)
 }
 
-func updateSingleNode(name, branch string, updateConfig bool) error {
-	nodePath := nodePath(name)
-	keyPairPath := filepath.Join(nodePath, "ssh_keypair")
-	configPath := filepath.Join(nodePath, "config.json")
+func updateSingleNode(name string, updateConfig bool) error {
+	path := util.NodePath(name)
+	configPath := filepath.Join(path, "config.json")
 
-	// Check if we need to update the node config
 	if updateConfig {
-		// Read the local config file
 		data, err := ioutil.ReadFile(configPath)
 		if err != nil {
 			return err
 		}
-		var cfg config.Config
-		err = json.Unmarshal(data, &cfg)
-		if err != nil {
+		dir := "$HOME/.darknode"
+		script := fmt.Sprintf(`mkdir -p %v/backup && mv %v/config.json %v/backup/%v.json && echo '%s' > $HOME/.darknode/config.json`, dir, dir, dir, time.Now().String(), string(data))
+		if err := util.RemoteRun(name, script); err != nil {
 			return err
 		}
-
-		// Read ssh private key from `ssh_keypair` file and decode it into a rsa key
-		keyData, err := ioutil.ReadFile(keyPairPath)
-		if err != nil {
-			return err
-		}
-		block, _ := pem.Decode(keyData)
-		if block == nil {
-			return ErrInvalidSshKeyFile
-		}
-		key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-		if err != nil {
-			return err
-		}
-
-		// Replace the rsaKey with the one for SSHing.
-		cfg.Keystore.RsaKey = crypto.NewRsaKey(key)
-		data, err = json.MarshalIndent(cfg, "", "    ")
-		if err != nil {
-			return err
-		}
-		if err := ioutil.WriteFile(configPath, data, 0644); err != nil {
-			return err
-		}
-
-		updateConfigScript := fmt.Sprintf(`echo '%s' > $HOME/.darknode/config.json`, string(data))
-		if err := remoteRun(name, updateConfigScript); err != nil {
-			return err
-		}
-
-		fmt.Printf("%sConfig of [%s] has been updated to the local version.%s\n", GREEN, name, RESET)
+		util.GreenPrintln(fmt.Sprintf("Config of [%s] has been updated to the local version.", name))
 	}
 
-	update, err := ioutil.ReadFile(filepath.Join(Directory, "scripts", "update.sh"))
-	if err != nil {
-		return err
-	}
-	if err := remoteRun(name, string(update)); err != nil {
-		return err
-	}
-
-	fmt.Printf("%s[%s] has been updated to the latest version on %s branch.%s \n", GREEN, name, branch, RESET)
+	// FIXME : HOW DOW WE UPDATE DARKNODE.
+	util.GreenPrintln(fmt.Sprintf("[%s] has been updated to the latest version.", name))
 	return nil
 }
 
@@ -110,12 +58,12 @@ func sshNode(ctx *cli.Context) error {
 		cli.ShowCommandHelp(ctx, "ssh")
 		return ErrEmptyNodeName
 	}
-	nodePath := nodePath(name)
-	ip, err := getIp(nodePath)
+	nodePath := util.NodePath(name)
+	ip, err := util.IP(nodePath)
 	if err != nil {
 		return err
 	}
 	keyPairPath := nodePath + "/ssh_keypair"
 
-	return run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no")
+	return util.Run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no")
 }

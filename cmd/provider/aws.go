@@ -79,17 +79,19 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	sshPubKey, err := initNode(name, tags, network)
+	if err := initNode(name, tags, network); err != nil {
+		return err
+	}
 
 	// Generate terraform config and start deploying
-	if err := p.awsTerraformConfig(name, region, instance, sshPubKey); err != nil {
+	if err := p.tfConfig(name, region, instance); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {
 		return err
 	}
 
-	return outputURL(name, network, sshPubKey)
+	return outputURL(name, network)
 }
 
 func (p providerAws) validateRegionAndInstance(ctx *cli.Context) (string, string, error) {

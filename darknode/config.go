@@ -37,6 +37,28 @@ type Config struct {
 	PeerOptions *aw.PeerOptions `json:"peerOptions"`
 }
 
+// NewConfig generate a new config.
+func NewConfig(network Network) (Config, error) {
+	// Generate a new random keystore.
+	ks, err := keystore.RandomKeystore()
+	if err != nil {
+		return Config{}, err
+	}
+
+	// Parse the config or create a new random one
+	return Config{
+		Keystore:               ks,
+		ECDSADistKeyShare:      ECDSADistKeyShare{PubKey: network.PublicKey()},
+		Network:                network,
+		Host:                   "0.0.0.0",
+		Port:                   18514,
+		Bootstraps:             network.BootstrapNodes(),
+		DNRAddress:             network.DnrAddress(),
+		ShifterRegistryAddress: network.ShiftRegistryAddress(),
+		PeerOptions:            &aw.PeerOptions{},
+	}, nil
+}
+
 // NewConfigFromJSONFile parses a json file that contains the config
 // options specified by Config.
 func NewConfigFromJSONFile(filename string) (Config, error) {
