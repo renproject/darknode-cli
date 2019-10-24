@@ -153,8 +153,24 @@ func RemoteRunWithUser(name, script, user string) error {
 		return err
 	}
 	defer session.Close()
-	session.Stdout = os.Stdout
-	session.Stderr = os.Stderr
+
+	// Redirect the remote stdin, stdout and stderr to local.
+	sessStdIn, err := session.StdinPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(sessStdIn, os.Stdin)
+	sessStdOut, err := session.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(os.Stdout, sessStdOut)
+	sessStdErr, err := session.StderrPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(os.Stderr, sessStdErr)
+
 	return session.Run(script)
 }
 
