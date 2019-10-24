@@ -97,8 +97,5 @@ resource "digitalocean_droplet" "darknode" {
       private_key = file(var.pri_key)
     }
   }
-}
-
-output "multiaddress" {
-  value  = "/ip4/${digitalocean_droplet.darknode.ipv4_address}/tcp/18514/ren/${var.address}"
 }`
+

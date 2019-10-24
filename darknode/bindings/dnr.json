@@ -36,28 +36,6 @@
     "constant": false,
     "inputs": [
       {
-        "name": "_darknodeID",
-        "type": "address"
-      },
-      {
-        "name": "_publicKey",
-        "type": "bytes"
-      },
-      {
-        "name": "_bond",
-        "type": "uint256"
-      }
-    ],
-    "name": "register",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
         "name": "_nextMinimumBond",
         "type": "uint256"
       }
@@ -113,6 +91,24 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_darknodeID",
+        "type": "address"
+      },
+      {
+        "name": "_publicKey",
+        "type": "bytes"
+      }
+    ],
+    "name": "register",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -267,6 +263,15 @@
       }
     ],
     "name": "updateMinimumEpochInterval",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "claimStoreOwnership",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -434,6 +439,20 @@
       {
         "name": "",
         "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isOwner",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
       }
     ],
     "payable": false,
@@ -617,7 +636,7 @@
     "constant": false,
     "inputs": [
       {
-        "name": "_newOwner",
+        "name": "newOwner",
         "type": "address"
       }
     ],
@@ -709,7 +728,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "name": "_darknodeID",
         "type": "address"
       },
@@ -726,7 +745,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "name": "_darknodeID",
         "type": "address"
       }
@@ -738,7 +757,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "name": "_owner",
         "type": "address"
       },
@@ -753,7 +772,13 @@
   },
   {
     "anonymous": false,
-    "inputs": [],
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "epochhash",
+        "type": "uint256"
+      }
+    ],
     "name": "LogNewEpoch",
     "type": "event"
   },
@@ -823,18 +848,6 @@
       }
     ],
     "name": "LogSlasherUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "name": "previousOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipRenounced",
     "type": "event"
   },
   {

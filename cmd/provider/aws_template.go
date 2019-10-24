@@ -17,10 +17,11 @@ type awsTerraform struct {
 	AccessKey     string
 	SecretKey     string
 	ConfigPath    string
+	IPFS          string
 }
 
 // tfConfig generates the terraform config file for deploying to AWS.
-func (p providerAws) tfConfig(name, region, instance string) error {
+func (p providerAws) tfConfig(name, region, instance, ipfs string) error {
 	tf := awsTerraform{
 		Name:          name,
 		Region:        region,
@@ -30,6 +31,7 @@ func (p providerAws) tfConfig(name, region, instance string) error {
 		AccessKey:     p.accessKey,
 		SecretKey:     p.secretKey,
 		ConfigPath:    filepath.Join(util.NodePath(name), "config.json"),
+		IPFS:          ipfs,
 	}
 
 	t, err := template.New("aws").Parse(awsTemplate)
@@ -44,42 +46,10 @@ func (p providerAws) tfConfig(name, region, instance string) error {
 }
 
 var awsTemplate = `
-variable "name" {
-  default = "{{.Name}}"
-}
-
-variable "region" {
-  default = "{{.Region}}"
-}
-
-variable "instance_type" {
-  default = "{{.InstanceType}}"
-}
-
-variable "public_key_path" {
-  default = "{{.SshPubKey}}"
-}
-
-variable "private_key_path" {
-  default = "{{.SshPriKeyPath}}"
-}
-
-variable "access_key" {
-  default = "{{.AccessKey}}"
-}
-
-variable "secret_key" {
-  default = "{{.SecretKey}}"
-}
-
-variable "config_path" {
-  default = "{{.ConfigPath}}"
-}
-
 provider "aws" {
-  region     = var.region
-  access_key = var.access_key
-  secret_key = var.secret_key
+  region     = "{{.Region}}"
+  access_key = "{{.AccessKey}}"
+  secret_key = "{{.SecretKey}}"
 }
 
 data "aws_ami" "ubuntu" {
@@ -99,7 +69,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_security_group" "darknode" {
-  name        = "darknode-sg-${var.name}"
+  name        = "darknode-sg-{{.Name}}"
   description = "Allow inbound SSH and REN project traffic"
 
   // SSH
@@ -126,61 +96,85 @@ resource "aws_security_group" "darknode" {
 }
 
 resource "aws_key_pair" "darknode" {
-  key_name   = var.name
-  public_key = file(var.public_key_path)
+  key_name   = "{{.Name}}"
+  public_key = file("{{.SshPubKey}}")
 }
 
 resource "aws_instance" "darknode" {
   ami             = data.aws_ami.ubuntu.id
-  instance_type   = var.instance_type
+  instance_type   = "{{.InstanceType}}"
   key_name        = aws_key_pair.darknode.key_name
   security_groups = [aws_security_group.darknode.name]
 
   tags = {
-    Name = var.name
+    Name = "{{.Name}}"
   }
 
   provisioner "remote-exec" {
+
 	inline = [
-		"curl https://releases.renproject.io/darknode-cli/init.sh -sSf | sh"
+      "sudo adduser darknode --gecos \",,,\" --disabled-password",
+      "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove",
+      "sudo apt-get update",
+      "sudo apt-get -y install jq",
+      "sudo apt-get install ufw",
+      "sudo ufw limit 22/tcp",
+      "sudo ufw allow 18514/tcp", 
+      "sudo ufw allow 18515/tcp", 
+      "sudo ufw --force enable",
 	]
 
     connection {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("${var.private_key_path}")
+      private_key = file("{{.SshPriKeyPath}}")
     }
   }
 
   provisioner "file" {
-    source      = var.config_path
-    destination = "$HOME/darknode-config.json"
+
+    source      = "{{.ConfigPath}}"
+    destination = "$HOME/config.json"
 
     connection {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = "${file("${var.private_key_path}")}"
+      private_key = file("{{.SshPriKeyPath}}")
     }
   }
 
   provisioner "remote-exec" {
+	
 	inline = [
-		"curl https://releases.renproject.io/darknode-cli/install.sh -sSf | sh"
+      "wget -O darknode.gz {{.IPFS}}",
+      "tar -zxvf darknode.gz",
+	  "mkdir -p $HOME/.darknode",
+      "mv $HOME/config.json $HOME/.darknode/config.json",
+      "./install.sh",
+      "rm -r darknode.gz bin config install.sh",
 	]
 
     connection {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = file("${var.private_key_path}")
+      private_key = file("{{.SshPriKeyPath}}")
     }
+  }
+
+  provisioner "local-exec" {
+    command = "echo ${aws_instance.darknode.public_ip} > ip.out"
   }
 }
 
 output "multiaddress" {
-  value = "/ip4/${aws_instance.darknode.public_ip}/tcp/18514/ren/${var.address}"
+  value = "ip=${aws_instance.darknode.public_ip}"
 }`
 
 // {{if .AllocationID}}

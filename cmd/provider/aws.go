@@ -84,7 +84,7 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := p.tfConfig(name, region, instance); err != nil {
+	if err := p.tfConfig(name, region, instance, ipfsUrl(network)); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {
