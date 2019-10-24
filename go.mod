@@ -7,6 +7,7 @@ require (
 	github.com/btcsuite/btcd v0.20.0-beta
 	github.com/certifi/gocertifi v0.0.0-20191021191039-0944d244cd40 // indirect
 	github.com/ethereum/go-ethereum v1.9.6
+	github.com/fatih/color v1.7.0
 	github.com/getsentry/raven-go v0.2.0 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect

@@ -8,16 +8,17 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/republicprotocol/darknode-cli/cmd/provider"
 	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 
 // ErrEmptyNodeName is returned when user doesn't provide the node name.
-var ErrEmptyNodeName = util.RedError("node name cannot be empty")
+var ErrEmptyNodeName = errors.New("node name cannot be empty")
 
 // ErrInvalidInstanceSize is returned when the given instance size is invalid.
-var ErrInvalidInstanceSize = util.RedError("invalid instance size")
+var ErrInvalidInstanceSize = errors.New("invalid instance size")
 
 func resize(ctx *cli.Context) error {
 	name := ctx.Args().Get(0)
@@ -71,7 +72,7 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 	}
 
 	// ActionStart running terraform
-	util.GreenPrintln("Resizing dark nodes ...")
+	color.Green("Resizing dark nodes ...")
 	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", nodePath)
 	err = util.Run("bash", "-c", apply)
 	if err != nil {
@@ -80,7 +81,7 @@ func resizeAwsInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 			if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
 				fmt.Println("fail to revert the change to `main.tf` file")
 			}
-			util.RedPrintln("Darknode has been stopped when trying to resizing to a invalid instance type, please try resizing again with a valid instance type")
+			color.Red("Darknode has been stopped when trying to resizing to a invalid instance type, please try resizing again with a valid instance type")
 		}()
 		return err
 	}
@@ -112,7 +113,7 @@ func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 	}
 
 	// ActionStart running terraform
-	util.GreenPrintln("Resizing dark nodes ...")
+	color.Green("Resizing dark nodes ...")
 	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", nodePath)
 	err = util.Run("bash", "-c", apply)
 	if err != nil {
@@ -120,7 +121,7 @@ func resizeDoInstance(tfFile []byte, nodePath, tfPath, newSize string) error {
 			if err := ioutil.WriteFile(tfPath, tfFile, 0644); err != nil {
 				fmt.Println("fail to revert the change to `main.tf` file")
 			}
-			util.RedPrintln("Darknode has been stopped when trying to resizing to a invalid instance type, please try resizing again with a valid instance type")
+			color.Red("Darknode has been stopped when trying to resizing to a invalid instance type, please try resizing again with a valid instance type")
 		}()
 	}
 	return err

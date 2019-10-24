@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/google/go-github/github"
 	"github.com/hashicorp/go-version"
 	"github.com/republicprotocol/darknode-cli/cmd/provider"
@@ -74,7 +75,13 @@ func main() {
 			Flags: []cli.Flag{},
 			Usage: "SSH into one of your Darknode",
 			Action: func(c *cli.Context) error {
-				return sshNode(c)
+				name := c.Args().First()
+				ip, err := util.IP(name)
+				if err != nil {
+					return err
+				}
+				keyPath := filepath.Join(util.NodePath(name), "ssh_keypair")
+				return util.Run("ssh", "-i", keyPath, "darknode@"+ip, "-oStrictHostKeyChecking=no")
 			},
 		},
 		{
@@ -140,7 +147,7 @@ func main() {
 		if err := cli.ShowAppHelp(c); err != nil {
 			panic(err)
 		}
-		util.RedPrintln(fmt.Sprintf("command %q not found", command))
+		color.Red("command %q not found", command)
 	}
 
 	// ActionStart the app
@@ -162,26 +169,26 @@ func checkUpdates(curVer string) {
 	client := github.NewClient(nil)
 	release, _, err := client.Repositories.GetLatestRelease(ctx, "renproject", "darknode-cli")
 	if err != nil {
-		util.RedPrintln(fmt.Sprintf("cannot check latest release, err = %v", err))
+		color.Red("cannot check latest release, err = %v", err)
 		return
 	}
 
 	// Compare versions
 	versionCurrent, err := version.NewVersion(curVer)
 	if err != nil {
-		util.RedPrintln(fmt.Sprintf("cannot parse current software version, err = %v", err))
+		color.Red("cannot parse current software version, err = %v", err)
 		return
 	}
 	versionLatest, err := version.NewVersion(release.GetTagName())
 	if err != nil {
-		util.RedPrintln(fmt.Sprintf("cannot parse latest software version, err = %v", err))
+		color.Red("cannot parse latest software version, err = %v", err)
 		return
 	}
 
 	// Warn user they're using a older version.
 	if versionCurrent.LessThan(versionLatest) {
-		util.RedPrintln(fmt.Sprintf("You are running %v", curVer))
-		util.RedPrintln(fmt.Sprintf("A new release is available (%v)", release.GetTagName()))
-		util.RedPrintln("You can update with `darknode update` command")
+		color.Red("You are running %v", curVer)
+		color.Red("A new release is available (%v)", release.GetTagName())
+		color.Red("You can update with `darknode update` command")
 	}
 }

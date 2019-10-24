@@ -10,16 +10,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/multiformats/go-multiaddr"
-	"github.com/republicprotocol/republic-go/identity"
+	"github.com/republicprotocol/darknode-cli/darknode"
+	"github.com/republicprotocol/darknode-cli/darknode/addr"
 	"golang.org/x/crypto/ssh"
 )
 
-// ErrEmptyNameAndTags is returned when both name and tags are not given.
-var ErrEmptyNameAndTags = fmt.Errorf("%splease provide name or tags of the node you want to operate%s", RED, RESET)
+var (
+	// ErrEmptyNameAndTags is returned when both name and tags are not given.
+	ErrEmptyNameAndTags = fmt.Errorf("please provide name or tags of the node you want to operate")
 
-// ErrTooManyArguments is returned when both name and tags are given.
-var ErrTooManyArguments = fmt.Errorf("%stoo many arguments, cannot have both name and tags%s", RED, RESET)
+	// ErrTooManyArguments is returned when both name and tags are given.
+	ErrTooManyArguments = fmt.Errorf("too many arguments, cannot have both name and tags")
+
+	// ErrEmptyName is returned when user gives an empty node name.
+	ErrEmptyName = fmt.Errorf("node name cannot be empty")
+)
 
 // Directory is the directory address of the cli and all darknodes data.
 var Directory = filepath.Join(os.Getenv("HOME"), ".darknode")
@@ -52,36 +57,25 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
-// IP parses the ip address from a bytes representation of multiAddress.
-func IP(name string) (string, error) {
-	// FIXME : instead read from the multiAddress file, ssh into the node and run command to get the ip address
-	path := filepath.Join(NodePath(name), "multiAddress.out")
-	data, err := ioutil.ReadFile(path)
+// ID gets the ID of the node with given name.
+func ID(name string) (addr.ID, error) {
+	path := filepath.Join(NodePath(name), "config.json")
+	config, err := darknode.NewConfigFromJSONFile(path)
 	if err != nil {
-		return "", err
+		return addr.ID{}, err
 	}
-	multi, err := identity.NewMultiAddressFromString(strings.TrimSpace(string(data)))
-	if err != nil {
-		return "", err
-	}
-
-	return multi.ValueForProtocol(multiaddr.P_IP4)
+	return addr.FromPublicKey(config.Keystore.Ecdsa.PublicKey), nil
 }
 
-// ID parses the ID address from a bytes representation of
-// multiAddress.
-func ID(name string) (string, error) {
-	path := filepath.Join(NodePath(name), "multiAddress.out")
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	multi, err := identity.NewMultiAddressFromString(strings.TrimSpace(string(data)))
-	if err != nil {
-		return "", err
+// IP gets the IP address of the node with given name.
+func IP(name string) (string, error) {
+	if name == "" {
+		return "", ErrEmptyName
 	}
 
-	return multi.ValueForProtocol(identity.RepublicCode)
+	cmd := fmt.Sprintf("cd %v && terraform output ip", NodePath(name))
+	ip, err := CommandOutput(cmd)
+	return strings.TrimSpace(ip), err
 }
 
 // InitNodeDirectory creates the directory for the darknode.
@@ -116,6 +110,12 @@ func Run(name string, args ...string) error {
 	return cmd.Wait()
 }
 
+func CommandOutput(commands string) (string, error) {
+	cmd := exec.Command("bash", "-c", commands)
+	output, err := cmd.Output()
+	return string(output), err
+}
+
 // RemoteRun runs the script on the instance which host the darknode of given name.
 func RemoteRun(name, script string) error {
 	return RemoteRunWithUser(name, script, "darknode")
@@ -129,7 +129,7 @@ func RemoteRunWithUser(name, script, user string) error {
 		return err
 	}
 	config := ssh.ClientConfig{
-		User: "darknode",
+		User: user,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(key),
 		},
@@ -219,19 +219,3 @@ func HandleErrs(errs []error) error {
 
 	return nil
 }
-
-// // validateDarknodeName validates the darknode name and existence.
-// func validateDarknodeName(name string) (string, error) {
-// 	if name == "" {
-// 		return "", ErrEmptyNodeName
-// 	}
-// 	nodePath := nodePath(name)
-// 	if _, err := os.Stat(nodePath); err != nil {
-// 		return "", ErrNodeNotExist
-// 	}
-// 	if _, err := os.Stat(nodePath + "/config.json"); os.IsNotExist(err) {
-// 		return "", ErrNodeNotExist
-// 	}
-//
-// 	return nodePath, nil
-// }

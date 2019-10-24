@@ -105,6 +105,7 @@ resource "aws_instance" "darknode" {
   instance_type   = "{{.InstanceType}}"
   key_name        = aws_key_pair.darknode.key_name
   security_groups = [aws_security_group.darknode.name]
+  monitoring      = true 
 
   tags = {
     Name = "{{.Name}}"
@@ -167,14 +168,14 @@ resource "aws_instance" "darknode" {
       private_key = file("{{.SshPriKeyPath}}")
     }
   }
-
-  provisioner "local-exec" {
-    command = "echo ${aws_instance.darknode.public_ip} > ip.out"
-  }
 }
 
-output "multiaddress" {
-  value = "ip=${aws_instance.darknode.public_ip}"
+output "provider" {
+  value = "aws"
+}
+
+output "ip" {
+  value = "${aws_instance.darknode.public_ip}"
 }`
 
 // {{if .AllocationID}}

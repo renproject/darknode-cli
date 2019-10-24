@@ -16,6 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/fatih/color"
 	"github.com/renproject/mercury/sdk/client/ethclient"
 	"github.com/renproject/mercury/types/ethtypes"
 	"github.com/republicprotocol/darknode-cli/darknode"
@@ -83,7 +84,7 @@ func destroyNode(ctx *cli.Context) error {
 			return nil
 		}
 	}
-	util.GreenPrintln("Destroying your darknode ...")
+	color.Green("Destroying your darknode ...")
 
 	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
 	return util.Run("bash", "-c", destroy)
@@ -144,9 +145,9 @@ func withdraw(ctx *cli.Context) error {
 			return err
 		}
 		renBalanceNoDecimals := big.NewInt(0).Div(renBalance, oneREN)
-		util.GreenPrintln(fmt.Sprintf("%v REN has been withdrawn from your darknode to [%v]. TxHash: %v.", renBalanceNoDecimals.Int64(), receiverAddr.Hex(), receipt.TxHash.Hex()))
+		color.Green("%v REN has been withdrawn from your darknode to [%v]. TxHash: %v.", renBalanceNoDecimals.Int64(), receiverAddr.Hex(), receipt.TxHash.Hex())
 	} else {
-		util.GreenPrintln("Your account doesn't have REN token.")
+		color.Green("Your account doesn't have REN token.")
 	}
 
 	// Check the ETH balance
@@ -163,12 +164,12 @@ func withdraw(ctx *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			util.GreenPrintln(fmt.Sprintf("Your ETH has been withdrawn from your darknode to [%v]. TxHash: %v.", receiverAddr.Hex(), tx.Hash().Hex()))
+			color.Green("Your ETH has been withdrawn from your darknode to [%v]. TxHash: %v.", receiverAddr.Hex(), tx.Hash().Hex())
 		} else {
-			return util.RedError(fmt.Sprintf("Your account has %v wei which is not enough to cover the transaction fee %v on ethereum.", balance, gas))
+			return fmt.Errorf("your account has %v wei which is not enough to cover the transaction fee %v on ethereum", balance, gas)
 		}
 	} else {
-		util.GreenPrintln("Your don't have any ETH left in your account.")
+		color.Green("Your don't have any ETH left in your account.")
 	}
 	return nil
 }
@@ -214,9 +215,9 @@ func checkRegistered(dnr *bindings.DarknodeRegistry, addr common.Address) error 
 		return err
 	}
 	if registered {
-		util.RedPrintln("Your node hasn't been deregistered")
-		util.RedPrintln("Please go to darknode command center to deregister your darknode.")
-		return util.RedError("Please try again after you fully deregister your node")
+		color.Red("Your node hasn't been deregistered")
+		color.Red("Please go to darknode command center to deregister your darknode.")
+		color.Red("Please try again after you fully deregister your node")
 	}
 	return nil
 }
@@ -229,7 +230,7 @@ func checkPendingStage(dnr *bindings.DarknodeRegistry, addr common.Address) erro
 		return err
 	}
 	if pendingRegistration {
-		return util.RedError("Your node is currently in pending registration stage, please deregister your node after next epoch shuffle")
+		return fmt.Errorf("your node is currently in pending registration stage, please deregister your node after next epoch shuffle")
 	}
 
 	deCtx, deCancel := context.WithTimeout(context.Background(), time.Minute)
@@ -239,7 +240,7 @@ func checkPendingStage(dnr *bindings.DarknodeRegistry, addr common.Address) erro
 		return err
 	}
 	if pendingDeregistration {
-		return util.RedError("Your node is currently in pending deregistration stage, please wait for next epoch shuffle and try again")
+		return fmt.Errorf("your node is currently in pending deregistration stage, please wait for next epoch shuffle and try again")
 	}
 
 	return nil

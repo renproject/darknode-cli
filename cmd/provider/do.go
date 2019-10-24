@@ -7,9 +7,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
-	"os"
-	"path/filepath"
-	"text/template"
 
 	"github.com/republicprotocol/darknode-cli/darknode"
 	"github.com/republicprotocol/darknode-cli/util"
@@ -52,35 +49,13 @@ func (p providerDo) Deploy(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := p.tfConfig(name, region, droplet); err != nil {
+	if err := p.tfConfig(name, region, droplet, ipfsUrl(network)); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {
 		return err
 	}
 	return outputURL(name, network)
-}
-
-func (p providerDo) tfConfig(name, region, droplet string) error {
-	tf := doTerraform{
-		Name:       name,
-		Token:      p.token,
-		Region:     region,
-		Size:       droplet,
-		ConfigPath: filepath.Join(util.NodePath(name), "config.json"),
-		PubKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
-		PriKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair"),
-	}
-
-	t, err := template.New("do").Parse(doTemplate)
-	if err != nil {
-		return err
-	}
-	tfFile, err := os.Create(filepath.Join(util.NodePath(name), "main.tf"))
-	if err != nil {
-		return err
-	}
-	return t.Execute(tfFile, tf)
 }
 
 func validateRegionAndDroplet(ctx *cli.Context) (string, string, error) {

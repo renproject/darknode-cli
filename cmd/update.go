@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"time"
 
+	"github.com/fatih/color"
 	"github.com/renproject/phi"
 	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
@@ -38,32 +38,16 @@ func updateSingleNode(name string, updateConfig bool) error {
 		if err != nil {
 			return err
 		}
-		dir := "$HOME/.darknode"
-		script := fmt.Sprintf(`mkdir -p %v/backup && mv %v/config.json %v/backup/%v.json && echo '%s' > $HOME/.darknode/config.json`, dir, dir, dir, time.Now().String(), string(data))
+		script := fmt.Sprintf("echo '%s' > $HOME/.darknode/config.json", string(data))
 		if err := util.RemoteRun(name, script); err != nil {
 			return err
 		}
-		util.GreenPrintln(fmt.Sprintf("Config of [%s] has been updated to the local version.", name))
+		color.Green("Config of [%s] has been updated to the local version.", name)
 	}
-
-	// FIXME : HOW DOW WE UPDATE DARKNODE.
-	util.GreenPrintln(fmt.Sprintf("[%s] has been updated to the latest version.", name))
-	return nil
-}
-
-// sshNode will ssh into the Darknode
-func sshNode(ctx *cli.Context) error {
-	name := ctx.Args().First()
-	if name == "" {
-		cli.ShowCommandHelp(ctx, "ssh")
-		return ErrEmptyNodeName
-	}
-	nodePath := util.NodePath(name)
-	ip, err := util.IP(nodePath)
-	if err != nil {
+	updateScript := "$HOME/.darknode/bin/update.sh"
+	if err := util.RemoteRun(name, updateScript); err != nil {
 		return err
 	}
-	keyPairPath := nodePath + "/ssh_keypair"
-
-	return util.Run("ssh", "-i", keyPairPath, "darknode@"+ip, "-oStrictHostKeyChecking=no")
+	color.Green("[%s] has been updated to the latest version.", name)
+	return nil
 }

@@ -1,5 +1,13 @@
 package provider
 
+import (
+	"os"
+	"path/filepath"
+	"text/template"
+
+	"github.com/republicprotocol/darknode-cli/util"
+)
+
 type doTerraform struct {
 	Name       string
 	Token      string
@@ -8,52 +16,48 @@ type doTerraform struct {
 	ConfigPath string
 	PubKeyPath string
 	PriKeyPath string
+	IPFS       string
+}
+
+func (p providerDo) tfConfig(name, region, droplet, ipfs string) error {
+	tf := doTerraform{
+		Name:       name,
+		Token:      p.token,
+		Region:     region,
+		Size:       droplet,
+		ConfigPath: filepath.Join(util.NodePath(name), "config.json"),
+		PubKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
+		PriKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair"),
+		IPFS:       ipfs,
+	}
+
+	t, err := template.New("do").Parse(doTemplate)
+	if err != nil {
+		return err
+	}
+	tfFile, err := os.Create(filepath.Join(util.NodePath(name), "main.tf"))
+	if err != nil {
+		return err
+	}
+	return t.Execute(tfFile, tf)
 }
 
 var doTemplate = `
-variable "name" {
-	default = "{{.Name}}"
-}
-
-variable "do_token" {
-	default = "{{.Token}}"
-}
-
-variable "region" {
-	default = "{{.Region}}"
-}
-
-variable "size" {
-	default = "{{.Size}}"
-}
-
-variable "config_path" {
-  default = "{{.ConfigPath}}"
-}
-
-variable "pub_key" {
-  default = "{{.PubKeyPath}}"
-}
-
-variable "pri_key" {
-  default = "{{.PriKeyPath}}"
-}
-
 provider "digitalocean" {
-  token = var.do_token
+  token = "{{.Token}}"
 }
 
 resource "digitalocean_ssh_key" "darknode" {
-   name       = var.name
-   public_key = file(var.pub_key)
+   name       = "{{.Name}}"
+   public_key = file("{{.PubKeyPath}}")
 }
 
 resource "digitalocean_droplet" "darknode" {
   provider   = digitalocean
   image      = "ubuntu-18-04-x64"
-  name       = var.name
-  region     = var.region
-  size       = var.size
+  name       = "{{.Name}}"
+  region     = "{{.Region}}"
+  size       = "{{.Size}}"
   monitoring = true
 
   ssh_keys   = [
@@ -61,41 +65,68 @@ resource "digitalocean_droplet" "darknode" {
   ]
 
   provisioner "remote-exec" {
+	
 	inline = [
-		"curl https://releases.renproject.io/darknode-cli/init.sh -sSf | sh"
+      "sudo adduser darknode --gecos \",,,\" --disabled-password",
+      "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove",
+      "sudo apt-get update",
+      "sudo apt-get -y install jq",
+      "sudo apt-get install ufw",
+      "sudo ufw limit 22/tcp",
+      "sudo ufw allow 18514/tcp", 
+      "sudo ufw allow 18515/tcp", 
+      "sudo ufw --force enable",
 	]
 
     connection {
       host        = self.ipv4_address
       type        = "ssh"
       user        = "root"
-      private_key = file(var.pri_key)
+      private_key = file("{{.PriKeyPath}}")
     }
   }
 
   provisioner "file" {
-    source = var.config_path
-    destination = "$HOME/darknode-config.json"
+
+    source      = "{{.ConfigPath}}"
+    destination = "$HOME/config.json"
 
     connection {
       host        = self.ipv4_address
       type        = "ssh"
       user        = "darknode"
-      private_key = file(var.pri_key)
+      private_key = file("{{.PriKeyPath}}")
     }
   }
 
   provisioner "remote-exec" {
+	
 	inline = [
-		"curl https://releases.renproject.io/darknode-cli/install.sh -sSf | sh"
+      "wget -O darknode.gz {{.IPFS}}",
+      "tar -zxvf darknode.gz",
+	  "mkdir -p $HOME/.darknode",
+      "mv $HOME/config.json $HOME/.darknode/config.json",
+      "./install.sh",
+      "rm -r darknode.gz bin config install.sh",
 	]
 
     connection {
       host        = self.ipv4_address
       type        = "ssh"
       user        = "darknode"
-      private_key = file(var.pri_key)
+      private_key = file("{{.PriKeyPath}}")
     }
   }
-}`
+}
 
+output "provider" {
+  value = "do"
+}
+
+output "ip" {
+  value = "${digitalocean_droplet.darknode.ipv4_address}"
+}`

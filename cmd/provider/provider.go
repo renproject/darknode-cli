@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/republicprotocol/darknode-cli/darknode"
 	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
@@ -41,10 +42,10 @@ func ParseProvider(ctx *cli.Context) (Provider, error) {
 		return NewAws(ctx)
 	}
 
-	// if ctx.Bool(NameDo) {
-	// 	return
-	// }
-	//
+	if ctx.Bool(NameDo) {
+		return NewDo(ctx)
+	}
+
 	// if ctx.Bool(NameGcp) {
 	// 	return
 	// }
@@ -54,23 +55,13 @@ func ParseProvider(ctx *cli.Context) (Provider, error) {
 
 // Provider returns the provider of a darknode instance.
 func GetProvider(name string) (string, error) {
-	// Get main.tf file
-	filePath := filepath.Join(util.NodePath(name), "main.tf")
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return "", err
+	if name == "" {
+		return "", util.ErrEmptyName
 	}
 
-	// Check if it's aws or digital ocean
-	if strings.Contains(string(data), `provider "aws"`) {
-		return NameAws, nil
-	} else if strings.Contains(string(data), `provider "digitalocean"`) {
-		return NameDo, nil
-	} else if strings.Contains(string(data), `provider "gcp"`) {
-		return NameGcp, nil
-	} else {
-		return "", errors.New("unknown provider")
-	}
+	cmd := fmt.Sprintf("cd %v && terraform output provider", util.NodePath(name))
+	provider, err := util.CommandOutput(cmd)
+	return strings.TrimSpace(provider), err
 }
 
 // initialise all files needed by deploying a new node
@@ -129,13 +120,13 @@ func outputURL(name string, network darknode.Network) error {
 	}
 	url = "https://www.renproject.io"
 
-	fmt.Printf("\n")
-	fmt.Printf("%sCongratulations! Your Darknode is deployed.%s\n\n", util.GREEN, util.RESET)
-	fmt.Printf("%sJoin the network by registering your Darknode at %s%s\n\n", util.GREEN, url, util.RESET)
+	color.Green("")
+	color.Green("Congratulations! Your Darknode is deployed.")
+	color.Green("Join the network by registering your Darknode at %s", url)
 	return nil
 }
 
-func ipfsUrl(network darknode.Network) string{
+func ipfsUrl(network darknode.Network) string {
 	switch network {
 	case darknode.Mainnet:
 		panic("unsupported")
