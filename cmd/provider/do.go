@@ -52,7 +52,7 @@ func (p providerDo) Deploy(ctx *cli.Context) error {
 	if err := runTerraform(name); err != nil {
 		return err
 	}
-	return outputURL(name, network)
+	return outputURL(name)
 }
 
 func validateRegionAndDroplet(ctx *cli.Context) (string, string, error) {

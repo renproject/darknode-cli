@@ -1,12 +1,14 @@
 package util
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -76,6 +78,15 @@ func IP(name string) (string, error) {
 	cmd := fmt.Sprintf("cd %v && terraform output ip", NodePath(name))
 	ip, err := CommandOutput(cmd)
 	return strings.TrimSpace(ip), err
+}
+
+func Network(name string) (darknode.Network, error) {
+	path := filepath.Join(NodePath(name), "config.json")
+	config, err := darknode.NewConfigFromJSONFile(path)
+	if err != nil {
+		return "", err
+	}
+	return config.Network, nil
 }
 
 // InitNodeDirectory creates the directory for the darknode.
@@ -172,6 +183,36 @@ func RemoteRunWithUser(name, script, user string) error {
 	go io.Copy(os.Stderr, sessStdErr)
 
 	return session.Run(script)
+}
+
+func OpenInBrowser(url string) error{
+	switch runtime.GOOS {
+	case "darwin":
+		return Run("open", url)
+	case "linux":
+		return Run("xdg-open", url)
+	}
+	return nil
+}
+
+// RegisterUrl returns the url for registering a particular darknode.
+func RegisterUrl(name string) (string, error) {
+	path := filepath.Join(NodePath(name), "config.json")
+	config, err := darknode.NewConfigFromJSONFile(path)
+	if err != nil {
+		return "", err
+	}
+	pubKey, err := ssh.NewPublicKey(&config.Keystore.Rsa.PublicKey)
+	if err != nil {
+		return "", err
+	}
+	pubKeyHex := hex.EncodeToString(pubKey.Marshal())
+	id := addr.FromPublicKey(config.Keystore.Ecdsa.PublicKey)
+	network, err := Network(name)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("https://%v.renproject.io/darknode/%v?action=register&public_key=0x%s&name=%v", network, id.String(), pubKeyHex, name), nil
 }
 
 // GetNodesByTags return the names of the nodes which have the given tags.

@@ -89,7 +89,7 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 		return err
 	}
 
-	return outputURL(name, network)
+	return outputURL(name)
 }
 
 func (p providerAws) validateRegionAndInstance(ctx *cli.Context) (string, string, error) {

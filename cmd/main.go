@@ -140,6 +140,21 @@ func main() {
 				return execScript(c)
 			},
 		},
+		{
+			Name:  "register",
+			Usage: "Redirect you to the register page of a particular darknode.",
+			Flags: []cli.Flag{},
+			Action: func(c *cli.Context) error {
+				name := c.Args().First()
+				url, err := util.RegisterUrl(name)
+				if err != nil {
+					return err
+				}
+				color.Green("If the browser doesn't open for you, please copy the following url and open in browser.")
+				color.Green(url)
+				return util.OpenInBrowser(url)
+			},
+		},
 	}
 
 	// Show error message and display the help page for the app

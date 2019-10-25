@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,10 +10,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/republicprotocol/darknode-cli/darknode"
-	"github.com/republicprotocol/darknode-cli/darknode/addr"
 	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
-	"golang.org/x/crypto/ssh"
 )
 
 // ErrUnknownProvider is returned when user tries to deploy a darknode with an unknown cloud provider.
@@ -99,21 +96,11 @@ func runTerraform(name string) error {
 }
 
 // outputURL writes success message and the URL for registering the node to the terminal.
-func outputURL(name string, network darknode.Network) error {
-	// Get the public key of the node
-	path := filepath.Join(util.NodePath(name), "config.json")
-	config, err := darknode.NewConfigFromJSONFile(path)
+func outputURL(name string) error {
+	url, err :=util.RegisterUrl(name)
 	if err != nil {
 		return err
 	}
-	pubKey, err := ssh.NewPublicKey(&config.Keystore.Rsa.PublicKey)
-	if err != nil {
-		panic(err)
-	}
-	pubKeyHex := hex.EncodeToString(pubKey.Marshal())
-	id := addr.FromPublicKey(config.Keystore.Ecdsa.PublicKey)
-
-	url := fmt.Sprintf("https://%v.renproject.io/darknode/%v?action=register&public_key=0x%s&name=%v", network, id.String(), pubKeyHex, name)
 	color.Green("")
 	color.Green("Congratulations! Your Darknode is deployed.")
 	color.Green("Join the network by registering your Darknode at %s", url)
