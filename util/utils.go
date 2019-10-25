@@ -185,7 +185,7 @@ func RemoteRunWithUser(name, script, user string) error {
 	return session.Run(script)
 }
 
-func OpenInBrowser(url string) error{
+func OpenInBrowser(url string) error {
 	switch runtime.GOOS {
 	case "darwin":
 		return Run("open", url)

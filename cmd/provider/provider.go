@@ -97,7 +97,7 @@ func runTerraform(name string) error {
 
 // outputURL writes success message and the URL for registering the node to the terminal.
 func outputURL(name string) error {
-	url, err :=util.RegisterUrl(name)
+	url, err := util.RegisterUrl(name)
 	if err != nil {
 		return err
 	}
