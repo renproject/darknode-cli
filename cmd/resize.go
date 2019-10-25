@@ -43,7 +43,7 @@ func resize(ctx *cli.Context) error {
 		return applyChanges(name, RegexAws, replacement)
 	case provider.NameDo:
 		replacement := fmt.Sprintf(`size       = "%v"`, newSize)
-		return applyChanges(name, RegexAws, replacement)
+		return applyChanges(name, RegexDo, replacement)
 	case provider.NameGcp:
 		panic("unsupported yet")
 	default:

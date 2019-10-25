@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"path/filepath"
 
 	"github.com/renproject/phi"
@@ -19,7 +18,6 @@ func listAllNodes(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Print("nodenames = ", nodesNames)
 
 	nodes := make([][]string, len(nodesNames))
 	errs := map[string]error{}

@@ -55,7 +55,7 @@ func StringfySshPubkey(key ssh.PublicKey) string {
 	return string(pubKeyBytes)
 }
 
-func ParsePrivateKey(name string) (ssh.Signer, error) {
+func ParseSshPrivateKey(name string) (ssh.Signer, error) {
 	path := filepath.Join(NodePath(name), "ssh_keypair")
 	sshKey, err := ioutil.ReadFile(path)
 	if err != nil {

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 
@@ -133,7 +132,6 @@ func availableRegions(ctx *cli.Context) ([]Region, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("response body = %v", string(data))
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(string(data))
 	}

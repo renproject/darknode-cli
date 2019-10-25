@@ -124,7 +124,7 @@ func RemoteRun(name, script string) error {
 // RemoteRun runs the script on the instance as specific system user.
 func RemoteRunWithUser(name, script, user string) error {
 	// Parse the ssh private key
-	key, err := ParsePrivateKey(name)
+	key, err := ParseSshPrivateKey(name)
 	if err != nil {
 		return err
 	}

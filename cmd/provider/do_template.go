@@ -53,14 +53,15 @@ resource "digitalocean_ssh_key" "darknode" {
 }
 
 resource "digitalocean_droplet" "darknode" {
-  provider   = digitalocean
-  image      = "ubuntu-18-04-x64"
-  name       = "{{.Name}}"
-  region     = "{{.Region}}"
-  size       = "{{.Size}}"
-  monitoring = true
+  provider    = digitalocean
+  image       = "ubuntu-18-04-x64"
+  name        = "{{.Name}}"
+  region      = "{{.Region}}"
+  size        = "{{.Size}}"
+  monitoring  = true
+  resize_disk = false
 
-  ssh_keys   = [
+  ssh_keys = [
     digitalocean_ssh_key.darknode.id
   ]
 
