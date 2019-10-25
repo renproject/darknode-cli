@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 
@@ -32,9 +33,6 @@ func (p providerDo) Name() string {
 func (p providerDo) Deploy(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
-	if name == "" {
-		return ErrEmptyNodeName
-	}
 
 	region, droplet, err := validateRegionAndDroplet(ctx)
 	if err != nil {
@@ -135,6 +133,7 @@ func availableRegions(ctx *cli.Context) ([]Region, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("response body = %v", string(data))
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(string(data))
 	}

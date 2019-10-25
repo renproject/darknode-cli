@@ -30,10 +30,6 @@ import (
 func destroyNode(ctx *cli.Context) error {
 	force := ctx.Bool("force")
 	name := ctx.Args().First()
-	if name == "" {
-		cli.ShowCommandHelp(ctx, "down")
-		return ErrEmptyNodeName
-	}
 
 	// Parse the node config
 	nodePath := util.NodePath(name)

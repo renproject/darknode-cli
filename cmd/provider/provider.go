@@ -14,9 +14,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-// ErrEmptyNodeName is returned when user doesn't provide the node name.
-var ErrEmptyNodeName = errors.New("node name cannot be empty")
-
 // ErrUnknownProvider is returned when user tries to deploy a darknode with an unknown cloud provider.
 var ErrUnknownProvider = errors.New("unknown cloud provider")
 

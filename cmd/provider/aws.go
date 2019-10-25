@@ -66,9 +66,7 @@ func (p providerAws) Name() string {
 func (p providerAws) Deploy(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
-	if name == "" {
-		return ErrEmptyNodeName
-	}
+
 	region, instance, err := p.validateRegionAndInstance(ctx)
 	if err != nil {
 		return err
