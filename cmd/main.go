@@ -39,11 +39,11 @@ func main() {
 				// General
 				NameFlag, TagsFlag, NetworkFlag,
 				// AWS
-				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsElasticIpFlag, AwsProfileFlag,
+				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsProfileFlag,
 				// Digital Ocean
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 				// Google Cloud Platform
-				GcpFlag, GcpZoneFlag, GcpCredFlag,
+				// GcpFlag, GcpZoneFlag, GcpCredFlag,
 			},
 			Action: func(c *cli.Context) error {
 				p, err := provider.ParseProvider(c)
@@ -87,7 +87,7 @@ func main() {
 		{
 			Name:  "start",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "ActionStart a single Darknode or a set of Darknodes by its tag",
+			Usage: "Start a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
 				return switchNode(c, "start")
 			},
@@ -95,7 +95,7 @@ func main() {
 		{
 			Name:  "stop",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "ActionStop a single Darknode or a set of Darknodes by its tag",
+			Usage: "Stop a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
 				return switchNode(c, "stop")
 			},
@@ -103,7 +103,7 @@ func main() {
 		{
 			Name:  "restart",
 			Flags: []cli.Flag{TagsFlag},
-			Usage: "ActionRestart a single Darknode or a set of Darknodes by its tag",
+			Usage: "Restart a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
 				return switchNode(c, "restart")
 			},
@@ -142,7 +142,7 @@ func main() {
 		},
 		{
 			Name:  "register",
-			Usage: "Redirect you to the register page of a particular darknode.",
+			Usage: "Redirect you to the register page of a particular darknode",
 			Flags: []cli.Flag{},
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
@@ -165,12 +165,12 @@ func main() {
 		color.Red("command %q not found", command)
 	}
 
-	// ActionStart the app
+	// Start the app
 	err := app.Run(os.Args)
 	if err != nil {
 		// Remove the timestamp for error message
 		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-		log.Fatal(err)
+		color.Red(err.Error())
 	}
 }
 

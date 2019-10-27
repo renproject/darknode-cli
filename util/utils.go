@@ -91,19 +91,25 @@ func Network(name string) (darknode.Network, error) {
 
 // InitNodeDirectory creates the directory for the darknode.
 func InitNodeDirectory(name, tags string) error {
+	if name == "" {
+		return ErrEmptyName
+	}
 	path := NodePath(name)
 
-	// Make a directory for the new node if not exist.
-	if _, err := os.Stat(path); err != nil {
-		if err := os.Mkdir(path, 0700); err != nil {
-			return err
-		}
+	// Ask user to destroy the old node first if there's already a node with the name.
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("Node [%v] already exist. \nIf you want to do a fresh deployment, destroy the old one first.", name)
+	}
+
+	// Make a directory for the new node
+	if err := os.Mkdir(path, 0700); err != nil {
+		return err
 	}
 
 	// Create the `tags.out` file if not exist.
 	tagsPath := filepath.Join(path, "tags.out")
 	if _, err := os.Stat(tagsPath); err != nil {
-		return ioutil.WriteFile(tagsPath, []byte(strings.TrimSpace(tags)), 0644)
+		return ioutil.WriteFile(tagsPath, []byte(strings.TrimSpace(tags)), 0600)
 	}
 
 	return nil
@@ -115,10 +121,15 @@ func Run(name string, args ...string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	return cmd.Wait()
+	return cmd.Run()
+}
+
+func SilentRun(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = ioutil.Discard
+	cmd.Stderr = ioutil.Discard
+	return cmd.Run()
 }
 
 func CommandOutput(commands string) (string, error) {
@@ -235,12 +246,23 @@ func GetNodesByTags(tags string) ([]string, error) {
 				haveAllTags = false
 			}
 		}
-		if haveAllTags {
+		if !haveAllTags {
+			continue
+		}
+
+		// Check if the node is fully deployed
+		if isDeployed(f.Name()) {
 			nodes = append(nodes, f.Name())
 		}
 	}
 
 	return nodes, nil
+}
+
+func isDeployed(name string) bool {
+	path := NodePath(name)
+	script := fmt.Sprintf("cd %v && terraform output ip", path)
+	return SilentRun("bash", "-c", script) == nil
 }
 
 // copyFile copies the src file to dst. Any existing file will be overwritten
@@ -263,6 +285,13 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return out.Close()
+}
+
+func Mkdir(path string, mode os.FileMode) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return os.Mkdir(path, mode)
+	}
+	return nil
 }
 
 // HandleErrs checks a list of errors, return the first error encountered,

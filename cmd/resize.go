@@ -76,8 +76,7 @@ func applyChanges(name, regex, replacement string) error {
 		if err := ioutil.WriteFile(path, tf, 0600); err != nil {
 			fmt.Println("fail to revert the change to `main.tf` file")
 		}
-		color.Red("Darknode has been stopped when trying to resize to an invalid instance type.")
-		color.Red("Please try to resize again with a valid instance type.")
+		color.Red("Invalid instance type, please try again with a valid one.")
 	}
 	return nil
 }

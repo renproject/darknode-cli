@@ -104,7 +104,7 @@ func outputURL(name string) error {
 	color.Green("")
 	color.Green("Congratulations! Your Darknode is deployed.")
 	color.Green("Join the network by registering your Darknode at %s", url)
-	return nil
+	return util.OpenInBrowser(url)
 }
 
 func ipfsUrl(network darknode.Network) string {

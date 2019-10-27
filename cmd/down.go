@@ -80,9 +80,19 @@ func destroyNode(ctx *cli.Context) error {
 			return nil
 		}
 	}
-	color.Green("Destroying your darknode ...")
 
-	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
+	color.Green("Back up config...")
+	backupFolder := filepath.Join(util.Directory, "backup", name)
+	if err := util.Run("mkdir", "-p", backupFolder); err != nil {
+		return err
+	}
+	backup := fmt.Sprintf("cp %v %v", filepath.Join(nodePath, "config.json"), backupFolder)
+	if err := util.Run("bash", "-c", backup); err != nil {
+		return err
+	}
+
+	color.Green("Destroying your darknode ...")
+	destroy := fmt.Sprintf("cd %v && terraform destroy --force && cd .. && rm -rf %v", nodePath, name)
 	return util.Run("bash", "-c", destroy)
 }
 
