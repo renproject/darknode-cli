@@ -20,4 +20,5 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20190923125748-758128399b1d // indirect
 	github.com/urfave/cli v1.22.1
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 )
