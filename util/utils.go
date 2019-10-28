@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,13 +20,17 @@ import (
 
 var (
 	// ErrEmptyNameAndTags is returned when both name and tags are not given.
-	ErrEmptyNameAndTags = fmt.Errorf("please provide name or tags of the node you want to operate")
+	ErrEmptyNameAndTags = errors.New("please provide name or tags of the node you want to operate")
 
 	// ErrTooManyArguments is returned when both name and tags are given.
-	ErrTooManyArguments = fmt.Errorf("too many arguments, cannot have both name and tags")
+	ErrTooManyArguments = errors.New("too many arguments, cannot have both name and tags")
 
 	// ErrEmptyName is returned when user gives an empty node name.
-	ErrEmptyName = fmt.Errorf("node name cannot be empty")
+	ErrEmptyName = errors.New("node name cannot be empty")
+
+	// ErrUnknownDarknode is returned when the provided darknode name is unknown to us.
+	ErrUnknownDarknode = errors.New("unknown darknode name")
+
 )
 
 // Directory is the directory address of the cli and all darknodes data.
@@ -46,6 +51,19 @@ func ParseNodesFromNameAndTags(name, tags string) ([]string, error) {
 	} else {
 		return nil, ErrTooManyArguments
 	}
+}
+
+func ValidateNodeName(name string) error {
+	files, err := ioutil.ReadDir(filepath.Join(Directory, "/darknodes"))
+	if err != nil {
+		return err
+	}
+	for _, f:= range files {
+		if f.Name() == name {
+			return nil
+		}
+	}
+	return ErrUnknownDarknode
 }
 
 // StringInSlice checks whether the string is in the slice

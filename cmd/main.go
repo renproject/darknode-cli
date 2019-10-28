@@ -25,7 +25,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "2.3.0"
+	app.Version = "2.3.0-beta"
 
 	// Fetch latest release and check if our version is bebind.
 	checkUpdates(app.Version)
@@ -146,6 +146,10 @@ func main() {
 			Flags: []cli.Flag{},
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
+				if err := util.ValidateNodeName(name); err != nil {
+					return err
+				}
+
 				url, err := util.RegisterUrl(name)
 				if err != nil {
 					return err
