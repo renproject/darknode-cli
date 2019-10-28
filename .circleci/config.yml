@@ -18,7 +18,6 @@ jobs:
             - run:
                 name: install tools
                 command: |
-                    go get github.com/tcnksm/ghr
                     go vet ./...
             - run:
                 name: Build binaries
@@ -28,6 +27,7 @@ jobs:
                     mv darknode ../artifacts/darknode_linux_amd64
                     env GOOS=darwin CGO_ENABLED=1 CC=o64-clang GOARCH=amd64 go build -o darknode .
                     mv darknode ../artifacts/darknode_darwin_amd64
+                    go get github.com/tcnksm/ghr
                     ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 2.3.0 ../artifacts/
 
 workflows:
