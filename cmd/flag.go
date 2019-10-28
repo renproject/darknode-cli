@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/republicprotocol/darknode-cli/cmd/provider"
+	"github.com/renproject/darknode-cli/cmd/provider"
 	"github.com/urfave/cli"
 )
 

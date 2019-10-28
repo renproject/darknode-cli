@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/renproject/darknode-cli/cmd/provider"
+	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
-	"github.com/republicprotocol/darknode-cli/cmd/provider"
-	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 

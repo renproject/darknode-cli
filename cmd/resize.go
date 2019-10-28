@@ -8,8 +8,8 @@ import (
 	"regexp"
 
 	"github.com/fatih/color"
-	"github.com/republicprotocol/darknode-cli/cmd/provider"
-	"github.com/republicprotocol/darknode-cli/util"
+	"github.com/renproject/darknode-cli/cmd/provider"
+	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 

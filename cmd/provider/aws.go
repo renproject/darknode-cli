@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/republicprotocol/darknode-cli/darknode"
-	"github.com/republicprotocol/darknode-cli/util"
+	"github.com/renproject/darknode-cli/darknode"
+	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 

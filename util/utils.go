@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/republicprotocol/darknode-cli/darknode"
-	"github.com/republicprotocol/darknode-cli/darknode/addr"
+	"github.com/renproject/darknode-cli/darknode"
+	"github.com/renproject/darknode-cli/darknode/addr"
 	"golang.org/x/crypto/ssh"
 )
 

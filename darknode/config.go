@@ -1,6 +1,7 @@
 package darknode
 
 import (
+	"crypto/ecdsa"
 	"encoding/json"
 	"math/big"
 	"os"
@@ -9,9 +10,8 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/renproject/aw"
-	"github.com/renproject/rzl/asm/value"
-	"github.com/republicprotocol/darknode-cli/darknode/addr"
-	"github.com/republicprotocol/darknode-cli/darknode/keystore"
+	"github.com/renproject/darknode-cli/darknode/addr"
+	"github.com/renproject/darknode-cli/darknode/keystore"
 )
 
 // Config is an in-memory description of the configuration file that will be
@@ -91,8 +91,8 @@ func NewConfigFromJSONFile(filename string) (Config, error) {
 // that there can be multiple ECDSA distributed keys that are constantly
 // changed.
 type ECDSADistKeyShare struct {
-	PubKey       value.ECDSAPubKey   `json:"pubKey"`
-	PrivKeyShare *value.SsSecp256k1N `json:"privKeyShare,omitempty"`
+	PubKey       ecdsa.PublicKey `json:"pubKey"`
+	PrivKeyShare []byte          `json:"privKeyShare,omitempty"`
 }
 
 // MarshalJSON implements the `json.Marshaler` interface for the

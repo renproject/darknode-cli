@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"net/http"
 
-	"github.com/republicprotocol/darknode-cli/darknode"
-	"github.com/republicprotocol/darknode-cli/util"
+	"github.com/renproject/darknode-cli/darknode"
+	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 

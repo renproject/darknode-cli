@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/republicprotocol/darknode-cli/util"
+	"github.com/renproject/darknode-cli/util"
 )
 
 type awsTerraform struct {

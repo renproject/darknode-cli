@@ -1,13 +1,13 @@
 package darknode
 
 import (
+	"crypto/ecdsa"
 	"errors"
 	"math/big"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/renproject/rzl/asm/value"
-	"github.com/republicprotocol/darknode-cli/darknode/addr"
+	"github.com/renproject/darknode-cli/darknode/addr"
 )
 
 // The Network type defines the different RenVM networks that exist.
@@ -47,7 +47,7 @@ func NewNetwork(network string) (Network, error) {
 }
 
 // PublicKey returns the public key of .
-func (network Network) PublicKey() value.ECDSAPubKey {
+func (network Network) PublicKey() ecdsa.PublicKey {
 	var x *big.Int
 	var xOk bool
 	switch network {
@@ -80,7 +80,7 @@ func (network Network) PublicKey() value.ECDSAPubKey {
 		panic("invalid y for shared public key")
 	}
 
-	return value.ECDSAPubKey{
+	return ecdsa.PublicKey{
 		Curve: btcec.S256(),
 		X:     x,
 		Y:     y,

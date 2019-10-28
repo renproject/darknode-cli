@@ -12,8 +12,8 @@ package provider
 // 	"strings"
 // 	"text/template"
 //
-// 	"github.com/republicprotocol/darknode-cli/darknode"
-// 	"github.com/republicprotocol/darknode-cli/darknode/addr"
+// 	"github.com/renproject/darknode-cli/darknode"
+// 	"github.com/renproject/darknode-cli/darknode/addr"
 // 	"github.com/urfave/cli"
 // 	"golang.org/x/crypto/ssh"
 // 	"golang.org/x/oauth2/google"

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"io/ioutil"
 
+	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
-	"github.com/republicprotocol/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 
