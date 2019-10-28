@@ -9,7 +9,7 @@ orbs:
 
 _defaults: &defaults
     docker:
-        - image: circleci/golang:1.13.3
+        - image: techknowlogick/xgo:latest
 
 jobs:
     deploy:
@@ -21,6 +21,7 @@ jobs:
             - run:
                 name: install tools
                 command: |
+                    go get src.techknowlogick.com/xgo
                     go vet ./...
             - save_cache:
                 key: go-mod-v3-{{ checksum "go.sum" }}
@@ -29,16 +30,9 @@ jobs:
             - run:
                 name: Build binaries
                 command: |
-                    go build -o "darknode_linux_amd64_$CIRCLE_BRANCH" ./cmd
-            - run:
-                name: install AWS CLI
-                command: |
-                    sudo apt install python-pip python-dev
-                    sudo pip install awscli
-            - aws-s3/copy:
-                from: darknode_linux_amd64*
-                to: 's3://releases.republicprotocol.com/darknode-cli/'
-                arguments: '--acl public-read'
+                    cd cmd
+                    xgo --targets=linux/amd64 .
+                    xgo --targets=darwin/amd64 .
 
 workflows:
     version: 2.1
