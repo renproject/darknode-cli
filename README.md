@@ -18,7 +18,7 @@ Checkout the instructions for [Creating a Personal Access Token](https://github.
 To download and install the Darknode CLI, open a terminal and run:
 
 ```sh
-curl https://releases.republicprotocol.com/darknode-cli/install.sh -sSf | sh
+curl https://www.github.com/renproject/darknode-cli/releases/latest/download/install.sh -sSfL | sh
 ```
 
 This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode CLI.
@@ -30,7 +30,7 @@ This will download the required binaries and templates and install them to the `
 To update your Darknode CLI, open a terminal and run:
 
 ```sh
-curl https://releases.republicprotocol.com/darknode-cli/update.sh -sSf | sh
+curl https://www.github.com/renproject/darknode-cli/releases/latest/download/update.sh -sSfL | sh
 ```
 
 This will update your Darknode CLI to the latest version without affecting any of your deployed node. 
