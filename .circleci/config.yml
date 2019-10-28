@@ -22,6 +22,7 @@ jobs:
                 name: install tools
                 command: |
                     go get src.techknowlogick.com/xgo
+                    go get github.com/tcnksm/ghr
                     go vet ./...
             - save_cache:
                 key: go-mod-v3-{{ checksum "go.sum" }}
@@ -31,11 +32,14 @@ jobs:
                 name: Build binaries
                 command: |
                     cd cmd
-                    xgo --targets=linux/amd64 .
-                    xgo --targets=darwin/amd64 .
+                    xgo --targets=linux/amd64,darwin-10.10/amd64 .
+                    mkdir -p artifacts
+                    mv cmd-linux-amd64 artifacts/darknode_linux_amd64
+                    mv cmd-darwin-10.10-amd64 artifacts/darknode_darwin_amd64
+                    ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 2.3.1 ./artifacts/
 
 workflows:
     version: 2.1
-    build:
+    deployment:
         jobs:
             - deploy
