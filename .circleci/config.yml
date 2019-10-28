@@ -18,12 +18,9 @@ jobs:
             - checkout
             - restore_cache:
                 key: go-mod-v3-{{ checksum "go.sum" }}
-            - setup_remote_docker
             - run:
                 name: install tools
                 command: |
-                    docker pull techknowlogick/xgo:latest
-                    go get src.techknowlogick.com/xgo
                     go get github.com/tcnksm/ghr
                     go vet ./...
             - save_cache:
@@ -33,12 +30,6 @@ jobs:
             - run:
                 name: Build binaries
                 command: |
-                    cd cmd
-                    xgo --targets=linux/amd64,darwin-10.10/amd64 .
-                    ls
-                    mkdir -p artifacts
-                    mv cmd-linux-amd64 artifacts/darknode_linux_amd64
-                    mv cmd-darwin-10.10-amd64 artifacts/darknode_darwin_amd64
                     ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 2.3.1 ./artifacts/
 
 workflows:
