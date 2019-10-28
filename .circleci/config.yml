@@ -9,7 +9,7 @@ orbs:
 
 _defaults: &defaults
     docker:
-        - image: techknowlogick/xgo:latest
+        - image: circleci/golang:1.13.3
 
 jobs:
     deploy:
@@ -21,6 +21,7 @@ jobs:
             - run:
                 name: install tools
                 command: |
+                    docker pull techknowlogick/xgo:latest
                     go get src.techknowlogick.com/xgo
                     go get github.com/tcnksm/ghr
                     go vet ./...
@@ -33,6 +34,7 @@ jobs:
                 command: |
                     cd cmd
                     xgo --targets=linux/amd64,darwin-10.10/amd64 .
+                    ls
                     mkdir -p artifacts
                     mv cmd-linux-amd64 artifacts/darknode_linux_amd64
                     mv cmd-darwin-10.10-amd64 artifacts/darknode_darwin_amd64
