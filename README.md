@@ -1,6 +1,6 @@
 # Darknode CLI
 
-The Darknode CLI is a command-line interface for managing Darknodes on Ren Protocol. It is installed on your local workspace, and will automatically create and update machines for you. Currently it only support **macOS**, **Linux** and **Window**(see [Windows Instructions](docs/windows-instructions.md)). 
+The Darknode CLI is a command-line interface for managing Darknodes on Ren. It is installed on your local workspace, and will automatically create and update machines for you. Currently it supports **macOS**, **Linux** and **Window**(see [Windows Instructions](docs/windows-instructions.md)). 
 
 ![](./docs/darknode-cli-overview.jpg)
 
@@ -21,7 +21,7 @@ To download and install the Darknode CLI, open a terminal and run:
 curl https://www.github.com/renproject/darknode-cli/releases/latest/download/install.sh -sSfL | sh
 ```
 
-This will download the required binaries and templates and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode CLI.
+This will download the required binaries and install them to the `$HOME/.darknode` directory. Open a new terminal to begin using the Darknode CLI.
 
 ## Updating the tool
 
@@ -66,14 +66,6 @@ darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY 
 The default instance type is `t3.micro` and region will be random.
 You can find all available regions and instance types at [AWS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
-You can also associate the darknode to an elastic IP by providing the `EIP-ALLOCATION-ID` of the elastic IP. 
-Make sure you give the same region of the elastic IP to the darknode. 
-
-
-```sh
-darknode up --name my-first-darknode --aws --aws-access-key YOUR-AWS-ACCESS-KEY --aws-secret-key YOUR-AWS-SECRET-KEY --aws-region SAME-REGION-AS-EIP --aws-elastic-ip EIP-ALLOCATION-ID
-``` 
-
 #### Digital Ocean
 
 Follow the steps in the [tutorial](https://www.digitalocean.com/docs/api/create-personal-access-token/) to create a API token. 
@@ -86,7 +78,7 @@ darknode up --name my-first-darknode --do --do-token YOUR-API-TOKEN
 You can also specify the region and droplet size you want to use for the Darknode:
 
 ```sh
-darknode up --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet 8gb
+darknode up --name my-first-darknode --do --do-token YOUR-API-TOKEN --do-region nyc1 --do-droplet s-2vcpu-2gb
 ``` 
 
 The default droplet size is `s-1vcpu-1gb` and region will be random. 
@@ -129,7 +121,8 @@ If you are using DigitalOcean, you will need to replace the `NEW_INSTANCE_TYPE` 
 ```sh
 darknode resize YOUR-DARKNODE-NAME s-1vcpu-2gb
 ``` 
-This may take longer than AWS as it recreates the instance. You can find all available droplet slugs at [Digital Ocean Standard plans](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) and [DigitalOcean API Slugs](https://slugs.do-api.dev/)
+
+Changing droplet size will not change the storage volume of the instance, this allows user to resize down to a lower plan in the future. You can find all available droplet slugs at [Digital Ocean Standard plans](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) and [DigitalOcean API Slugs](https://slugs.do-api.dev/)
 
 > If you accidentally try to resize to a invalid instance, the darknode will be stopped. You need to run the command again with a valid instance type to restart the darknode. 
 
@@ -142,7 +135,7 @@ The Darknode CLI supports deploying multiple Darknodes. To list all available Da
 darknode list
 ```
 
-### Stop Darknode
+### Start/Stop/Restart Darknode
 
 To turn off your darknode, open a terminal and run: 
 
@@ -151,9 +144,9 @@ darknode stop my-first-darknode
 
 ``` 
 
+Note this won't shut down the cloud instance so you will still be charged by your cloud provider. 
 If it is already off, `stop` will do nothing.
 
-### Start Darknode
 
 To turn on your darknode, open a terminal and run: 
 
@@ -162,6 +155,12 @@ darknode start my-first-darknode
 ``` 
 
 If it is already on, `start` will do nothing.
+
+To restart your darknode, open a terminal and run: 
+
+```sh
+darknode restart my-first-darknode
+``` 
 
 ### SSH into Darknode
 
