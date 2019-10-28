@@ -5,34 +5,29 @@ version: 2.1
 
 orbs:
     core: ren/core@0.0.1
-    aws-s3: circleci/aws-s3@1.0.0
 
 _defaults: &defaults
     docker:
-        - image: circleci/golang:1.13.3
+        - image: techknowlogick/xgo:latest
 
 jobs:
     deploy:
         <<: *defaults
         steps:
             - checkout
-            - restore_cache:
-                key: go-mod-v3-{{ checksum "go.sum" }}
             - run:
                 name: install tools
                 command: |
                     go get github.com/tcnksm/ghr
                     go vet ./...
-            - save_cache:
-                key: go-mod-v3-{{ checksum "go.sum" }}
-                paths:
-                    - "~/go"
             - run:
                 name: Build binaries
                 command: |
                     cd cmd
-                    go build .
-                    mv cmd ../artifacts/darknode_linux_amd64
+                    go build -o darknode .
+                    mv darknode ../artifacts/darknode_linux_amd64
+                    env GOOS=darwin CGO_ENABLED=1 CC=o64-clang GOARCH=amd64 go build -o darknode .
+                    mv darknode ../artifacts/darknode_darwin_amd64
                     ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 2.3.0 ../artifacts/
 
 workflows:
@@ -42,4 +37,6 @@ workflows:
             - deploy:
                 filters:
                     branches:
-                        only: master
+                        only:
+                            - master
+                            - config

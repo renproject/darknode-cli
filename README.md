@@ -216,7 +216,7 @@ darknode withdraw YOUR-DARKNODE-NAME --address RECEIVER-ETHEREUM-ADDRESS
 If you want to run a specific command on your darknode. open a terminal and run:
                                                                             
 ```sh
-   darknode exec YOUR-DARKNODE-NAME --script "whoami"
+darknode exec YOUR-DARKNODE-NAME --script "whoami"
 ``` 
 
 or a script file
