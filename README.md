@@ -86,6 +86,17 @@ Be aware some region and droplet size are not available to all users.
 
 You can find all available regions and droplet size slug by using the digital ocean [API](https://developers.digitalocean.com/documentation/v2/#regions).
 
+### Showing register page
+
+The darknode-cli will show a link for registering your darknode after finish deploying. Don't panic if you lose the url. 
+Simply run 
+
+```sh
+darknode register YOUR-DARKNODE-NAME
+``` 
+
+which prints the registering link in the terminal and tries to open the url using your default browser.
+
 ### Destroy a Darknode
 
 _**WARNING: Before destroying a Darknode make sure you have de-registered it, and withdrawn all fees earned! You will not be able to destroy your darknode if it's not fully deregistered. The CLI will guide you to the page where you can deregister your node**_
@@ -199,3 +210,17 @@ darknode withdraw YOUR-DARKNODE-NAME --address RECEIVER-ETHEREUM-ADDRESS
 ``` 
 
 > Note: This will also withdraw any REN in the darknode address. Keep in mind this will only withdraw the ETH and REN the address holds directly, not the rewards it receives by matching orders.
+
+### Running commands(script) on your darknode
+
+If you want to run a specific command on your darknode. open a terminal and run:
+                                                                            
+```sh
+   darknode exec YOUR-DARKNODE-NAME --script "whoami"
+``` 
+
+or a script file
+
+```sh
+darknode exec YOUR-DARKNODE-NAME --file test.sh
+``` 
