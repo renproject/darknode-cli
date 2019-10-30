@@ -30,7 +30,6 @@ var (
 
 	// ErrUnknownDarknode is returned when the provided darknode name is unknown to us.
 	ErrUnknownDarknode = errors.New("unknown darknode name")
-
 )
 
 // Directory is the directory address of the cli and all darknodes data.
@@ -116,7 +115,7 @@ func InitNodeDirectory(name, tags string) error {
 
 	// Ask user to destroy the old node first if there's already a node with the name.
 	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("Node [%v] already exist. \nIf you want to do a fresh deployment, destroy the old one first.", name)
+		return fmt.Errorf("Darknode [%v] already exists. \nIf you want to do a fresh deployment, destroy the old one first.", name)
 	}
 
 	// Make a directory for the new node

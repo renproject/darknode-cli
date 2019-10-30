@@ -110,7 +110,7 @@ func main() {
 		},
 		{
 			Name:  "list",
-			Usage: "List informations of all of your Darknodes",
+			Usage: "List information about all of your Darknodes",
 			Flags: []cli.Flag{TagsFlag},
 			Action: func(c *cli.Context) error {
 				return listAllNodes(c)
@@ -118,7 +118,7 @@ func main() {
 		},
 		{
 			Name:  "withdraw",
-			Usage: "Withdraw all the ETH and REN the darknode address holds",
+			Usage: "Withdraw all the ETH and REN the Darknode address holds",
 			Flags: []cli.Flag{AddressFlag},
 			Action: func(c *cli.Context) error {
 				return withdraw(c)
