@@ -57,7 +57,7 @@ func ValidateNodeName(name string) error {
 	if err != nil {
 		return err
 	}
-	for _, f:= range files {
+	for _, f := range files {
 		if f.Name() == name {
 			return nil
 		}
