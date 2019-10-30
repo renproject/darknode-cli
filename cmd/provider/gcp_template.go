@@ -46,7 +46,7 @@ func (p providerGcp) tfConfig(name, project, zone, machine, ipfs string) error {
 
 var gcpTemplate = `
 provider "google" {
-  credentials = "${file("{{.CredentialFile}}")}"
+  credentials = file("{{.CredentialFile}}")
   project     = "{{.Project}}"
   zone        = "{{.Zone}}"
 }
@@ -82,6 +82,7 @@ resource "google_compute_firewall" "darknode_firewall" {
 resource "google_compute_instance" "darknode" {
   name         = "{{.Name}}"
   machine_type = "{{.MachineType}}"
+  allow_stopping_for_update = true  
 
   boot_disk {
 	initialize_params {
