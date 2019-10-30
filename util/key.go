@@ -11,8 +11,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// NewKey generates a new ssh key and write it to the given path.
-func NewKey(name string) error {
+// GenerateSshKeyAndWriteToDir generates a new ssh key and write it to the given path.
+func GenerateSshKeyAndWriteToDir(name string) error {
 	path := NodePath(name)
 	priKeyPath := filepath.Join(path, "ssh_keypair")
 	pubKeyPath := filepath.Join(path, "ssh_keypair.pub")
@@ -49,7 +49,7 @@ func NewKey(name string) error {
 	return ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
 }
 
-func StringfySshPubkey(key ssh.PublicKey) string {
+func StringifySshPubKey(key ssh.PublicKey) string {
 	pubKeyBytes := ssh.MarshalAuthorizedKey(key)
 
 	return string(pubKeyBytes)

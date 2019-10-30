@@ -69,7 +69,7 @@ func initNode(name, tags string, network darknode.Network) error {
 	if err := initNodeDirectory(name, tags); err != nil {
 		return err
 	}
-	if err := util.NewKey(name); err != nil {
+	if err := util.GenerateSshKeyAndWriteToDir(name); err != nil {
 		return err
 	}
 

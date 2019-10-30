@@ -51,7 +51,7 @@ Download the CSV file containing your _access key ID_, and your _secret access k
 To install the Darknode CLI, open a terminal and run:
 
 ```sh
-curl https://releases.renproject.com/darknode-cli/install.sh -sSf | sh
+curl https://www.github.com/renproject/darknode-cli/releases/latest/download/install.sh -sSfL | sh
 ```
 
 Once this has finished, close the terminal and open a new one.
