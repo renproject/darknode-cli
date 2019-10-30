@@ -2,12 +2,12 @@
 
 Before installing and using the Darknode CLI, make sure that you have [created a Google Account](https://accounts.google.com/SignUp) and configured billing for [Google Cloud Platform](https://cloud.google.com/billing/docs/how-to/manage-billing-account), and [created a Project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
 
-# Enabling the API
+# Enabling the APIs
 
 You need to enable both the [Cloud Resource Manager API](https://console.developers.google.com/apis/library/cloudresourcemanager.googleapis.com) and 
 the [Compute Engine API](https://console.developers.google.com/apis/library/compute.googleapis.com). Make sure your project is selected and you're using the correct google account. 
 
-You should be able to something like below if you successfully enable the APIs. 
+You should be able to see something like these if you successfully enable the APIs. 
 
 ![Visual representation of a block](cloud_resource_manager.png)
 ![Visual representation of a block](compute_engine.png)
@@ -18,13 +18,18 @@ Create a [Service Account](https://cloud.google.com/iam/docs/creating-managing-s
 
 ### Creating a Service account
 ![Creating a service account](create-sa-1.png)
+
 ### Assigning a role
+
 ![Creating a service account](create-sa-2.png)
+
 ![Creating a service account](create-sa-3.png)
 
 ### Generating a JSON Key
+
 ![Creating a service account](create-sa-4.png)
 
+Save the key to a secure place and remember the path where you save it. You'll use it for deploying darknodes.
 
 ## Installing the Darknode CLI
 
