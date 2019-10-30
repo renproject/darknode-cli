@@ -49,7 +49,7 @@ func NewKey(name string) error {
 	return ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
 }
 
-func StringfySshPubkey(key ssh.PublicKey) string {
+func StringifySshPubKey(key ssh.PublicKey) string {
 	pubKeyBytes := ssh.MarshalAuthorizedKey(key)
 
 	return string(pubKeyBytes)
