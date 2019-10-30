@@ -3,8 +3,9 @@ package provider
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
-	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -17,6 +18,35 @@ import (
 )
 
 var ErrInsufficientPermission = errors.New("insufficient permissions")
+
+type GcpRegion struct {
+	region string
+	zones  []string
+}
+
+// AllGcpRegions
+var AllGcpRegions = []GcpRegion{
+	{"asia-east1", []string{"a", "b", "c"}},
+	{"asia-east2", []string{"a", "b", "c"}},
+	{"asia-northeast1", []string{"a", "b", "c"}},
+	{"asia-northeast2", []string{"a", "b", "c"}},
+	{"asia-south1", []string{"a", "b", "c"}},
+	{"asia-southeast1", []string{"a", "b", "c"}},
+	{"australia-southeast1", []string{"a", "b", "c"}},
+	{"europe-north1", []string{"a", "b", "c"}},
+	{"europe-west1", []string{"b", "c", "d"}},
+	{"europe-west2", []string{"a", "b", "c"}},
+	{"europe-west3", []string{"a", "b", "c"}},
+	{"europe-west4", []string{"a", "b", "c"}},
+	{"europe-west6", []string{"a", "b", "c"}},
+	{"northamerica-northeast1", []string{"a", "b", "c"}},
+	{"southamerica-east1", []string{"a", "b", "c"}},
+	{"us-central1", []string{"a", "b", "c", "f"}},
+	{"us-east1", []string{"b", "c", "d"}},
+	{"us-east4", []string{"a", "b", "c"}},
+	{"us-west1", []string{"a", "b", "c"}},
+	{"us-west2", []string{"a", "b", "c"}},
+}
 
 type providerGcp struct {
 	credFile string
@@ -80,7 +110,6 @@ func (p providerGcp) projectID() (string, error) {
 	if error != nil {
 		return "", err
 	}
-	log.Print("project id =", creds.ProjectID)
 	service, err := cloudresourcemanager.NewService(ctx, option.WithCredentials(creds))
 	if err != nil {
 		return "", err
@@ -93,7 +122,6 @@ func (p providerGcp) projectID() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Printf("number of permissions = %v", resp.Permissions)
 	if len(resp.Permissions) < 3 {
 		return "", ErrInsufficientPermission
 	}
@@ -103,6 +131,12 @@ func (p providerGcp) projectID() (string, error) {
 func (p providerGcp) validateZoneAndMachine(ctx *cli.Context) (string, string, error) {
 	zone := strings.ToLower(strings.TrimSpace(ctx.String("gcp-zone")))
 	machine := strings.ToLower(strings.TrimSpace(ctx.String("gcp-machine")))
+
+	// Select a random zone for user if they don't provide one.
+	if zone == "" {
+		region := AllGcpRegions[rand.Intn(len(AllGcpRegions))]
+		return fmt.Sprintf("%v-%v", region.region, region.zones[rand.Intn(len(region.zones))]), machine, nil
+	}
 
 	// todo : validate the zone and machine type
 	return zone, machine, nil

@@ -81,7 +81,7 @@ resource "google_compute_firewall" "darknode_firewall" {
 
 resource "google_compute_instance" "darknode" {
   name         = "{{.Name}}"
-  machine_type = "{{.MachineType}}}"
+  machine_type = "{{.MachineType}}"
 
   boot_disk {
 	initialize_params {
@@ -141,7 +141,7 @@ resource "google_compute_instance" "darknode" {
 
     connection {
       type        = "ssh"
-      user        = "ubuntu"
+      user        = "darknode"
       private_key = file("{{.SshPriKey}}")
       host        = self.network_interface[0].access_config[0].nat_ip
     }
@@ -160,7 +160,7 @@ resource "google_compute_instance" "darknode" {
 
     connection {
       type        = "ssh"
-      user        = "ubuntu"
+      user        = "darknode"
       private_key = file("{{.SshPriKey}}")
       host        = self.network_interface[0].access_config[0].nat_ip
     }
