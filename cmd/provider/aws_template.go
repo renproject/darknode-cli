@@ -9,29 +9,29 @@ import (
 )
 
 type awsTerraform struct {
-	Name          string
-	Region        string
-	InstanceType  string
-	SshPubKey     string
-	SshPriKeyPath string
-	AccessKey     string
-	SecretKey     string
-	ConfigPath    string
-	IPFS          string
+	Name         string
+	Region       string
+	InstanceType string
+	SshPubKey    string
+	SshPriKey    string
+	AccessKey    string
+	SecretKey    string
+	ConfigPath   string
+	IPFS         string
 }
 
 // tfConfig generates the terraform config file for deploying to AWS.
 func (p providerAws) tfConfig(name, region, instance, ipfs string) error {
 	tf := awsTerraform{
-		Name:          name,
-		Region:        region,
-		InstanceType:  instance,
-		SshPubKey:     filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
-		SshPriKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair"),
-		AccessKey:     p.accessKey,
-		SecretKey:     p.secretKey,
-		ConfigPath:    filepath.Join(util.NodePath(name), "config.json"),
-		IPFS:          ipfs,
+		Name:         name,
+		Region:       region,
+		InstanceType: instance,
+		SshPubKey:    filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
+		SshPriKey:    filepath.Join(util.NodePath(name), "ssh_keypair"),
+		AccessKey:    p.accessKey,
+		SecretKey:    p.secretKey,
+		ConfigPath:   filepath.Join(util.NodePath(name), "config.json"),
+		IPFS:         ipfs,
 	}
 
 	t, err := template.New("aws").Parse(awsTemplate)
@@ -87,6 +87,7 @@ resource "aws_security_group" "darknode" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -133,7 +134,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("{{.SshPriKeyPath}}")
+      private_key = file("{{.SshPriKey}}")
     }
   }
 
@@ -146,7 +147,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.SshPriKeyPath}}")
+      private_key = file("{{.SshPriKey}}")
     }
   }
 
@@ -165,7 +166,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.SshPriKeyPath}}")
+      private_key = file("{{.SshPriKey}}")
     }
   }
 }
