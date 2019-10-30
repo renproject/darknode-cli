@@ -23,6 +23,8 @@ var (
 	RegexAws = `instance_type\s+=\s*"(?P<instance>.+)"`
 
 	RegexDo = `size\s+=\s*"(?P<instance>.+)"`
+
+	RegexGcp = `machine_type\s+=\s+"(?P<instance>.+)"`
 )
 
 func resize(ctx *cli.Context) error {
@@ -45,7 +47,8 @@ func resize(ctx *cli.Context) error {
 		replacement := fmt.Sprintf(`size       = "%v"`, newSize)
 		return applyChanges(name, RegexDo, replacement)
 	case provider.NameGcp:
-		panic("unsupported yet")
+		replacement := fmt.Sprintf(`machine_type = "%v"`, newSize)
+		return applyChanges(name, RegexGcp, replacement)
 	default:
 		panic("unknown provider")
 	}
