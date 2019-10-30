@@ -15,8 +15,8 @@ var (
 	ActionRestart = "systemctl --user restart darknode"
 )
 
-// switchNode provide commands for basic operations to the darknode service.
-func switchNode(ctx *cli.Context, cmd string) error {
+// updateServiceStatus can update status of the darknode service.
+func updateServiceStatus(ctx *cli.Context, cmd string) error {
 	tags := ctx.String("tags")
 	name := ctx.Args().First()
 

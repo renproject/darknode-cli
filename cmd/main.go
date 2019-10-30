@@ -89,7 +89,7 @@ func main() {
 			Flags: []cli.Flag{TagsFlag},
 			Usage: "Start a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
-				return switchNode(c, "start")
+				return updateServiceStatus(c, "start")
 			},
 		},
 		{
@@ -97,7 +97,7 @@ func main() {
 			Flags: []cli.Flag{TagsFlag},
 			Usage: "Stop a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
-				return switchNode(c, "stop")
+				return updateServiceStatus(c, "stop")
 			},
 		},
 		{
@@ -105,7 +105,7 @@ func main() {
 			Flags: []cli.Flag{TagsFlag},
 			Usage: "Restart a single Darknode or a set of Darknodes by its tag",
 			Action: func(c *cli.Context) error {
-				return switchNode(c, "restart")
+				return updateServiceStatus(c, "restart")
 			},
 		},
 		{
