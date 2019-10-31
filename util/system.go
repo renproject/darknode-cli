@@ -107,9 +107,9 @@ func RemoteRunWithUser(name, script, user string) error {
 func OpenInBrowser(url string) error {
 	switch runtime.GOOS {
 	case "darwin":
-		return Run("open", url)
+		return SilentRun("open", url)
 	case "linux":
-		return Run("xdg-open", url)
+		return SilentRun("xdg-open", url)
 	}
 	return nil
 }
