@@ -3,22 +3,26 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
-	"math"
 	"math/big"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/renproject/libeth-go"
-	"github.com/republicprotocol/darknode-go/adapter/ethcontract"
-	"github.com/republicprotocol/darknode-go/adapter/ethcontract/bindings"
-	"github.com/republicprotocol/darknode-go/adapter/ethcontract/dnr"
-	"github.com/republicprotocol/darknode-go/cmd/darknode/config"
-	"github.com/republicprotocol/ren-go/foundation/addr"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/fatih/color"
+	"github.com/renproject/darknode-cli/darknode"
+	"github.com/renproject/darknode-cli/darknode/bindings"
+	"github.com/renproject/darknode-cli/util"
+	"github.com/renproject/mercury/sdk/client/ethclient"
+	"github.com/renproject/mercury/types/ethtypes"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
@@ -26,38 +30,37 @@ import (
 func destroyNode(ctx *cli.Context) error {
 	force := ctx.Bool("force")
 	name := ctx.Args().First()
-	if name == "" {
-		cli.ShowCommandHelp(ctx, "down")
-		return ErrEmptyNodeName
-	}
 
-	// Read the node config
-	nodePath := nodePath(name)
-	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
+	// Parse the node config
+	nodePath := util.NodePath(name)
+	config, err := darknode.NewConfigFromJSONFile(filepath.Join(nodePath, "config.json"))
 	if err != nil {
 		return err
 	}
-	network := config.Ethereum.Network
-	address := addr.New(config.Address)
 
 	// Connect to Ethereum
-	_, dnr, err := connect(network)
+	client, err := connect(config.Network)
 	if err != nil {
 		return err
 	}
+	dnr, err := bindings.NewDarknodeRegistry(config.DNRAddress, client.EthClient())
+	if err != nil {
+		return err
+	}
+	ethAddr := crypto.PubkeyToAddress(config.Keystore.Ecdsa.PublicKey)
 
 	// Check if the node is registered
-	if err := checkRegistered(dnr, network, address); err != nil {
+	if err := checkRegistered(dnr, ethAddr); err != nil {
 		return err
 	}
 	// Check if the node is in pending registration/deregistration stage
-	if err := checkPendingStage(dnr, address); err != nil {
+	if err := checkPendingStage(dnr, ethAddr); err != nil {
 		return err
 	}
 	// Check if the darknode has been refunded
-	context, cancel := context.WithTimeout(context.Background(), time.Minute)
+	context, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	refunded, err := dnr.Refunded(context, address)
+	refunded, err := dnr.IsRefunded(&bind.CallOpts{Context: context}, ethAddr)
 	if err != nil {
 		return err
 	}
@@ -77,10 +80,20 @@ func destroyNode(ctx *cli.Context) error {
 			return nil
 		}
 	}
-	fmt.Printf("%sDestroying your darknode ...%s\n", RESET, RESET)
 
-	destroy := fmt.Sprintf("cd %v && terraform destroy --force && find . -type f -not -name 'config.json' -delete", nodePath)
-	return run("bash", "-c", destroy)
+	color.Green("Back up config...")
+	backupFolder := filepath.Join(util.Directory, "backup", name)
+	if err := util.Run("mkdir", "-p", backupFolder); err != nil {
+		return err
+	}
+	backup := fmt.Sprintf("cp %v %v", filepath.Join(nodePath, "config.json"), backupFolder)
+	if err := util.Run("bash", "-c", backup); err != nil {
+		return err
+	}
+
+	color.Green("Destroying your darknode ...")
+	destroy := fmt.Sprintf("cd %v && terraform destroy --force && cd .. && rm -rf %v", nodePath, name)
+	return util.Run("bash", "-c", destroy)
 }
 
 // Withdraw ETH and REN in the darknode address to the provided receiver address
@@ -89,171 +102,152 @@ func withdraw(ctx *cli.Context) error {
 	withdrawAddress := ctx.String("address")
 
 	// Validate the name and received ethereum address
-	nodePath, err := validateDarknodeName(name)
-	if err != nil {
-		return err
+	if !common.IsHexAddress(withdrawAddress) {
+		return errors.New("invalid receiver address")
 	}
-	receiverAddr, err := stringToEthereumAddress(withdrawAddress)
-	if err != nil {
-		return err
-	}
+	receiverAddr := common.HexToAddress(withdrawAddress)
 
-	// Read config of the specified darknode
-	config, err := config.NewConfigFromJSONFile(path.Join(nodePath, "config.json"))
-	if err != nil {
-		return err
-	}
-	network := config.Ethereum.Network
-
-	// Connect to Ethereum
-	client, _, err := connect(network)
-	if err != nil {
-		return err
-	}
-	account, err := libeth.NewAccount(client, config.Keystore.EcdsaKey.PrivateKey)
+	// Parse the node config
+	config, err := darknode.NewConfigFromJSONFile(filepath.Join(util.NodePath(name), "config.json"))
 	if err != nil {
 		return err
 	}
 
-	darknodeEthAddress, err := republicAddressToEthAddress(config.Address)
+	// Connect to Ethereum
+	client, err := connect(config.Network)
 	if err != nil {
 		return err
 	}
-	auth := bind.NewKeyedTransactor(config.Keystore.EcdsaKey.PrivateKey)
+
+	// Create a transactor for ethereum tx
+	ethAddr := crypto.PubkeyToAddress(config.Keystore.Ecdsa.PublicKey)
+	c, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	auth := bind.NewKeyedTransactor(config.Keystore.Ecdsa.PrivateKey)
 	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 Gwei
+	auth.Context = c
 
 	// Check REN balance first
-	renAddress := renAddress(network)
-	if renAddress == "" {
-		return ErrUnknownNetwork
-	}
-	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), bind.ContractBackend(client.EthClient()))
+	renAddress := renAddress(config.Network)
+	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), client.EthClient())
 	if err != nil {
 		return err
 	}
-	renBalance, err := tokenContract.BalanceOf(&bind.CallOpts{}, darknodeEthAddress)
+	renBalance, err := tokenContract.BalanceOf(&bind.CallOpts{}, ethAddr)
 	if err != nil {
 		return err
 	}
 
 	// Withdraw REN if the darknode has more than 1 REN.
-	oneREN := big.NewInt(int64(math.Pow10(18)))
+	fmt.Println("Checking REN balance...")
+	oneREN := big.NewInt(1e18)
 	if renBalance.Cmp(oneREN) > 0 {
 		tx, err := tokenContract.Transfer(auth, receiverAddr, renBalance)
 		if err != nil {
 			return err
 		}
-		minedCtx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		defer cancel()
-		_, err = bind.WaitMined(minedCtx, client.EthClient(), tx)
+		receipt, err := bind.WaitMined(c, client.EthClient(), tx)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%sYour REN has been withdrawn from your darknode to [%v]. TxHash: %v.%s\n", GREEN, receiverAddr.Hex(), tx.Hash().Hex(), RESET)
+		renBalanceNoDecimals := big.NewInt(0).Div(renBalance, oneREN)
+		color.Green("%v REN has been withdrawn from your darknode to [%v]. TxHash: %v.", renBalanceNoDecimals.Int64(), receiverAddr.Hex(), receipt.TxHash.Hex())
+	} else {
+		color.Green("Your account doesn't have REN token.")
 	}
-
-	ethCtx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
 
 	// Check the ETH balance
-	balance, err := account.BalanceAt(ethCtx, nil)
+	fmt.Println("Checking ETH balance...")
+	balance, err := client.Balance(c, ethtypes.Address(ethAddr))
 	if err != nil {
 		return err
 	}
-	if balance.Cmp(big.NewInt(0)) == 0 {
-		return nil
+	gas := ethtypes.Gwei(5 * 21000)
+	zero := ethtypes.Wei(0)
+	if balance.Gt(zero) {
+		if balance.Gt(gas) {
+			tx, err := transfer(auth, receiverAddr, balance.Sub(gas), client)
+			if err != nil {
+				return err
+			}
+			color.Green("Your ETH has been withdrawn from your darknode to [%v]. TxHash: %v.", receiverAddr.Hex(), tx.Hash().Hex())
+		} else {
+			return fmt.Errorf("your account has %v wei which is not enough to cover the transaction fee %v on ethereum", balance, gas)
+		}
+	} else {
+		color.Green("Your don't have any ETH left in your account.")
 	}
-
-	tx, err := account.Transfer(ethCtx, receiverAddr, nil, libeth.Fast, 0, true)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("%sYour ETH has been withdrawn from your darknode to [%v]. TxHash: %v.%s\n", GREEN, receiverAddr.Hex(), tx.Hash().Hex(), RESET)
 	return nil
 }
 
-// renAddress on different testnet
-func renAddress(network string) string {
+// transfer ETH to
+func transfer(transactor *bind.TransactOpts, receiver common.Address, amount ethtypes.Amount, client ethclient.Client) (*types.Transaction, error) {
+	bound := bind.NewBoundContract(receiver, abi.ABI{}, nil, client.EthClient(), nil)
+	transactor.Value = amount.ToBig()
+	transactor.GasLimit = 21000
+	return bound.Transfer(transactor)
+}
+
+// renAddress on different network
+func renAddress(network darknode.Network) string {
 	switch network {
-	case "mainnet":
+	case darknode.Mainnet, darknode.Chaosnet:
 		return "0x408e41876cCCDC0F92210600ef50372656052a38"
-	case "kovan", "testnet":
+	case darknode.Testnet, darknode.Devnet:
 		return "0x2CD647668494c1B15743AB283A0f980d90a87394"
 	default:
-		return ""
+		panic("unknown network")
 	}
 }
 
-func connect(network string) (libeth.Client, dnr.Caller, error) {
-	client, err := libeth.NewMercuryClient(network, "dcc")
-	if err != nil {
-		return libeth.Client{}, nil, err
+func connect(network darknode.Network) (ethclient.Client, error) {
+	logger := logrus.New()
+	switch network {
+	case darknode.Mainnet, darknode.Chaosnet:
+		return ethclient.New(logger, ethtypes.Mainnet)
+	case darknode.Testnet, darknode.Devnet:
+		return ethclient.New(logger, ethtypes.Kovan)
+	default:
+		return nil, errors.New("unknown network")
 	}
-	contract, err := ethcontract.NewCaller(client).DarknodeRegistry()
-	if err != nil {
-		return libeth.Client{}, nil, err
-	}
-
-	return client, contract, nil
 }
 
-func checkRegistered(dnr dnr.Caller, network string, address addr.Addr) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+func checkRegistered(dnr *bindings.DarknodeRegistry, addr common.Address) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	registered, err := dnr.IsRegistered(ctx, address)
+	registered, err := dnr.IsRegistered(&bind.CallOpts{Context: ctx}, addr)
 	if err != nil {
 		return err
 	}
 	if registered {
-		var url string
-		switch network {
-		case "testnet", "kovan":
-			url = fmt.Sprintf("https://dcc-testnet.republicprotocol.com/darknode/%v?action=deregister", address.String())
-		case "mainnet":
-			url = fmt.Sprintf("https://dcc.republicprotocol.com/darknode/%v?action=deregister", address.String())
-		default:
-			return ErrUnknownNetwork
-		}
-
-		fmt.Printf("%sYour node hasn't been deregistered%s\n", RED, RESET)
-		fmt.Printf("%sDeregister your darknode at %s%s\n", RED, url, RESET)
-
-		for i := 5; i >= 0; i-- {
-			time.Sleep(time.Second)
-			fmt.Printf("\r%sYou will be redirected to deregister your node in %v seconds%s", RED, i, RESET)
-		}
-		redirect, err := redirectCommand()
-		if err != nil {
-			return err
-		}
-		if err := run(redirect, url); err != nil {
-			return err
-		}
-		return fmt.Errorf("%s\nPlease try again after you fully deregister your node%s\n", RED, RESET)
+		color.Red("Your node hasn't been deregistered")
+		color.Red("Please go to darknode command center to deregister your darknode.")
+		color.Red("Please try again after you fully deregister your node")
 	}
 	return nil
 }
 
-func checkPendingStage(dnr dnr.Caller, address addr.Addr) error {
-	reCtx, reCancel := context.WithTimeout(context.Background(), time.Minute)
+func checkPendingStage(dnr *bindings.DarknodeRegistry, addr common.Address) error {
+	reCtx, reCancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer reCancel()
-	pendingRegistration, err := dnr.PendingRegistration(reCtx, address)
+	pendingRegistration, err := dnr.IsPendingRegistration(&bind.CallOpts{Context: reCtx}, addr)
 	if err != nil {
 		return err
 	}
 	if pendingRegistration {
-		return fmt.Errorf("%sYour node is currently in pending registration stage, please deregister your node after next epoch shuffle%s\n", RED, RESET)
+		return fmt.Errorf("your node is currently in pending registration stage, please deregister your node after next epoch shuffle")
 	}
 
 	deCtx, deCancel := context.WithTimeout(context.Background(), time.Minute)
 	defer deCancel()
-	pendingDeregistration, err := dnr.PendingDeregistration(deCtx, address)
+	pendingDeregistration, err := dnr.IsPendingDeregistration(&bind.CallOpts{Context: deCtx}, addr)
 	if err != nil {
 		return err
 	}
 	if pendingDeregistration {
-		return fmt.Errorf("%sYour node is currently in pending deregistration stage, please wait for next epoch shuffle and try again%s\n", RED, RESET)
+		return fmt.Errorf("your node is currently in pending deregistration stage, please wait for next epoch shuffle and try again")
 	}
+
 	return nil
 }

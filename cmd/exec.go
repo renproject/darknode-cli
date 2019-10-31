@@ -1,59 +1,46 @@
 package main
 
 import (
-	"os"
-	"path"
+	"errors"
+	"io/ioutil"
 
-	"github.com/republicprotocol/co-go"
+	"github.com/renproject/darknode-cli/util"
+	"github.com/renproject/phi"
 	"github.com/urfave/cli"
 )
 
-// execScript execute a bash script on a darknode
-// or a set of darknodes by the tags.
+// execScript execute a bash script on a darknode or a set of darknodes by the tags.
 func execScript(ctx *cli.Context) error {
 	name := ctx.Args().First()
 	tags := ctx.String("tags")
+	file := ctx.String("file")
 	script := ctx.String("script")
 
-	if name == "" && tags == "" {
-		cli.ShowCommandHelp(ctx, "update")
-		return ErrEmptyNameAndTags
-	} else if name != "" && tags == "" {
-		return execSingleNode(name, script)
-	} else if name == "" && tags != "" {
-		nodes, err := getNodesByTags(tags)
-		if err != nil {
-			return err
-		}
-
-		errs := make([]error, len(nodes))
-		co.ForAll(nodes, func(i int) {
-			errs[i] = execSingleNode(name, script)
-		})
-
-		return handleErrs(errs)
+	// Parse the names of the node we want to operate
+	nodes, err := util.ParseNodesFromNameAndTags(name, tags)
+	if err != nil {
+		return err
 	}
-
-	return ErrNameAndTags
+	errs := make([]error, len(nodes))
+	phi.ParForAll(nodes, func(i int) {
+		errs[i] = execSingleNode(nodes[i], file, script)
+	})
+	return util.HandleErrs(errs)
 }
 
 // execScript execute a bash script on a single darknode.
-func execSingleNode(name, script string) error {
-	if script == "" {
-		return ErrEmptyFilePath
+func execSingleNode(name, file, script string) error {
+	if file != "" {
+		script, err := ioutil.ReadFile(file)
+		if err != nil {
+			return err
+		}
+		return util.RemoteRun(name, string(script))
 	}
-	nodeDirectory := nodePath(name)
-	keyPairPath := nodeDirectory + "/ssh_keypair"
-	ip, err := getIp(nodeDirectory)
-	if err != nil {
-		return err
-	}
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	filePath := path.Join(cwd, script)
 
-	// todo : why this not working?
-	return run("ssh", "-i", keyPairPath, "darknode@"+ip, "'bash -s'", "", filePath)
+	if script != "" {
+		return util.RemoteRun(name, script)
+	}
+
+	return errors.New("please provide a script file or scripts to run ")
 }

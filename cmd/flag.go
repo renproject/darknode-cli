@@ -1,6 +1,9 @@
 package main
 
-import "github.com/urfave/cli"
+import (
+	"github.com/renproject/darknode-cli/cmd/provider"
+	"github.com/urfave/cli"
+)
 
 // General flags
 var (
@@ -16,30 +19,18 @@ var (
 		Name:  "script",
 		Usage: "path of the script file you want to run",
 	}
-	KeystoreFlag = cli.StringFlag{
-		Name:  "keystore",
-		Usage: "An optional keystore `file` that will be used for the Darknode",
-	}
-	PassphraseFlag = cli.StringFlag{
-		Name:  "passphrase",
-		Usage: "An optional `secret` for decrypting the keystore file",
-	}
-	ConfigFlag = cli.StringFlag{
-		Name:  "config",
-		Usage: "An optional configuration `file` for the Darknode",
-	}
 	NetworkFlag = cli.StringFlag{
 		Name:  "network",
-		Value: "mainnet",
-		Usage: "Darkpool network of your node (default: mainnet)",
-	}
-	BranchFlag = cli.StringFlag{
-		Name:  "branch, b",
-		Usage: "Release `branch` used to update the software",
+		Value: "chaosnet",
+		Usage: "Darkpool network of your node (default: chaosnet)",
 	}
 	AddressFlag = cli.StringFlag{
 		Name:  "address",
 		Usage: "Ethereum address you want to withdraw the tokens to.",
+	}
+	FileFlag = cli.StringFlag{
+		Name:  "file",
+		Usage: "path of the script file to run by the darknode",
 	}
 	UpdateConfigFlag = cli.BoolFlag{
 		Name:  "config, c",
@@ -54,7 +45,7 @@ var (
 // AWS flags
 var (
 	AwsFlag = cli.BoolFlag{
-		Name:  "aws",
+		Name:  provider.NameAws,
 		Usage: "AWS will be used to provision the Darknode",
 	}
 	AwsAccessKeyFlag = cli.StringFlag{
@@ -87,22 +78,42 @@ var (
 
 // Digital ocean flags
 var (
-	// Digital Ocean flags
 	DoFlag = cli.BoolFlag{
-		Name:  "do",
+		Name:  provider.NameDo,
 		Usage: "Digital Ocean will be used to provision the Darknode",
 	}
 	DoTokenFlag = cli.StringFlag{
 		Name:  "do-token",
-		Usage: "Digital ocean API token for programmatic access",
+		Usage: "Digital Ocean API token for programmatic access",
 	}
 	DoRegionFlag = cli.StringFlag{
 		Name:  "do-region",
-		Usage: "An optional digital ocean region (default: random)",
+		Usage: "An optional Digital Ocean region (default: random)",
 	}
 	DoSizeFlag = cli.StringFlag{
 		Name:  "do-droplet",
 		Value: "s-1vcpu-1gb",
-		Usage: "An optional digital ocean droplet size (default: s-1vcpu-1gb)",
+		Usage: "An optional Digital Ocean droplet size (default: s-1vcpu-1gb)",
+	}
+)
+
+// Google cloud platform flags
+var (
+	GcpFlag = cli.BoolFlag{
+		Name:  provider.NameGcp,
+		Usage: "Google Cloud Platform will be used to provision the Darknode",
+	}
+	GcpCredFlag = cli.StringFlag{
+		Name:  "gcp-credentials",
+		Usage: "Service Account credential file (JSON) to be used",
+	}
+	GcpMachineFlag = cli.StringFlag{
+		Name:  "gcp-machine",
+		Value: "n1-standard-1",
+		Usage: "An optional Google Cloud machine type (default: n1-standard-1)",
+	}
+	GcpZoneFlag = cli.StringFlag{
+		Name:  "gcp-zone",
+		Usage: "An optional Google Cloud Zone (default: random)",
 	}
 )

@@ -4,49 +4,11 @@
 version: 2.1
 
 orbs:
-    core: ren/circleci-orbs@dev:first
-    aws-s3: circleci/aws-s3@1.0.0
+    core: ren/core@0.0.1
 
 _defaults: &defaults
-    machine: true
-    working_directory: ~/.go_workspace/src/github.com/renproject/darknode-cli
-    environment:
-        GOPATH: /home/circleci/.go_workspace
-
-commands:
-    dep_ensure:
-        description: Installing dependencies
-        steps:
-            - restore_cache:
-                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
-                  paths:
-                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
-            - core/install_dep
-            - run:
-                  name: Download dependencies
-                  command: |
-                      if [ ! -d ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor ]; then
-                          dep ensure -v
-                      else
-                          echo "Dependencies were restored from cache."
-                      fi
-            - save_cache:
-                  key: gopkg-v1-{{ checksum "Gopkg.lock" }}
-                  paths:
-                      - ~/.go_workspace/src/github.com/renproject/darknode-cli/vendor
-    install_xgo:
-        description: Installing x-go cross compilation tool
-        steps:
-            - run:
-                name: Building Docker image
-                command: |
-                    docker pull karalabe/xgo-latest
-            - run:
-                name: Installing xgo
-                command: |
-                    mkdir -p $GOPATH/src
-                    mkdir -p $GOPATH/bin
-                    go get -v github.com/karalabe/xgo
+    docker:
+        - image: techknowlogick/xgo:latest
 
 jobs:
     deploy:
@@ -54,41 +16,28 @@ jobs:
         steps:
             - checkout
             - run:
-                name: install golang
+                name: install tools
                 command: |
-                    wget https://dl.google.com/go/go1.12.2.linux-amd64.tar.gz
-                    sudo tar -xf go1.12.2.linux-amd64.tar.gz
-                    sudo rm -rf /usr/local/go
-                    sudo mv go /usr/local
-                    go version
-            - dep_ensure
-            - install_xgo
+                    go vet ./...
             - run:
                 name: Build binaries
                 command: |
-                    xgo --targets=darwin-10.10/amd64 ./cmd
-                    xgo --targets=linux/amd64 ./cmd
-                    mv cmd-darwin-10.10-amd64 darknode_darwin_amd64
-                    mv cmd-linux-amd64 darknode_linux_amd64
-            - run:
-                name: install AWS CLI
-                command: |
-                    sudo apt install python-pip python-dev
-                    sudo pip install awscli
-            - aws-s3/copy:
-                from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_linux_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_linux_amd64'
-                arguments: '--acl public-read'
-            - aws-s3/copy:
-                from: ~/.go_workspace/src/github.com/renproject/darknode-cli/darknode_darwin_amd64
-                to: 's3://releases.republicprotocol.com/darknode-cli/darknode_darwin_amd64'
-                arguments: '--acl public-read'
+                    cd cmd
+                    go build -o darknode .
+                    mv darknode ../artifacts/darknode_linux_amd64
+                    env GOOS=darwin CGO_ENABLED=1 CC=o64-clang GOARCH=amd64 go build -o darknode .
+                    mv darknode ../artifacts/darknode_darwin_amd64
+                    wget https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
+                    tar xvzf ghr_v0.13.0_linux_amd64.tar.gz
+                    mv ghr_v0.13.0_linux_amd64/ghr ghr
+                    ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete v2.3.0 ../artifacts/
 
 workflows:
     version: 2.1
-    build:
+    deployment:
         jobs:
             - deploy:
                 filters:
                     branches:
-                        only: master
+                        only:
+                            - master
