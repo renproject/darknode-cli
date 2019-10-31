@@ -142,7 +142,7 @@ func (network Network) DnrAddress() common.Address {
 	case Mainnet:
 		panic("unimplemented")
 	case Chaosnet:
-		return common.HexToAddress("0xe0a0fc6ecaba77638b4f516c11b68f3837fe949a")
+		return common.HexToAddress("0xA1eb04Db7a0ffd6e458b1868660a0edAF8199Fa9")
 	case Testnet:
 		return common.HexToAddress("0x39238ddCc6b301068f6D5B3DCa3A981EB20ba9A3")
 	case Devnet:
@@ -157,7 +157,7 @@ func (network Network) ShiftRegistryAddress() common.Address {
 	case Mainnet:
 		panic("unimplemented")
 	case Chaosnet:
-		return common.HexToAddress("0x1d4713b74e79a3696722aebe05de976979876cac")
+		return common.HexToAddress("0x5d9bF2Bad3dD710e4D533681ed16eD1cfeAc9e6F")
 	case Testnet:
 		return common.HexToAddress("0xbA563a8510d86dE95F5a50007E180d6d4966ad12")
 	case Devnet:
