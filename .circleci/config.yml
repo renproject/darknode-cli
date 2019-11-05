@@ -22,17 +22,22 @@ jobs:
             - run:
                 name: Build binaries
                 command: |
-                    cd cmd
-                    go build -o darknode .
-                    mv darknode ../artifacts/darknode_linux_amd64
-                    env GOOS=linux CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc-6 GOARCH=arm go build -o darknode .
-                    mv darknode ../artifacts/darknode_linux_arm
-                    env GOOS=darwin CGO_ENABLED=1 CC=o64-clang GOARCH=amd64 go build -o darknode .
-                    mv darknode ../artifacts/darknode_darwin_amd64
+                    make
+                    mv $(make target_name) ./artifacts/darknode_linux_amd64
+                    env GOOS=linux CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc-6 GOARCH=arm make
+                    mv $(make target_name) ./artifacts/darknode_linux_arm
+                    env GOOS=darwin CGO_ENABLED=1 CC=o64-clang GOARCH=amd64 make
+                    mv $(make target_name) ./artifacts/darknode_darwin_amd64
+            - run:
+                name: Install ghr
+                command: |
                     wget https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
                     tar xvzf ghr_v0.13.0_linux_amd64.tar.gz
                     mv ghr_v0.13.0_linux_amd64/ghr ghr
-                    ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 3.0.1 ../artifacts/
+            - run:
+                name: Create release
+                command: |
+                    ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete $(cat ./VERSION) ./artifacts/
 
 workflows:
     version: 2.1
@@ -43,3 +48,4 @@ workflows:
                     branches:
                         only:
                             - master
+
