@@ -4,40 +4,82 @@
 version: 2.1
 
 orbs:
-    core: ren/core@0.0.1
+    aws-s3: circleci/aws-s3@1.0.11
 
 _defaults: &defaults
     docker:
         - image: techknowlogick/xgo:latest
 
+commands:
+    cross_compile:
+        description: "Cross compile binaries for different os and archs"
+        steps:
+            - run:
+                  name: Build binaries
+                  command: |
+                      cd cmd
+                      go build -o darknode .
+                      mv darknode ../artifacts/darknode_linux_amd64
+                      env GOOS=linux CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc-6 GOARCH=arm go build -o darknode .
+                      mv darknode ../artifacts/darknode_linux_arm
+                      env GOOS=darwin CGO_ENABLED=1 CC=o64-clang GOARCH=amd64 go build -o darknode .
+                      mv darknode ../artifacts/darknode_darwin_amd64
+    release:
+        description: "Publish a new release"
+        steps:
+            - run:
+                  wget https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
+                  tar xvzf ghr_v0.13.0_linux_amd64.tar.gz
+                  mv ghr_v0.13.0_linux_amd64/ghr ghr
+                  ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 3.0.1 ../artifacts/
+    test_env:
+        description: "Push the binaries to aws s3, so that we can test before releasing."
+        steps:
+            - run:
+                  name: install AWS CLI
+                  command: |
+                      apt-get -y install python3
+                      apt -y install python-pip python-dev
+                      pip install awscli
+            - aws-s3/sync:
+                  from: ./artifacts
+                  to: 's3://releases.republicprotocol.com/darknode-cli/temp/'
+                  arguments: '--acl public-read'
+                  overwrite: true
+
 jobs:
-    deploy:
+    deployment:
         <<: *defaults
         steps:
             - checkout
             - run:
-                name: install tools
-                command: |
-                    go vet ./...
+                  name: install tools
+                  command: |
+                      go vet ./...
+            - cross_compile
+            - release
+    test:
+        <<: *defaults
+        steps:
+            - checkout
             - run:
-                name: Build binaries
-                command: |
-                    cd cmd
-                    go build -o darknode .
-                    mv darknode ../artifacts/darknode_linux_amd64
-                    env GOOS=darwin CGO_ENABLED=1 CC=o64-clang GOARCH=amd64 go build -o darknode .
-                    mv darknode ../artifacts/darknode_darwin_amd64
-                    wget https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
-                    tar xvzf ghr_v0.13.0_linux_amd64.tar.gz
-                    mv ghr_v0.13.0_linux_amd64/ghr ghr
-                    ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 3.0.1 ../artifacts/
+                  name: install tools
+                  command: |
+                      go vet ./...
+            - cross_compile
+            - test_env
 
 workflows:
     version: 2.1
     deployment:
         jobs:
-            - deploy:
-                filters:
-                    branches:
-                        only:
-                            - master
+            - deployment:
+                  filters:
+                      branches:
+                          only:
+                              - master
+            - test:
+                  filters:
+                      branches:
+                          ignore:
+                              - master
