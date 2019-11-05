@@ -53,10 +53,7 @@ workflows:
 
   build_release:
     jobs:
-      - build:
-          filters:
-            tags:
-              only: /^v.*/
+      - build
       - deploy:
           requires:
             - build
