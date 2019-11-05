@@ -10,8 +10,8 @@ LDFLAGS = -s -w -X main.binaryVersion=${FULL_VERSION}
 
 all: local
 
-local:
-	$(call build_local,./cmd/darknode)
+local: clean
+	$(call build_local,./cmd)
 
 version:
 	@ echo ${FULL_VERSION}
