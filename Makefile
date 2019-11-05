@@ -6,7 +6,7 @@ FULL_VERSION = ${MAIN_VERSION}-${BRANCH}-${COMMIT_HASH}
 TARGET = ./darknode_bin
 
 # For information on flags: https://golang.org/cmd/link/
-LDFLAGS = -s -w -X main.version=${FULL_VERSION}
+LDFLAGS = -s -w -X main.binaryVersion=${FULL_VERSION}
 
 all: local
 

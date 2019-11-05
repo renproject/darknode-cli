@@ -10,13 +10,14 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
+	version "github.com/hashicorp/go-version"
 	"github.com/renproject/darknode-cli/cmd/provider"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 
 // This will be populated on build
-var version = "undefined"
+var binaryVersion = "undefined"
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -27,7 +28,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = version
+	app.Version = binaryVersion
 
 	// Fetch latest release and check if our version is bebind.
 	checkUpdates(app.Version)
