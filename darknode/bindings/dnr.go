@@ -16,7 +16,7 @@ import (
 )
 
 // DarknodeRegistryABI is the input ABI used to generate the binding from.
-const DarknodeRegistryABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isPendingRegistration\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"numDarknodesNextEpoch\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_nextMinimumBond\",\"type\":\"uint256\"}],\"name\":\"updateMinimumBond\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"numDarknodes\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"getDarknodeOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextSlasher\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"},{\"name\":\"_publicKey\",\"type\":\"bytes\"}],\"name\":\"register\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isPendingDeregistration\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_start\",\"type\":\"address\"},{\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"getPreviousDarknodes\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextMinimumEpochInterval\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumEpochInterval\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_prover\",\"type\":\"address\"},{\"name\":\"_challenger1\",\"type\":\"address\"},{\"name\":\"_challenger2\",\"type\":\"address\"}],\"name\":\"slash\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRefundable\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"previousEpoch\",\"outputs\":[{\"name\":\"epochhash\",\"type\":\"uint256\"},{\"name\":\"blocknumber\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextMinimumBond\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_nextMinimumEpochInterval\",\"type\":\"uint256\"}],\"name\":\"updateMinimumEpochInterval\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"claimStoreOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextMinimumPodSize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"numDarknodesPreviousEpoch\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"currentEpoch\",\"outputs\":[{\"name\":\"epochhash\",\"type\":\"uint256\"},{\"name\":\"blocknumber\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRegisteredInPreviousEpoch\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isDeregistered\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_nextMinimumPodSize\",\"type\":\"uint256\"}],\"name\":\"updateMinimumPodSize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"deregister\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"getDarknodePublicKey\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"ren\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"epoch\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"store\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumBond\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"slasher\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_slasher\",\"type\":\"address\"}],\"name\":\"updateSlasher\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"getDarknodeBond\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"transferStoreOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRegistered\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumPodSize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isDeregisterable\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_start\",\"type\":\"address\"},{\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"getDarknodes\",\"outputs\":[{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"refund\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"VERSION\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRefunded\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_VERSION\",\"type\":\"string\"},{\"name\":\"_renAddress\",\"type\":\"address\"},{\"name\":\"_storeAddress\",\"type\":\"address\"},{\"name\":\"_minimumBond\",\"type\":\"uint256\"},{\"name\":\"_minimumPodSize\",\"type\":\"uint256\"},{\"name\":\"_minimumEpochInterval\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_darknodeID\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_bond\",\"type\":\"uint256\"}],\"name\":\"LogDarknodeRegistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"LogDarknodeDeregistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_owner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"LogDarknodeOwnerRefunded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"epochhash\",\"type\":\"uint256\"}],\"name\":\"LogNewEpoch\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"previousMinimumBond\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"nextMinimumBond\",\"type\":\"uint256\"}],\"name\":\"LogMinimumBondUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"previousMinimumPodSize\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"nextMinimumPodSize\",\"type\":\"uint256\"}],\"name\":\"LogMinimumPodSizeUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"previousMinimumEpochInterval\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"nextMinimumEpochInterval\",\"type\":\"uint256\"}],\"name\":\"LogMinimumEpochIntervalUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"previousSlasher\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"nextSlasher\",\"type\":\"address\"}],\"name\":\"LogSlasherUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"}]"
+const DarknodeRegistryABI = "[{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_VERSION\",\"type\":\"string\"},{\"internalType\":\"contractRenToken\",\"name\":\"_renAddress\",\"type\":\"address\"},{\"internalType\":\"contractDarknodeRegistryStore\",\"name\":\"_storeAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_minimumBond\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_minimumPodSize\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_minimumEpochIntervalSeconds\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"LogDarknodeDeregistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"LogDarknodeOwnerRefunded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contractIDarknodePayment\",\"name\":\"_previousDarknodePayment\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"contractIDarknodePayment\",\"name\":\"_nextDarknodePayment\",\"type\":\"address\"}],\"name\":\"LogDarknodePaymentUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_bond\",\"type\":\"uint256\"}],\"name\":\"LogDarknodeRegistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_percentage\",\"type\":\"uint256\"}],\"name\":\"LogDarknodeSlashed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousMinimumBond\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_nextMinimumBond\",\"type\":\"uint256\"}],\"name\":\"LogMinimumBondUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousMinimumEpochInterval\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_nextMinimumEpochInterval\",\"type\":\"uint256\"}],\"name\":\"LogMinimumEpochIntervalUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_previousMinimumPodSize\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_nextMinimumPodSize\",\"type\":\"uint256\"}],\"name\":\"LogMinimumPodSizeUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"epochhash\",\"type\":\"uint256\"}],\"name\":\"LogNewEpoch\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_previousSlasher\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"_nextSlasher\",\"type\":\"address\"}],\"name\":\"LogSlasherUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"claimOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"claimStoreOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"currentEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"epochhash\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"blocktime\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"darknodePayment\",\"outputs\":[{\"internalType\":\"contractIDarknodePayment\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"deregister\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"epoch\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"getDarknodeBond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"getDarknodeOwner\",\"outputs\":[{\"internalType\":\"addresspayable\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"getDarknodePublicKey\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_start\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"getDarknodes\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_start\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_count\",\"type\":\"uint256\"}],\"name\":\"getPreviousDarknodes\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isDeregisterable\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isDeregistered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isPendingDeregistration\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isPendingRegistration\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRefundable\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRefunded\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRegistered\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"isRegisteredInPreviousEpoch\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumBond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumEpochInterval\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumPodSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextMinimumBond\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextMinimumEpochInterval\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextMinimumPodSize\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"nextSlasher\",\"outputs\":[{\"internalType\":\"contractIDarknodeSlasher\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"numDarknodes\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"numDarknodesNextEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"numDarknodesPreviousEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"previousEpoch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"epochhash\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"blocktime\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"recoverTokens\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"}],\"name\":\"refund\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_darknodeID\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"_publicKey\",\"type\":\"bytes\"}],\"name\":\"register\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"ren\",\"outputs\":[{\"internalType\":\"contractRenToken\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_guilty\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_percentage\",\"type\":\"uint256\"}],\"name\":\"slash\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"slasher\",\"outputs\":[{\"internalType\":\"contractIDarknodeSlasher\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"store\",\"outputs\":[{\"internalType\":\"contractDarknodeRegistryStore\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contractDarknodeRegistry\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"transferStoreOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contractIDarknodePayment\",\"name\":\"_darknodePayment\",\"type\":\"address\"}],\"name\":\"updateDarknodePayment\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_nextMinimumBond\",\"type\":\"uint256\"}],\"name\":\"updateMinimumBond\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_nextMinimumEpochInterval\",\"type\":\"uint256\"}],\"name\":\"updateMinimumEpochInterval\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_nextMinimumPodSize\",\"type\":\"uint256\"}],\"name\":\"updateMinimumPodSize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contractIDarknodeSlasher\",\"name\":\"_slasher\",\"type\":\"address\"}],\"name\":\"updateSlasher\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // DarknodeRegistry is an auto generated Go binding around an Ethereum contract.
 type DarknodeRegistry struct {
@@ -188,14 +188,14 @@ func (_DarknodeRegistry *DarknodeRegistryCallerSession) VERSION() (string, error
 
 // CurrentEpoch is a free data retrieval call binding the contract method 0x76671808.
 //
-// Solidity: function currentEpoch() constant returns(epochhash uint256, blocknumber uint256)
+// Solidity: function currentEpoch() constant returns(epochhash uint256, blocktime uint256)
 func (_DarknodeRegistry *DarknodeRegistryCaller) CurrentEpoch(opts *bind.CallOpts) (struct {
-	Epochhash   *big.Int
-	Blocknumber *big.Int
+	Epochhash *big.Int
+	Blocktime *big.Int
 }, error) {
 	ret := new(struct {
-		Epochhash   *big.Int
-		Blocknumber *big.Int
+		Epochhash *big.Int
+		Blocktime *big.Int
 	})
 	out := ret
 	err := _DarknodeRegistry.contract.Call(opts, out, "currentEpoch")
@@ -204,22 +204,48 @@ func (_DarknodeRegistry *DarknodeRegistryCaller) CurrentEpoch(opts *bind.CallOpt
 
 // CurrentEpoch is a free data retrieval call binding the contract method 0x76671808.
 //
-// Solidity: function currentEpoch() constant returns(epochhash uint256, blocknumber uint256)
+// Solidity: function currentEpoch() constant returns(epochhash uint256, blocktime uint256)
 func (_DarknodeRegistry *DarknodeRegistrySession) CurrentEpoch() (struct {
-	Epochhash   *big.Int
-	Blocknumber *big.Int
+	Epochhash *big.Int
+	Blocktime *big.Int
 }, error) {
 	return _DarknodeRegistry.Contract.CurrentEpoch(&_DarknodeRegistry.CallOpts)
 }
 
 // CurrentEpoch is a free data retrieval call binding the contract method 0x76671808.
 //
-// Solidity: function currentEpoch() constant returns(epochhash uint256, blocknumber uint256)
+// Solidity: function currentEpoch() constant returns(epochhash uint256, blocktime uint256)
 func (_DarknodeRegistry *DarknodeRegistryCallerSession) CurrentEpoch() (struct {
-	Epochhash   *big.Int
-	Blocknumber *big.Int
+	Epochhash *big.Int
+	Blocktime *big.Int
 }, error) {
 	return _DarknodeRegistry.Contract.CurrentEpoch(&_DarknodeRegistry.CallOpts)
+}
+
+// DarknodePayment is a free data retrieval call binding the contract method 0xb6b34c67.
+//
+// Solidity: function darknodePayment() constant returns(address)
+func (_DarknodeRegistry *DarknodeRegistryCaller) DarknodePayment(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _DarknodeRegistry.contract.Call(opts, out, "darknodePayment")
+	return *ret0, err
+}
+
+// DarknodePayment is a free data retrieval call binding the contract method 0xb6b34c67.
+//
+// Solidity: function darknodePayment() constant returns(address)
+func (_DarknodeRegistry *DarknodeRegistrySession) DarknodePayment() (common.Address, error) {
+	return _DarknodeRegistry.Contract.DarknodePayment(&_DarknodeRegistry.CallOpts)
+}
+
+// DarknodePayment is a free data retrieval call binding the contract method 0xb6b34c67.
+//
+// Solidity: function darknodePayment() constant returns(address)
+func (_DarknodeRegistry *DarknodeRegistryCallerSession) DarknodePayment() (common.Address, error) {
+	return _DarknodeRegistry.Contract.DarknodePayment(&_DarknodeRegistry.CallOpts)
 }
 
 // GetDarknodeBond is a free data retrieval call binding the contract method 0xba0f5b20.
@@ -874,14 +900,14 @@ func (_DarknodeRegistry *DarknodeRegistryCallerSession) Owner() (common.Address,
 
 // PreviousEpoch is a free data retrieval call binding the contract method 0x5cdaab48.
 //
-// Solidity: function previousEpoch() constant returns(epochhash uint256, blocknumber uint256)
+// Solidity: function previousEpoch() constant returns(epochhash uint256, blocktime uint256)
 func (_DarknodeRegistry *DarknodeRegistryCaller) PreviousEpoch(opts *bind.CallOpts) (struct {
-	Epochhash   *big.Int
-	Blocknumber *big.Int
+	Epochhash *big.Int
+	Blocktime *big.Int
 }, error) {
 	ret := new(struct {
-		Epochhash   *big.Int
-		Blocknumber *big.Int
+		Epochhash *big.Int
+		Blocktime *big.Int
 	})
 	out := ret
 	err := _DarknodeRegistry.contract.Call(opts, out, "previousEpoch")
@@ -890,20 +916,20 @@ func (_DarknodeRegistry *DarknodeRegistryCaller) PreviousEpoch(opts *bind.CallOp
 
 // PreviousEpoch is a free data retrieval call binding the contract method 0x5cdaab48.
 //
-// Solidity: function previousEpoch() constant returns(epochhash uint256, blocknumber uint256)
+// Solidity: function previousEpoch() constant returns(epochhash uint256, blocktime uint256)
 func (_DarknodeRegistry *DarknodeRegistrySession) PreviousEpoch() (struct {
-	Epochhash   *big.Int
-	Blocknumber *big.Int
+	Epochhash *big.Int
+	Blocktime *big.Int
 }, error) {
 	return _DarknodeRegistry.Contract.PreviousEpoch(&_DarknodeRegistry.CallOpts)
 }
 
 // PreviousEpoch is a free data retrieval call binding the contract method 0x5cdaab48.
 //
-// Solidity: function previousEpoch() constant returns(epochhash uint256, blocknumber uint256)
+// Solidity: function previousEpoch() constant returns(epochhash uint256, blocktime uint256)
 func (_DarknodeRegistry *DarknodeRegistryCallerSession) PreviousEpoch() (struct {
-	Epochhash   *big.Int
-	Blocknumber *big.Int
+	Epochhash *big.Int
+	Blocktime *big.Int
 }, error) {
 	return _DarknodeRegistry.Contract.PreviousEpoch(&_DarknodeRegistry.CallOpts)
 }
@@ -986,6 +1012,27 @@ func (_DarknodeRegistry *DarknodeRegistryCallerSession) Store() (common.Address,
 	return _DarknodeRegistry.Contract.Store(&_DarknodeRegistry.CallOpts)
 }
 
+// ClaimOwnership is a paid mutator transaction binding the contract method 0x4e71e0c8.
+//
+// Solidity: function claimOwnership() returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactor) ClaimOwnership(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _DarknodeRegistry.contract.Transact(opts, "claimOwnership")
+}
+
+// ClaimOwnership is a paid mutator transaction binding the contract method 0x4e71e0c8.
+//
+// Solidity: function claimOwnership() returns()
+func (_DarknodeRegistry *DarknodeRegistrySession) ClaimOwnership() (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.ClaimOwnership(&_DarknodeRegistry.TransactOpts)
+}
+
+// ClaimOwnership is a paid mutator transaction binding the contract method 0x4e71e0c8.
+//
+// Solidity: function claimOwnership() returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactorSession) ClaimOwnership() (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.ClaimOwnership(&_DarknodeRegistry.TransactOpts)
+}
+
 // ClaimStoreOwnership is a paid mutator transaction binding the contract method 0x6fd689e8.
 //
 // Solidity: function claimStoreOwnership() returns()
@@ -1047,6 +1094,27 @@ func (_DarknodeRegistry *DarknodeRegistrySession) Epoch() (*types.Transaction, e
 // Solidity: function epoch() returns()
 func (_DarknodeRegistry *DarknodeRegistryTransactorSession) Epoch() (*types.Transaction, error) {
 	return _DarknodeRegistry.Contract.Epoch(&_DarknodeRegistry.TransactOpts)
+}
+
+// RecoverTokens is a paid mutator transaction binding the contract method 0x16114acd.
+//
+// Solidity: function recoverTokens(_token address) returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactor) RecoverTokens(opts *bind.TransactOpts, _token common.Address) (*types.Transaction, error) {
+	return _DarknodeRegistry.contract.Transact(opts, "recoverTokens", _token)
+}
+
+// RecoverTokens is a paid mutator transaction binding the contract method 0x16114acd.
+//
+// Solidity: function recoverTokens(_token address) returns()
+func (_DarknodeRegistry *DarknodeRegistrySession) RecoverTokens(_token common.Address) (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.RecoverTokens(&_DarknodeRegistry.TransactOpts, _token)
+}
+
+// RecoverTokens is a paid mutator transaction binding the contract method 0x16114acd.
+//
+// Solidity: function recoverTokens(_token address) returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactorSession) RecoverTokens(_token common.Address) (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.RecoverTokens(&_DarknodeRegistry.TransactOpts, _token)
 }
 
 // Refund is a paid mutator transaction binding the contract method 0xfa89401a.
@@ -1112,25 +1180,25 @@ func (_DarknodeRegistry *DarknodeRegistryTransactorSession) RenounceOwnership() 
 	return _DarknodeRegistry.Contract.RenounceOwnership(&_DarknodeRegistry.TransactOpts)
 }
 
-// Slash is a paid mutator transaction binding the contract method 0x563bf264.
+// Slash is a paid mutator transaction binding the contract method 0xe74f8239.
 //
-// Solidity: function slash(_prover address, _challenger1 address, _challenger2 address) returns()
-func (_DarknodeRegistry *DarknodeRegistryTransactor) Slash(opts *bind.TransactOpts, _prover common.Address, _challenger1 common.Address, _challenger2 common.Address) (*types.Transaction, error) {
-	return _DarknodeRegistry.contract.Transact(opts, "slash", _prover, _challenger1, _challenger2)
+// Solidity: function slash(_guilty address, _challenger address, _percentage uint256) returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactor) Slash(opts *bind.TransactOpts, _guilty common.Address, _challenger common.Address, _percentage *big.Int) (*types.Transaction, error) {
+	return _DarknodeRegistry.contract.Transact(opts, "slash", _guilty, _challenger, _percentage)
 }
 
-// Slash is a paid mutator transaction binding the contract method 0x563bf264.
+// Slash is a paid mutator transaction binding the contract method 0xe74f8239.
 //
-// Solidity: function slash(_prover address, _challenger1 address, _challenger2 address) returns()
-func (_DarknodeRegistry *DarknodeRegistrySession) Slash(_prover common.Address, _challenger1 common.Address, _challenger2 common.Address) (*types.Transaction, error) {
-	return _DarknodeRegistry.Contract.Slash(&_DarknodeRegistry.TransactOpts, _prover, _challenger1, _challenger2)
+// Solidity: function slash(_guilty address, _challenger address, _percentage uint256) returns()
+func (_DarknodeRegistry *DarknodeRegistrySession) Slash(_guilty common.Address, _challenger common.Address, _percentage *big.Int) (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.Slash(&_DarknodeRegistry.TransactOpts, _guilty, _challenger, _percentage)
 }
 
-// Slash is a paid mutator transaction binding the contract method 0x563bf264.
+// Slash is a paid mutator transaction binding the contract method 0xe74f8239.
 //
-// Solidity: function slash(_prover address, _challenger1 address, _challenger2 address) returns()
-func (_DarknodeRegistry *DarknodeRegistryTransactorSession) Slash(_prover common.Address, _challenger1 common.Address, _challenger2 common.Address) (*types.Transaction, error) {
-	return _DarknodeRegistry.Contract.Slash(&_DarknodeRegistry.TransactOpts, _prover, _challenger1, _challenger2)
+// Solidity: function slash(_guilty address, _challenger address, _percentage uint256) returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactorSession) Slash(_guilty common.Address, _challenger common.Address, _percentage *big.Int) (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.Slash(&_DarknodeRegistry.TransactOpts, _guilty, _challenger, _percentage)
 }
 
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
@@ -1173,6 +1241,27 @@ func (_DarknodeRegistry *DarknodeRegistrySession) TransferStoreOwnership(_newOwn
 // Solidity: function transferStoreOwnership(_newOwner address) returns()
 func (_DarknodeRegistry *DarknodeRegistryTransactorSession) TransferStoreOwnership(_newOwner common.Address) (*types.Transaction, error) {
 	return _DarknodeRegistry.Contract.TransferStoreOwnership(&_DarknodeRegistry.TransactOpts, _newOwner)
+}
+
+// UpdateDarknodePayment is a paid mutator transaction binding the contract method 0x71b4133c.
+//
+// Solidity: function updateDarknodePayment(_darknodePayment address) returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactor) UpdateDarknodePayment(opts *bind.TransactOpts, _darknodePayment common.Address) (*types.Transaction, error) {
+	return _DarknodeRegistry.contract.Transact(opts, "updateDarknodePayment", _darknodePayment)
+}
+
+// UpdateDarknodePayment is a paid mutator transaction binding the contract method 0x71b4133c.
+//
+// Solidity: function updateDarknodePayment(_darknodePayment address) returns()
+func (_DarknodeRegistry *DarknodeRegistrySession) UpdateDarknodePayment(_darknodePayment common.Address) (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.UpdateDarknodePayment(&_DarknodeRegistry.TransactOpts, _darknodePayment)
+}
+
+// UpdateDarknodePayment is a paid mutator transaction binding the contract method 0x71b4133c.
+//
+// Solidity: function updateDarknodePayment(_darknodePayment address) returns()
+func (_DarknodeRegistry *DarknodeRegistryTransactorSession) UpdateDarknodePayment(_darknodePayment common.Address) (*types.Transaction, error) {
+	return _DarknodeRegistry.Contract.UpdateDarknodePayment(&_DarknodeRegistry.TransactOpts, _darknodePayment)
 }
 
 // UpdateMinimumBond is a paid mutator transaction binding the contract method 0x0ff9aafe.
@@ -1328,38 +1417,47 @@ func (it *DarknodeRegistryLogDarknodeDeregisteredIterator) Close() error {
 
 // DarknodeRegistryLogDarknodeDeregistered represents a LogDarknodeDeregistered event raised by the DarknodeRegistry contract.
 type DarknodeRegistryLogDarknodeDeregistered struct {
+	Operator   common.Address
 	DarknodeID common.Address
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterLogDarknodeDeregistered is a free log retrieval operation binding the contract event 0x2dc89de5703d2c341a22ebfc7c4d3f197e5e1f0c19bc2e1135f387163cb927e4.
+// FilterLogDarknodeDeregistered is a free log retrieval operation binding the contract event 0xf73268ea792d9dbf3e21a95ec9711f0b535c5f6c99f6b4f54f6766838086b842.
 //
-// Solidity: event LogDarknodeDeregistered(_darknodeID indexed address)
-func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeDeregistered(opts *bind.FilterOpts, _darknodeID []common.Address) (*DarknodeRegistryLogDarknodeDeregisteredIterator, error) {
+// Solidity: event LogDarknodeDeregistered(_operator indexed address, _darknodeID indexed address)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeDeregistered(opts *bind.FilterOpts, _operator []common.Address, _darknodeID []common.Address) (*DarknodeRegistryLogDarknodeDeregisteredIterator, error) {
 
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
+	}
 	var _darknodeIDRule []interface{}
 	for _, _darknodeIDItem := range _darknodeID {
 		_darknodeIDRule = append(_darknodeIDRule, _darknodeIDItem)
 	}
 
-	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodeDeregistered", _darknodeIDRule)
+	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodeDeregistered", _operatorRule, _darknodeIDRule)
 	if err != nil {
 		return nil, err
 	}
 	return &DarknodeRegistryLogDarknodeDeregisteredIterator{contract: _DarknodeRegistry.contract, event: "LogDarknodeDeregistered", logs: logs, sub: sub}, nil
 }
 
-// WatchLogDarknodeDeregistered is a free log subscription operation binding the contract event 0x2dc89de5703d2c341a22ebfc7c4d3f197e5e1f0c19bc2e1135f387163cb927e4.
+// WatchLogDarknodeDeregistered is a free log subscription operation binding the contract event 0xf73268ea792d9dbf3e21a95ec9711f0b535c5f6c99f6b4f54f6766838086b842.
 //
-// Solidity: event LogDarknodeDeregistered(_darknodeID indexed address)
-func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeDeregistered(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodeDeregistered, _darknodeID []common.Address) (event.Subscription, error) {
+// Solidity: event LogDarknodeDeregistered(_operator indexed address, _darknodeID indexed address)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeDeregistered(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodeDeregistered, _operator []common.Address, _darknodeID []common.Address) (event.Subscription, error) {
 
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
+	}
 	var _darknodeIDRule []interface{}
 	for _, _darknodeIDItem := range _darknodeID {
 		_darknodeIDRule = append(_darknodeIDRule, _darknodeIDItem)
 	}
 
-	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodeDeregistered", _darknodeIDRule)
+	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodeDeregistered", _operatorRule, _darknodeIDRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1460,22 +1558,22 @@ func (it *DarknodeRegistryLogDarknodeOwnerRefundedIterator) Close() error {
 
 // DarknodeRegistryLogDarknodeOwnerRefunded represents a LogDarknodeOwnerRefunded event raised by the DarknodeRegistry contract.
 type DarknodeRegistryLogDarknodeOwnerRefunded struct {
-	Owner  common.Address
-	Amount *big.Int
-	Raw    types.Log // Blockchain specific contextual infos
+	Operator common.Address
+	Amount   *big.Int
+	Raw      types.Log // Blockchain specific contextual infos
 }
 
 // FilterLogDarknodeOwnerRefunded is a free log retrieval operation binding the contract event 0x96ab9e56c79eee4a72db6e2879cbfbecdba5c65b411f4861824e66b89df19764.
 //
-// Solidity: event LogDarknodeOwnerRefunded(_owner indexed address, _amount uint256)
-func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeOwnerRefunded(opts *bind.FilterOpts, _owner []common.Address) (*DarknodeRegistryLogDarknodeOwnerRefundedIterator, error) {
+// Solidity: event LogDarknodeOwnerRefunded(_operator indexed address, _amount uint256)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeOwnerRefunded(opts *bind.FilterOpts, _operator []common.Address) (*DarknodeRegistryLogDarknodeOwnerRefundedIterator, error) {
 
-	var _ownerRule []interface{}
-	for _, _ownerItem := range _owner {
-		_ownerRule = append(_ownerRule, _ownerItem)
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
 	}
 
-	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodeOwnerRefunded", _ownerRule)
+	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodeOwnerRefunded", _operatorRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1484,15 +1582,15 @@ func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeOwnerRefunde
 
 // WatchLogDarknodeOwnerRefunded is a free log subscription operation binding the contract event 0x96ab9e56c79eee4a72db6e2879cbfbecdba5c65b411f4861824e66b89df19764.
 //
-// Solidity: event LogDarknodeOwnerRefunded(_owner indexed address, _amount uint256)
-func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeOwnerRefunded(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodeOwnerRefunded, _owner []common.Address) (event.Subscription, error) {
+// Solidity: event LogDarknodeOwnerRefunded(_operator indexed address, _amount uint256)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeOwnerRefunded(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodeOwnerRefunded, _operator []common.Address) (event.Subscription, error) {
 
-	var _ownerRule []interface{}
-	for _, _ownerItem := range _owner {
-		_ownerRule = append(_ownerRule, _ownerItem)
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
 	}
 
-	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodeOwnerRefunded", _ownerRule)
+	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodeOwnerRefunded", _operatorRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1504,6 +1602,129 @@ func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeOwnerRefunded
 				// New log arrived, parse the event and forward to the user
 				event := new(DarknodeRegistryLogDarknodeOwnerRefunded)
 				if err := _DarknodeRegistry.contract.UnpackLog(event, "LogDarknodeOwnerRefunded", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// DarknodeRegistryLogDarknodePaymentUpdatedIterator is returned from FilterLogDarknodePaymentUpdated and is used to iterate over the raw logs and unpacked data for LogDarknodePaymentUpdated events raised by the DarknodeRegistry contract.
+type DarknodeRegistryLogDarknodePaymentUpdatedIterator struct {
+	Event *DarknodeRegistryLogDarknodePaymentUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *DarknodeRegistryLogDarknodePaymentUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(DarknodeRegistryLogDarknodePaymentUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(DarknodeRegistryLogDarknodePaymentUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *DarknodeRegistryLogDarknodePaymentUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *DarknodeRegistryLogDarknodePaymentUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// DarknodeRegistryLogDarknodePaymentUpdated represents a LogDarknodePaymentUpdated event raised by the DarknodeRegistry contract.
+type DarknodeRegistryLogDarknodePaymentUpdated struct {
+	PreviousDarknodePayment common.Address
+	NextDarknodePayment     common.Address
+	Raw                     types.Log // Blockchain specific contextual infos
+}
+
+// FilterLogDarknodePaymentUpdated is a free log retrieval operation binding the contract event 0xe3e25a79a5ba7c894fcc55794b2712e225537e89f777b9b9df307cc5504ba0e9.
+//
+// Solidity: event LogDarknodePaymentUpdated(_previousDarknodePayment address, _nextDarknodePayment address)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodePaymentUpdated(opts *bind.FilterOpts) (*DarknodeRegistryLogDarknodePaymentUpdatedIterator, error) {
+
+	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodePaymentUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &DarknodeRegistryLogDarknodePaymentUpdatedIterator{contract: _DarknodeRegistry.contract, event: "LogDarknodePaymentUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchLogDarknodePaymentUpdated is a free log subscription operation binding the contract event 0xe3e25a79a5ba7c894fcc55794b2712e225537e89f777b9b9df307cc5504ba0e9.
+//
+// Solidity: event LogDarknodePaymentUpdated(_previousDarknodePayment address, _nextDarknodePayment address)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodePaymentUpdated(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodePaymentUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodePaymentUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(DarknodeRegistryLogDarknodePaymentUpdated)
+				if err := _DarknodeRegistry.contract.UnpackLog(event, "LogDarknodePaymentUpdated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1593,39 +1814,48 @@ func (it *DarknodeRegistryLogDarknodeRegisteredIterator) Close() error {
 
 // DarknodeRegistryLogDarknodeRegistered represents a LogDarknodeRegistered event raised by the DarknodeRegistry contract.
 type DarknodeRegistryLogDarknodeRegistered struct {
+	Operator   common.Address
 	DarknodeID common.Address
 	Bond       *big.Int
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterLogDarknodeRegistered is a free log retrieval operation binding the contract event 0xd2819ba4c736158371edf0be38fd8d1fc435609832e392f118c4c79160e5bd7b.
+// FilterLogDarknodeRegistered is a free log retrieval operation binding the contract event 0x7c56cb7f63b6922d24414bf7c2b2c40c7ea1ea637c3f400efa766a85ecf2f093.
 //
-// Solidity: event LogDarknodeRegistered(_darknodeID indexed address, _bond uint256)
-func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeRegistered(opts *bind.FilterOpts, _darknodeID []common.Address) (*DarknodeRegistryLogDarknodeRegisteredIterator, error) {
+// Solidity: event LogDarknodeRegistered(_operator indexed address, _darknodeID indexed address, _bond uint256)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeRegistered(opts *bind.FilterOpts, _operator []common.Address, _darknodeID []common.Address) (*DarknodeRegistryLogDarknodeRegisteredIterator, error) {
 
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
+	}
 	var _darknodeIDRule []interface{}
 	for _, _darknodeIDItem := range _darknodeID {
 		_darknodeIDRule = append(_darknodeIDRule, _darknodeIDItem)
 	}
 
-	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodeRegistered", _darknodeIDRule)
+	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodeRegistered", _operatorRule, _darknodeIDRule)
 	if err != nil {
 		return nil, err
 	}
 	return &DarknodeRegistryLogDarknodeRegisteredIterator{contract: _DarknodeRegistry.contract, event: "LogDarknodeRegistered", logs: logs, sub: sub}, nil
 }
 
-// WatchLogDarknodeRegistered is a free log subscription operation binding the contract event 0xd2819ba4c736158371edf0be38fd8d1fc435609832e392f118c4c79160e5bd7b.
+// WatchLogDarknodeRegistered is a free log subscription operation binding the contract event 0x7c56cb7f63b6922d24414bf7c2b2c40c7ea1ea637c3f400efa766a85ecf2f093.
 //
-// Solidity: event LogDarknodeRegistered(_darknodeID indexed address, _bond uint256)
-func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeRegistered(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodeRegistered, _darknodeID []common.Address) (event.Subscription, error) {
+// Solidity: event LogDarknodeRegistered(_operator indexed address, _darknodeID indexed address, _bond uint256)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeRegistered(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodeRegistered, _operator []common.Address, _darknodeID []common.Address) (event.Subscription, error) {
 
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
+	}
 	var _darknodeIDRule []interface{}
 	for _, _darknodeIDItem := range _darknodeID {
 		_darknodeIDRule = append(_darknodeIDRule, _darknodeIDItem)
 	}
 
-	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodeRegistered", _darknodeIDRule)
+	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodeRegistered", _operatorRule, _darknodeIDRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1637,6 +1867,157 @@ func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeRegistered(op
 				// New log arrived, parse the event and forward to the user
 				event := new(DarknodeRegistryLogDarknodeRegistered)
 				if err := _DarknodeRegistry.contract.UnpackLog(event, "LogDarknodeRegistered", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// DarknodeRegistryLogDarknodeSlashedIterator is returned from FilterLogDarknodeSlashed and is used to iterate over the raw logs and unpacked data for LogDarknodeSlashed events raised by the DarknodeRegistry contract.
+type DarknodeRegistryLogDarknodeSlashedIterator struct {
+	Event *DarknodeRegistryLogDarknodeSlashed // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *DarknodeRegistryLogDarknodeSlashedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(DarknodeRegistryLogDarknodeSlashed)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(DarknodeRegistryLogDarknodeSlashed)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *DarknodeRegistryLogDarknodeSlashedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *DarknodeRegistryLogDarknodeSlashedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// DarknodeRegistryLogDarknodeSlashed represents a LogDarknodeSlashed event raised by the DarknodeRegistry contract.
+type DarknodeRegistryLogDarknodeSlashed struct {
+	Operator   common.Address
+	DarknodeID common.Address
+	Challenger common.Address
+	Percentage *big.Int
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterLogDarknodeSlashed is a free log retrieval operation binding the contract event 0xb43e0cc88b4d6ae901c6c99d1b58769cb8c9ded8e6f20a0d3712d09bf9e1ea77.
+//
+// Solidity: event LogDarknodeSlashed(_operator indexed address, _darknodeID indexed address, _challenger indexed address, _percentage uint256)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogDarknodeSlashed(opts *bind.FilterOpts, _operator []common.Address, _darknodeID []common.Address, _challenger []common.Address) (*DarknodeRegistryLogDarknodeSlashedIterator, error) {
+
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
+	}
+	var _darknodeIDRule []interface{}
+	for _, _darknodeIDItem := range _darknodeID {
+		_darknodeIDRule = append(_darknodeIDRule, _darknodeIDItem)
+	}
+	var _challengerRule []interface{}
+	for _, _challengerItem := range _challenger {
+		_challengerRule = append(_challengerRule, _challengerItem)
+	}
+
+	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogDarknodeSlashed", _operatorRule, _darknodeIDRule, _challengerRule)
+	if err != nil {
+		return nil, err
+	}
+	return &DarknodeRegistryLogDarknodeSlashedIterator{contract: _DarknodeRegistry.contract, event: "LogDarknodeSlashed", logs: logs, sub: sub}, nil
+}
+
+// WatchLogDarknodeSlashed is a free log subscription operation binding the contract event 0xb43e0cc88b4d6ae901c6c99d1b58769cb8c9ded8e6f20a0d3712d09bf9e1ea77.
+//
+// Solidity: event LogDarknodeSlashed(_operator indexed address, _darknodeID indexed address, _challenger indexed address, _percentage uint256)
+func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogDarknodeSlashed(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogDarknodeSlashed, _operator []common.Address, _darknodeID []common.Address, _challenger []common.Address) (event.Subscription, error) {
+
+	var _operatorRule []interface{}
+	for _, _operatorItem := range _operator {
+		_operatorRule = append(_operatorRule, _operatorItem)
+	}
+	var _darknodeIDRule []interface{}
+	for _, _darknodeIDItem := range _darknodeID {
+		_darknodeIDRule = append(_darknodeIDRule, _darknodeIDItem)
+	}
+	var _challengerRule []interface{}
+	for _, _challengerItem := range _challenger {
+		_challengerRule = append(_challengerRule, _challengerItem)
+	}
+
+	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogDarknodeSlashed", _operatorRule, _darknodeIDRule, _challengerRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(DarknodeRegistryLogDarknodeSlashed)
+				if err := _DarknodeRegistry.contract.UnpackLog(event, "LogDarknodeSlashed", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1733,7 +2114,7 @@ type DarknodeRegistryLogMinimumBondUpdated struct {
 
 // FilterLogMinimumBondUpdated is a free log retrieval operation binding the contract event 0x7c77c94944e9e4e5b0d46f1297127d060020792687cd743401d782346c68f655.
 //
-// Solidity: event LogMinimumBondUpdated(previousMinimumBond uint256, nextMinimumBond uint256)
+// Solidity: event LogMinimumBondUpdated(_previousMinimumBond uint256, _nextMinimumBond uint256)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogMinimumBondUpdated(opts *bind.FilterOpts) (*DarknodeRegistryLogMinimumBondUpdatedIterator, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogMinimumBondUpdated")
@@ -1745,7 +2126,7 @@ func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogMinimumBondUpdated(o
 
 // WatchLogMinimumBondUpdated is a free log subscription operation binding the contract event 0x7c77c94944e9e4e5b0d46f1297127d060020792687cd743401d782346c68f655.
 //
-// Solidity: event LogMinimumBondUpdated(previousMinimumBond uint256, nextMinimumBond uint256)
+// Solidity: event LogMinimumBondUpdated(_previousMinimumBond uint256, _nextMinimumBond uint256)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogMinimumBondUpdated(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogMinimumBondUpdated) (event.Subscription, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogMinimumBondUpdated")
@@ -1856,7 +2237,7 @@ type DarknodeRegistryLogMinimumEpochIntervalUpdated struct {
 
 // FilterLogMinimumEpochIntervalUpdated is a free log retrieval operation binding the contract event 0xb218cde2730b79a0667ddf869466ee66a12ef56fe65fa4986a590f8a7108c9de.
 //
-// Solidity: event LogMinimumEpochIntervalUpdated(previousMinimumEpochInterval uint256, nextMinimumEpochInterval uint256)
+// Solidity: event LogMinimumEpochIntervalUpdated(_previousMinimumEpochInterval uint256, _nextMinimumEpochInterval uint256)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogMinimumEpochIntervalUpdated(opts *bind.FilterOpts) (*DarknodeRegistryLogMinimumEpochIntervalUpdatedIterator, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogMinimumEpochIntervalUpdated")
@@ -1868,7 +2249,7 @@ func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogMinimumEpochInterval
 
 // WatchLogMinimumEpochIntervalUpdated is a free log subscription operation binding the contract event 0xb218cde2730b79a0667ddf869466ee66a12ef56fe65fa4986a590f8a7108c9de.
 //
-// Solidity: event LogMinimumEpochIntervalUpdated(previousMinimumEpochInterval uint256, nextMinimumEpochInterval uint256)
+// Solidity: event LogMinimumEpochIntervalUpdated(_previousMinimumEpochInterval uint256, _nextMinimumEpochInterval uint256)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogMinimumEpochIntervalUpdated(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogMinimumEpochIntervalUpdated) (event.Subscription, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogMinimumEpochIntervalUpdated")
@@ -1979,7 +2360,7 @@ type DarknodeRegistryLogMinimumPodSizeUpdated struct {
 
 // FilterLogMinimumPodSizeUpdated is a free log retrieval operation binding the contract event 0x6d520e46e5714982ddf8cb6216bcb3e1c1d5b79d337afc305335f819394f5d6a.
 //
-// Solidity: event LogMinimumPodSizeUpdated(previousMinimumPodSize uint256, nextMinimumPodSize uint256)
+// Solidity: event LogMinimumPodSizeUpdated(_previousMinimumPodSize uint256, _nextMinimumPodSize uint256)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogMinimumPodSizeUpdated(opts *bind.FilterOpts) (*DarknodeRegistryLogMinimumPodSizeUpdatedIterator, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogMinimumPodSizeUpdated")
@@ -1991,7 +2372,7 @@ func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogMinimumPodSizeUpdate
 
 // WatchLogMinimumPodSizeUpdated is a free log subscription operation binding the contract event 0x6d520e46e5714982ddf8cb6216bcb3e1c1d5b79d337afc305335f819394f5d6a.
 //
-// Solidity: event LogMinimumPodSizeUpdated(previousMinimumPodSize uint256, nextMinimumPodSize uint256)
+// Solidity: event LogMinimumPodSizeUpdated(_previousMinimumPodSize uint256, _nextMinimumPodSize uint256)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogMinimumPodSizeUpdated(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogMinimumPodSizeUpdated) (event.Subscription, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogMinimumPodSizeUpdated")
@@ -2234,7 +2615,7 @@ type DarknodeRegistryLogSlasherUpdated struct {
 
 // FilterLogSlasherUpdated is a free log retrieval operation binding the contract event 0x933228a1c3ba8fadd3ce47a9db5b898be647f89af99ba7c1b9a655f59ea306c8.
 //
-// Solidity: event LogSlasherUpdated(previousSlasher address, nextSlasher address)
+// Solidity: event LogSlasherUpdated(_previousSlasher address, _nextSlasher address)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogSlasherUpdated(opts *bind.FilterOpts) (*DarknodeRegistryLogSlasherUpdatedIterator, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.FilterLogs(opts, "LogSlasherUpdated")
@@ -2246,7 +2627,7 @@ func (_DarknodeRegistry *DarknodeRegistryFilterer) FilterLogSlasherUpdated(opts 
 
 // WatchLogSlasherUpdated is a free log subscription operation binding the contract event 0x933228a1c3ba8fadd3ce47a9db5b898be647f89af99ba7c1b9a655f59ea306c8.
 //
-// Solidity: event LogSlasherUpdated(previousSlasher address, nextSlasher address)
+// Solidity: event LogSlasherUpdated(_previousSlasher address, _nextSlasher address)
 func (_DarknodeRegistry *DarknodeRegistryFilterer) WatchLogSlasherUpdated(opts *bind.WatchOpts, sink chan<- *DarknodeRegistryLogSlasherUpdated) (event.Subscription, error) {
 
 	logs, sub, err := _DarknodeRegistry.contract.WatchLogs(opts, "LogSlasherUpdated")

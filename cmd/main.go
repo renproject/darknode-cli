@@ -25,7 +25,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "3.0.0"
+	app.Version = "3.0.1"
 
 	// Fetch latest release and check if our version is bebind.
 	checkUpdates(app.Version)
@@ -208,6 +208,6 @@ func checkUpdates(curVer string) {
 	if versionCurrent.LessThan(versionLatest) {
 		color.Red("You are running %v", curVer)
 		color.Red("A new release is available (%v)", release.GetTagName())
-		color.Red("You can update with `darknode update` command")
+		color.Red("You can update with `curl https://www.github.com/renproject/darknode-cli/releases/latest/download/update.sh -sSfL | sh` command")
 	}
 }
