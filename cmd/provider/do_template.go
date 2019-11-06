@@ -81,6 +81,7 @@ resource "digitalocean_droplet" "darknode" {
       "sudo ufw allow 18514/tcp", 
       "sudo ufw allow 18515/tcp", 
       "sudo ufw --force enable",
+	  "curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash",	
 	]
 
     connection {

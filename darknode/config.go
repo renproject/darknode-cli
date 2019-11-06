@@ -55,7 +55,9 @@ func NewConfig(network Network) (Config, error) {
 		Bootstraps:             network.BootstrapNodes(),
 		DNRAddress:             network.DnrAddress(),
 		ShifterRegistryAddress: network.ShiftRegistryAddress(),
-		PeerOptions:            &aw.PeerOptions{},
+		PeerOptions: &aw.PeerOptions{
+			DisablePeerDiscovery: true,
+		},
 	}, nil
 }
 
