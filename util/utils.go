@@ -213,7 +213,7 @@ func RemoteRunWithUser(name, script, user string) error {
 	return session.Run(script)
 }
 
-// OpenInBrowser tries to open the url from the
+// OpenInBrowser tries to open the url with system default browser. It ignores the error if failing.
 func OpenInBrowser(url string) error {
 	switch runtime.GOOS {
 	case "darwin":
