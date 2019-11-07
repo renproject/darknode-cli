@@ -70,15 +70,10 @@ resource "digitalocean_droplet" "darknode" {
 	
 	inline = [
       "set -x",
-      "until sudo apt update; do sleep 2; done",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
-      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y update; do sleep 2; done",
-      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade; do sleep 2; done",
-      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade; do sleep 2; done",
-      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y autoremove; do sleep 2; done",
-      "sudo apt-get -y install jq",
-      "sudo apt-get install ufw",
+	  "sudo snap install jq",
+      "sudo snap install ufw",
       "sudo ufw limit 22/tcp",
       "sudo ufw allow 18514/tcp", 
       "sudo ufw allow 18515/tcp", 
