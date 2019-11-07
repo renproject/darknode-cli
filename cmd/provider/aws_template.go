@@ -115,13 +115,13 @@ resource "aws_instance" "darknode" {
   provisioner "remote-exec" {
 
 	inline = [
+      "set -x",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove",
-      "sudo apt-get update",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y update; do sleep 2; done",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade; do sleep 2; done",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade; do sleep 2; done",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y autoremove; do sleep 2; done",
       "sudo apt-get -y install jq",
       "sudo apt-get install ufw",
       "sudo ufw limit 22/tcp",
