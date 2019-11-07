@@ -219,7 +219,7 @@ func OpenInBrowser(url string) error {
 	case "darwin":
 		SilentRun("open", url)
 	case "linux":
-		if CheckWSL(){
+		if CheckWSL() {
 			SilentRun("cmd.exe", "/C", "start", url)
 		} else {
 			SilentRun("xdg-open", url)
@@ -229,7 +229,7 @@ func OpenInBrowser(url string) error {
 }
 
 func CheckWSL() bool {
-	file, err:= ioutil.ReadFile("/proc/version")
+	file, err := ioutil.ReadFile("/proc/version")
 	if err != nil {
 		return false
 	}

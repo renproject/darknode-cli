@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -25,9 +26,9 @@ func (p providerDo) tfConfig(name, region, droplet, ipfs string) error {
 		Token:      p.token,
 		Region:     region,
 		Size:       droplet,
-		ConfigPath: filepath.Join(util.NodePath(name), "config.json"),
-		PubKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
-		PriKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair"),
+		ConfigPath: fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
+		PubKeyPath: fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
+		PriKeyPath: fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair", name),
 		IPFS:       ipfs,
 	}
 
@@ -68,14 +69,14 @@ resource "digitalocean_droplet" "darknode" {
   provisioner "remote-exec" {
 	
 	inline = [
+      "set -x",
       "until sudo apt update; do sleep 2; done",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove",
-      "sudo apt-get update",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y update; do sleep 2; done",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade; do sleep 2; done",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade; do sleep 2; done",
+      "until sudo DEBIAN_FRONTEND=noninteractive apt-get -y autoremove; do sleep 2; done",
       "sudo apt-get -y install jq",
       "sudo apt-get install ufw",
       "sudo ufw limit 22/tcp",
@@ -131,5 +132,5 @@ output "provider" {
 }
 
 output "ip" {
-  value = "${digitalocean_droplet.darknode.ipv4_address}"
+  value = digitalocean_droplet.darknode.ipv4_address
 }`

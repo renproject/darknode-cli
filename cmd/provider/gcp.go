@@ -132,8 +132,8 @@ package provider
 // 	Project       string
 // 	Address       string
 // 	MachineType   string
-// 	SshPubKey     string
-// 	SshPriKeyPath string
+// 	PubKeyPath     string
+// 	PriKeyPath string
 // 	Credentials   string
 // 	Port          string
 // 	Path          string
@@ -192,8 +192,8 @@ package provider
 // 		Project:       projectId,
 // 		Address:       id.String(),
 // 		MachineType:   machine_type,
-// 		SshPubKey:     strings.TrimSpace(StringfySshPubkey(pubKey)),
-// 		SshPriKeyPath: path.Join(nodePath, "ssh_keypair"),
+// 		PubKeyPath:     strings.TrimSpace(StringfySshPubkey(pubKey)),
+// 		PriKeyPath: path.Join(nodePath, "ssh_keypair"),
 // 		Credentials:   credentialPath,
 // 		Path:          Directory,
 // 		AllocationID:  ctx.String("aws-elastic-ip"),
