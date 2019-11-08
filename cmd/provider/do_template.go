@@ -80,7 +80,7 @@ resource "digitalocean_droplet" "darknode" {
       "sudo ufw allow 18514/tcp", 
       "sudo ufw allow 18515/tcp", 
       "sudo ufw --force enable",
-      "until sudo sudo apt-get -y install jq; do sleep 2; done",
+      "until sudo apt-get -y install jq; do sleep 2; done",
 	]
 
     connection {
