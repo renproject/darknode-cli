@@ -43,7 +43,7 @@ func destroyNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	dnr, err := bindings.NewDarknodeRegistry(config.DNRAddress, client.EthClient())
+	dnr, err := bindings.NewDarknodeRegistry(config.DarknodeRegistryAddress, client.EthClient())
 	if err != nil {
 		return err
 	}
