@@ -58,7 +58,9 @@ func listAllNodes(ctx *cli.Context) error {
 
 	fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s \n", "name", "id", "ip", "provider", "tags", "ethereum address")
 	for _, node := range nodes {
-		fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s\n", node[0], node[1], node[2], node[3], node[4], node[5])
+		if node != nil {
+			fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s\n", node[0], node[1], node[2], node[3], node[4], node[5])
+		}
 	}
 	return nil
 }
