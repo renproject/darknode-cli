@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -9,29 +10,29 @@ import (
 )
 
 type awsTerraform struct {
-	Name          string
-	Region        string
-	InstanceType  string
-	SshPubKey     string
-	SshPriKeyPath string
-	AccessKey     string
-	SecretKey     string
-	ConfigPath    string
-	IPFS          string
+	Name         string
+	Region       string
+	InstanceType string
+	ConfigPath   string
+	PubKeyPath   string
+	PriKeyPath   string
+	AccessKey    string
+	SecretKey    string
+	IPFS         string
 }
 
 // tfConfig generates the terraform config file for deploying to AWS.
 func (p providerAws) tfConfig(name, region, instance, ipfs string) error {
 	tf := awsTerraform{
-		Name:          name,
-		Region:        region,
-		InstanceType:  instance,
-		SshPubKey:     filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
-		SshPriKeyPath: filepath.Join(util.NodePath(name), "ssh_keypair"),
-		AccessKey:     p.accessKey,
-		SecretKey:     p.secretKey,
-		ConfigPath:    filepath.Join(util.NodePath(name), "config.json"),
-		IPFS:          ipfs,
+		Name:         name,
+		Region:       region,
+		InstanceType: instance,
+		ConfigPath:   fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
+		PubKeyPath:   fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
+		PriKeyPath:   fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair", name),
+		AccessKey:    p.accessKey,
+		SecretKey:    p.secretKey,
+		IPFS:         ipfs,
 	}
 
 	t, err := template.New("aws").Parse(awsTemplate)
@@ -97,7 +98,7 @@ resource "aws_security_group" "darknode" {
 
 resource "aws_key_pair" "darknode" {
   key_name   = "{{.Name}}"
-  public_key = file("{{.SshPubKey}}")
+  public_key = file("{{.PubKeyPath}}")
 }
 
 resource "aws_instance" "darknode" {
@@ -114,13 +115,14 @@ resource "aws_instance" "darknode" {
   provisioner "remote-exec" {
 
 	inline = [
+      "set -x",
+      "until sudo apt update; do sleep 2; done",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove",
-      "sudo apt-get update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y autoremove",
       "sudo apt-get -y install jq",
       "sudo apt-get install ufw",
       "sudo ufw limit 22/tcp",
@@ -133,7 +135,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("{{.SshPriKeyPath}}")
+      private_key = file("{{.PriKeyPath}}")
     }
   }
 
@@ -146,7 +148,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.SshPriKeyPath}}")
+      private_key = file("{{.PriKeyPath}}")
     }
   }
 
@@ -165,7 +167,7 @@ resource "aws_instance" "darknode" {
       host        = coalesce(self.public_ip, self.private_ip)
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.SshPriKeyPath}}")
+      private_key = file("{{.PriKeyPath}}")
     }
   }
 }
@@ -175,7 +177,7 @@ output "provider" {
 }
 
 output "ip" {
-  value = "${aws_instance.darknode.public_ip}"
+  value = aws_instance.darknode.public_ip
 }`
 
 // {{if .AllocationID}}
