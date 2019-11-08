@@ -28,8 +28,8 @@ type Config struct {
 	Bootstraps addr.MultiAddresses `json:"bootstraps"`
 
 	// Contract addresses
-	DarknodeRegistryAddress common.Address `json:"darknodeRegistryAddress"`
-	DarknodePaymentAddress  common.Address `json:"darknodePaymentAddress"`
+	DarknodeRegistryAddress common.Address `json:"dnrAddress"`
+	DarknodePaymentAddress  common.Address `json:"dnpAddress"`
 	ShifterRegistryAddress  common.Address `json:"shifterRegistryAddress"`
 
 	// Optional configuration
