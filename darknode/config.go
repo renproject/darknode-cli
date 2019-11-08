@@ -28,8 +28,9 @@ type Config struct {
 	Bootstraps addr.MultiAddresses `json:"bootstraps"`
 
 	// Contract addresses
-	DNRAddress             common.Address `json:"dnrAddress"`
-	ShifterRegistryAddress common.Address `json:"shifterRegistryAddress"`
+	DarknodeRegistryAddress common.Address `json:"darknodeRegistryAddress"`
+	DarknodePaymentAddress  common.Address `json:"darknodePaymentAddress"`
+	ShifterRegistryAddress  common.Address `json:"shifterRegistryAddress"`
 
 	// Optional configuration
 	HomeDir     *string         `json:"homeDir"`
@@ -47,14 +48,20 @@ func NewConfig(network Network) (Config, error) {
 
 	// Parse the config or create a new random one
 	return Config{
-		Keystore:               ks,
-		ECDSADistKeyShare:      ECDSADistKeyShare{PubKey: network.PublicKey()},
-		Network:                network,
-		Host:                   "0.0.0.0",
-		Port:                   18514,
-		Bootstraps:             network.BootstrapNodes(),
-		DNRAddress:             network.DnrAddress(),
-		ShifterRegistryAddress: network.ShiftRegistryAddress(),
+		Keystore:                ks,
+		ECDSADistKeyShare:       ECDSADistKeyShare{PubKey: network.PublicKey()},
+
+		Network:                 network,
+		Host:                    "0.0.0.0",
+		Port:                    18514,
+		Bootstraps:              network.BootstrapNodes(),
+
+		DarknodeRegistryAddress: network.DnrAddress(),
+		DarknodePaymentAddress:  network.DarknodePaymentAddress(),
+		ShifterRegistryAddress:  network.ShiftRegistryAddress(),
+
+		HomeDir:                 nil,
+		SentryDSN:               nil,
 		PeerOptions: &aw.PeerOptions{
 			DisablePeerDiscovery: true,
 		},

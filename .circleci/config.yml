@@ -33,7 +33,7 @@ commands:
                       wget https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
                       tar xvzf ghr_v0.13.0_linux_amd64.tar.gz
                       mv ghr_v0.13.0_linux_amd64/ghr ghr
-                      ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 3.0.3 ../artifacts/
+                      ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete 3.0.3 ./artifacts/
     test_env:
         description: "Push the binaries to aws s3, so that we can test before releasing."
         steps:
