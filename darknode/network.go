@@ -166,3 +166,18 @@ func (network Network) ShiftRegistryAddress() common.Address {
 		panic("unknown network")
 	}
 }
+
+func (network Network) DarknodePaymentAddress() common.Address {
+	switch network {
+	case Mainnet:
+		panic("unimplemented")
+	case Chaosnet:
+		return common.HexToAddress("0x376D835c6Dc5d06C6335915B36ffe9734D3E4faa")
+	case Testnet:
+		return common.HexToAddress("0x7e4E9ECeD2ba1EE5051C3B17dd1F81E7C1AfBFb1")
+	case Devnet:
+		return common.HexToAddress("0x1f1b1d015Fc31d425C616cC35E39e31686DA69A8")
+	default:
+		panic("unknown network")
+	}
+}
