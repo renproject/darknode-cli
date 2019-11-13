@@ -11,7 +11,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
-	version "github.com/hashicorp/go-version"
+	"github.com/hashicorp/go-version"
 	"github.com/renproject/darknode-cli/cmd/provider"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
