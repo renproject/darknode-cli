@@ -44,7 +44,7 @@ func resize(ctx *cli.Context) error {
 		replacement := fmt.Sprintf(`instance_type   = "%v"`, newSize)
 		return applyChanges(name, RegexAws, replacement)
 	case provider.NameDo:
-		replacement := fmt.Sprintf(`size       = "%v"`, newSize)
+		replacement := fmt.Sprintf(`size        = "%v"`, newSize)
 		return applyChanges(name, RegexDo, replacement)
 	case provider.NameGcp:
 		replacement := fmt.Sprintf(`machine_type = "%v"`, newSize)

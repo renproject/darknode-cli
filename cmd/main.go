@@ -25,7 +25,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "3.0.1"
+	app.Version = "3.0.4"
 
 	// Fetch latest release and check if our version is bebind.
 	checkUpdates(app.Version)
