@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/aws/aws-sdk-go v1.25.19
-	github.com/btcsuite/btcd v0.20.0-beta
+	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/ethereum/go-ethereum v1.9.6
 	github.com/fatih/color v1.7.0
 	github.com/google/go-github v17.0.0+incompatible
