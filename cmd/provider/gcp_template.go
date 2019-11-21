@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -14,9 +15,9 @@ type gcpTerraform struct {
 	Project        string
 	Zone           string
 	MachineType    string
-	SshPubKey      string
-	SshPriKey      string
 	ConfigPath     string
+	PubKeyPath     string
+	PriKeyPath     string
 	IPFS           string
 }
 
@@ -27,9 +28,9 @@ func (p providerGcp) tfConfig(name, project, zone, machine, ipfs string) error {
 		Project:        project,
 		Zone:           zone,
 		MachineType:    machine,
-		SshPubKey:      filepath.Join(util.NodePath(name), "ssh_keypair.pub"),
-		SshPriKey:      filepath.Join(util.NodePath(name), "ssh_keypair"),
-		ConfigPath:     filepath.Join(util.NodePath(name), "config.json"),
+		ConfigPath:     fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
+		PubKeyPath:     fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
+		PriKeyPath:     fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair", name),
 		IPFS:           ipfs,
 	}
 
@@ -106,19 +107,20 @@ resource "google_compute_instance" "darknode" {
   tags = ["darknode"]
 
   metadata = {
-    ssh-keys = "ubuntu:${file("{{.SshPubKey}}")}"
+    ssh-keys = "ubuntu:${file("{{.PubKeyPath}}")}"
   }
 
   provisioner "remote-exec" {
 
 	inline = [
+      "set -x",
+      "until sudo apt update; do sleep 2; done",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
-      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y auto-remove",
-      "sudo apt-get update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y autoremove",
       "sudo apt-get -y install jq",
       "sudo apt-get install ufw",
       "sudo ufw limit 22/tcp",
@@ -130,7 +132,7 @@ resource "google_compute_instance" "darknode" {
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("{{.SshPriKey}}")
+      private_key = file("{{.PriKeyPath}}")
       host        = self.network_interface[0].access_config[0].nat_ip
     }
   }
@@ -143,7 +145,7 @@ resource "google_compute_instance" "darknode" {
     connection {
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.SshPriKey}}")
+      private_key = file("{{.PriKeyPath}}")
       host        = self.network_interface[0].access_config[0].nat_ip
     }
   }
@@ -162,7 +164,7 @@ resource "google_compute_instance" "darknode" {
     connection {
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.SshPriKey}}")
+      private_key = file("{{.PriKeyPath}}")
       host        = self.network_interface[0].access_config[0].nat_ip
     }
   }
