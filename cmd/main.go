@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -184,9 +183,7 @@ func main() {
 
 // checkUpdates fetches the latest release of `darknode-cli` from github and compare the versions. It warns the user if
 // current version is older than the latest release.
-func checkUpdates(versionString string) {
-	curVer := strings.Split(versionString, "-")[0]
-
+func checkUpdates(curVer string) {
 	// Get latest release
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
