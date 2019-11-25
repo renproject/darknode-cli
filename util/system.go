@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -103,13 +104,27 @@ func RemoteRunWithUser(name, script, user string) error {
 	return session.Run(script)
 }
 
-// OpenInBrowser tries to open the url with the system default url.
+// OpenInBrowser tries to open the url with system default browser. It ignores the error if failing.
 func OpenInBrowser(url string) error {
 	switch runtime.GOOS {
 	case "darwin":
-		return SilentRun("open", url)
+		SilentRun("open", url)
 	case "linux":
-		return SilentRun("xdg-open", url)
+		if CheckWSL() {
+			SilentRun("cmd.exe", "/C", "start", url)
+		} else {
+			SilentRun("xdg-open", url)
+		}
 	}
 	return nil
 }
+
+// CheckWSL if the linux system is a Subsystem of window.
+func CheckWSL() bool {
+	file, err := ioutil.ReadFile("/proc/version")
+	if err != nil {
+		return false
+	}
+	return strings.Contains(string(file), "Microsoft")
+}
+
