@@ -3,7 +3,7 @@ BRANCH = $(shell git branch | grep \* | cut -d ' ' -f2)
 COMMIT_HASH = $(shell git describe --always --long)
 FULL_VERSION = ${MAIN_VERSION}-${BRANCH}-${COMMIT_HASH}
 
-TARGET = ./darknode_bin
+TARGET = ./darknode-cli-bin
 
 # For information on flags: https://golang.org/cmd/link/
 LDFLAGS = -s -w -X main.binaryVersion=${FULL_VERSION}
