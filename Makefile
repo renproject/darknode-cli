@@ -1,7 +1,5 @@
 MAIN_VERSION = $(shell cat ./VERSION | tr -d "[:space:]")
-BRANCH = $(shell git branch | grep \* | cut -d ' ' -f2)
-COMMIT_HASH = $(shell git describe --always --long)
-FULL_VERSION = ${MAIN_VERSION}-${BRANCH}-${COMMIT_HASH}
+FULL_VERSION = ${MAIN_VERSION}
 
 TARGET = ./darknode-cli-bin
 
