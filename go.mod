@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/aws/aws-sdk-go v1.25.19
-	github.com/btcsuite/btcd v0.20.0-beta
+	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/ethereum/go-ethereum v1.9.6
 	github.com/fatih/color v1.7.0
 	github.com/google/go-github v17.0.0+incompatible
@@ -20,5 +20,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20190923125748-758128399b1d // indirect
 	github.com/urfave/cli v1.22.1
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	google.golang.org/api v0.13.0
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 )

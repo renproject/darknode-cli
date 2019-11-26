@@ -25,7 +25,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "3.0.3"
+	app.Version = "3.0.4"
 
 	// Fetch latest release and check if our version is bebind.
 	checkUpdates(app.Version)
@@ -43,7 +43,7 @@ func main() {
 				// Digital Ocean
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 				// Google Cloud Platform
-				// GcpFlag, GcpZoneFlag, GcpCredFlag,
+				GcpFlag, GcpZoneFlag, GcpCredFlag, GcpMachineFlag,
 			},
 			Action: func(c *cli.Context) error {
 				p, err := provider.ParseProvider(c)

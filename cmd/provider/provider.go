@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -14,14 +15,16 @@ import (
 	"github.com/urfave/cli"
 )
 
-// ErrUnknownProvider is returned when user tries to deploy a darknode with an unknown cloud provider.
-var ErrUnknownProvider = errors.New("unknown cloud provider")
+var (
+	// ErrUnknownProvider is returned when user tries to deploy a darknode with an unknown cloud provider.
+	ErrUnknownProvider = errors.New("unknown cloud provider")
 
-// ErrUnsupportedInstanceType is returned when the selected instance type cannot be created to user account.
-var ErrInstanceTypeNotAvailable = errors.New("selected instance type is not available")
+	// ErrUnsupportedInstanceType is returned when the selected instance type cannot be created to user account.
+	ErrInstanceTypeNotAvailable = errors.New("selected instance type is not available")
 
-// ErrRegionNotAvailable is returned when the selected region is not available to user account.
-var ErrRegionNotAvailable = errors.New("selected region is not available")
+	// ErrRegionNotAvailable is returned when the selected region is not available to user account.
+	ErrRegionNotAvailable = errors.New("selected region is not available")
+)
 
 var (
 	NameAws = "aws"
@@ -43,9 +46,9 @@ func ParseProvider(ctx *cli.Context) (Provider, error) {
 		return NewDo(ctx)
 	}
 
-	// if ctx.Bool(NameGcp) {
-	// 	return
-	// }
+	if ctx.Bool(NameGcp) {
+		return NewGcp(ctx)
+	}
 
 	return nil, ErrUnknownProvider
 }
@@ -63,7 +66,7 @@ func GetProvider(name string) (string, error) {
 
 // initialise all files needed by deploying a new node
 func initNode(name, tags string, network darknode.Network) error {
-	if err := util.InitNodeDirectory(name, tags); err != nil {
+	if err := initNodeDirectory(name, tags); err != nil {
 		return err
 	}
 	if err := util.GenerateSshKeyAndWriteToDir(name); err != nil {
@@ -81,6 +84,31 @@ func initNode(name, tags string, network darknode.Network) error {
 	}
 	configPath := filepath.Join(util.NodePath(name), "config.json")
 	return ioutil.WriteFile(configPath, configData, 0600)
+}
+
+func initNodeDirectory(name, tags string) error {
+	if name == "" {
+		return util.ErrEmptyName
+	}
+	path := util.NodePath(name)
+
+	// Ask user to destroy the old node first if there's already a node with the name.
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("Node [%v] already exist. \nIf you want to do a fresh deployment, destroy the old one first.", name)
+	}
+
+	// Make a directory for the new node
+	if err := os.Mkdir(path, 0700); err != nil {
+		return err
+	}
+
+	// Create the `tags.out` file if not exist.
+	tagsPath := filepath.Join(path, "tags.out")
+	if _, err := os.Stat(tagsPath); err != nil {
+		return ioutil.WriteFile(tagsPath, []byte(strings.TrimSpace(tags)), 0600)
+	}
+
+	return nil
 }
 
 func runTerraform(name string) error {
