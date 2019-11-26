@@ -17,13 +17,12 @@ commands:
             - run:
                 name: Build binaries
                 command: |
-                    cd cmd
-                    go build -o darknode .
-                    mv darknode ../artifacts/darknode_linux_amd64
-                    env GOOS=linux CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc-6 CXX=aarch64-linux-gnu-g++-6 GOARCH=arm64 go build -o darknode .
-                    mv darknode ../artifacts/darknode_linux_arm
-                    env GOOS=darwin CGO_ENABLED=1 CC=o64-clang CXX=o64-clang++ GOARCH=amd64 go build -o darknode .
-                    mv darknode ../artifacts/darknode_darwin_amd64
+                    make
+                    mv $(make target_name) ./artifacts/darknode_linux_amd64
+                    env GOOS=linux CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc-6 CXX=aarch64-linux-gnu-g++-6 GOARCH=arm64 make
+                    mv $(make target_name) ./artifacts/darknode_linux_arm
+                    env GOOS=darwin CGO_ENABLED=1 CC=o64-clang CXX=o64-clang++ GOARCH=amd64 make
+                    mv $(make target_name) ./artifacts/darknode_darwin_amd64
     release:
         description: "Publish a new release"
         steps:
