@@ -16,6 +16,9 @@ import (
 	"github.com/urfave/cli"
 )
 
+// This will be populated on build
+var binaryVersion = "undefined"
+
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
@@ -25,7 +28,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = "3.0.4"
+	app.Version = binaryVersion
 
 	// Fetch latest release and check if our version is bebind.
 	checkUpdates(app.Version)
@@ -181,7 +184,6 @@ func main() {
 // checkUpdates fetches the latest release of `darknode-cli` from github and compare the versions. It warns the user if
 // current version is older than the latest release.
 func checkUpdates(curVer string) {
-
 	// Get latest release
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

@@ -127,4 +127,3 @@ func CheckWSL() bool {
 	}
 	return strings.Contains(string(file), "Microsoft")
 }
-
