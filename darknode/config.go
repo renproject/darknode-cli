@@ -48,20 +48,20 @@ func NewConfig(network Network) (Config, error) {
 
 	// Parse the config or create a new random one
 	return Config{
-		Keystore:                ks,
-		ECDSADistKeyShare:       ECDSADistKeyShare{PubKey: network.PublicKey()},
+		Keystore:          ks,
+		ECDSADistKeyShare: ECDSADistKeyShare{PubKey: network.PublicKey()},
 
-		Network:                 network,
-		Host:                    "0.0.0.0",
-		Port:                    18514,
-		Bootstraps:              network.BootstrapNodes(),
+		Network:    network,
+		Host:       "0.0.0.0",
+		Port:       18514,
+		Bootstraps: network.BootstrapNodes(),
 
 		DarknodeRegistryAddress: network.DnrAddress(),
 		DarknodePaymentAddress:  network.DarknodePaymentAddress(),
 		ShifterRegistryAddress:  network.ShiftRegistryAddress(),
 
-		HomeDir:                 nil,
-		SentryDSN:               nil,
+		HomeDir:   nil,
+		SentryDSN: nil,
 		PeerOptions: &aw.PeerOptions{
 			DisablePeerDiscovery: true,
 		},

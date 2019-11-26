@@ -46,7 +46,7 @@ func main() {
 				// Digital Ocean
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 				// Google Cloud Platform
-				// GcpFlag, GcpZoneFlag, GcpCredFlag,
+				GcpFlag, GcpZoneFlag, GcpCredFlag, GcpMachineFlag,
 			},
 			Action: func(c *cli.Context) error {
 				p, err := provider.ParseProvider(c)
