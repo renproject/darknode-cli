@@ -25,7 +25,7 @@ This will download the required binaries and install them to the `$HOME/.darknod
 
 ## Updating the tool
 
-**Before updating the Darknode-CLI, please make sure you do not have the CLI running in any terminal.**
+**Before updating the Darknode CLI, please make sure you do not have the CLI running in any terminal.**
 
 To update your Darknode CLI, open a terminal and run:
 
@@ -33,7 +33,9 @@ To update your Darknode CLI, open a terminal and run:
 curl https://www.github.com/renproject/darknode-cli/releases/latest/download/update.sh -sSfL | sh
 ```
 
-This will update your Darknode CLI to the latest version without affecting any of your deployed node. 
+> Note: make sure you are using Terraform version 0.12! To upgrade Terraform, download the executable for your operating system from https://www.terraform.io/downloads.html and copy it to `$HOME/.darknode/bin/terraform`.
+
+This will update your Darknode CLI to the latest version without affecting any of your deployed nodes.
 
 ## Usage
 
