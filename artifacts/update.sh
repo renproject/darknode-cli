@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "Updating Darknode CLI..."
+
 # Check the os type and cpu architecture
 ostype="$(uname -s)"
 cputype="$(uname -m)"
