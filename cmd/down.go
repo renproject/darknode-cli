@@ -43,7 +43,11 @@ func destroyNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	dnr, err := bindings.NewDarknodeRegistry(config.DarknodeRegistryAddress, client.EthClient())
+	dnrAddr, err:= config.DnrAddr(client.EthClient())
+	if err != nil {
+		return err
+	}
+	dnr, err := bindings.NewDarknodeRegistry(dnrAddr, client.EthClient())
 	if err != nil {
 		return err
 	}
@@ -223,7 +227,7 @@ func checkRegistered(dnr *bindings.DarknodeRegistry, addr common.Address) error 
 	if registered {
 		color.Red("Your node hasn't been deregistered")
 		color.Red("Please go to darknode command center to deregister your darknode.")
-		color.Red("Please try again after you fully deregister your node")
+		return fmt.Errorf("Please try again after you fully deregister your node")
 	}
 	return nil
 }

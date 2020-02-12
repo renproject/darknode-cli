@@ -32,10 +32,6 @@ var (
 		Name:  "file",
 		Usage: "path of the script file to run by the darknode",
 	}
-	UpdateConfigFlag = cli.BoolFlag{
-		Name:  "config, c",
-		Usage: "An optional configuration file used to update the configuration",
-	}
 	ForceFlag = cli.BoolFlag{
 		Name:  "force, f",
 		Usage: "Force destruction without interactive prompts",

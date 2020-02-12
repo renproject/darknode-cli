@@ -27,7 +27,8 @@ var (
 	ErrUnknownDarknode = errors.New("unknown darknode name")
 )
 
-// ParseNodesFromNameAndTags returns the darknode names which satisfies the name requirements or the tag requirements.
+// ParseNodesFromNameAndTags returns the darknode names which satisfies the name
+// requirements or the tag requirements.
 func ParseNodesFromNameAndTags(name, tags string) ([]string, error) {
 	if name == "" && tags == "" {
 		return nil, ErrEmptyNameAndTags
