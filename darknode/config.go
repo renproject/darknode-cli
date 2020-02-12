@@ -92,9 +92,9 @@ type GeneralConfig struct {
 // DnrAddr returns the darknode registry contract address from the config. If
 // only the protocol address is specified, it will try read the dnr address from
 // the protocol contract.
-func (config GeneralConfig) DnrAddr(client *ethclient.Client) (common.Address, error){
-	if bytes.Equal(config.DarknodeRegistryAddress.Bytes(), common.Address{}.Bytes()){
-		protocol, err:= bindings.NewProtocol(config.ProtocolAddress, client)
+func (config GeneralConfig) DnrAddr(client *ethclient.Client) (common.Address, error) {
+	if bytes.Equal(config.DarknodeRegistryAddress.Bytes(), common.Address{}.Bytes()) {
+		protocol, err := bindings.NewProtocol(config.ProtocolAddress, client)
 		if err != nil {
 			return common.Address{}, err
 		}

@@ -43,7 +43,7 @@ func destroyNode(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	dnrAddr, err:= config.DnrAddr(client.EthClient())
+	dnrAddr, err := config.DnrAddr(client.EthClient())
 	if err != nil {
 		return err
 	}
