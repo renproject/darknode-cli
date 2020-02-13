@@ -45,7 +45,7 @@ func updateServiceStatus(ctx *cli.Context, cmd string) error {
 		if errs[i] == nil {
 			color.Green("[%v] has been %v.", nodes[i], message)
 		} else {
-			color.Red("failed to %v [%v]: %v", script, nodes[i], err)
+			color.Red("failed to %v [%v]: %v", script, nodes[i], errs[i])
 		}
 	})
 	return util.HandleErrs(errs)

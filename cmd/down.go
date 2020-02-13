@@ -73,7 +73,7 @@ func destroyNode(ctx *cli.Context) error {
 		}
 
 		// Last time confirm with user.
-		fmt.Println("Do you really want to destroy your darknode? (Yes/No)")
+		fmt.Println("Are you sure you want to destroy your Darknode? (y/N)")
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		input := strings.ToLower(strings.TrimSpace(text))
