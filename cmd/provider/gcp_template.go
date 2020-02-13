@@ -114,19 +114,19 @@ resource "google_compute_instance" "darknode" {
 
 	inline = [
       "set -x",
-      "until sudo apt update; do sleep 2; done",
+      "until sudo apt update; do sleep 4; done",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y autoremove",
-      "sudo apt-get -y install jq",
-      "sudo apt-get install ufw",
+      "until sudo apt-get install ufw; do sleep 4; done",
       "sudo ufw limit 22/tcp",
       "sudo ufw allow 18514/tcp", 
       "sudo ufw allow 18515/tcp", 
       "sudo ufw --force enable",
+      "until sudo apt-get -y install jq; do sleep 4; done",
 	]
 
     connection {

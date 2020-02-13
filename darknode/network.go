@@ -114,22 +114,22 @@ func (network Network) BootstrapNodes() []addr.MultiAddress {
 		b10, _ := addr.NewSignedMultiAddressFromString("/ip4/54.206.68.198/tcp/18514/ren/8MKHfAVy5UY8E5DG9CwQdxcSTYx71L", "yRyiSNex2MfpsZqIcenGQFqASsiG4gG7GHlndM2aIUh7qDPjrK7zexnulf4lkO1tHJ7fNs0/fvyg7VLq6Ju90gE=")
 		b11, _ := addr.NewSignedMultiAddressFromString("/ip4/52.47.59.114/tcp/18514/ren/8MK1Uw3YSiK6qPXwKuLYNiFR1f2ByX", "PvPnmEsqLZZ1MBR5q6OV7kId5HhtreND3sbsNAcm/AMZ/WnLphpVodqMoWPPZrM2HgD9Oyib6OFIzavj3YO0JQE=")
 		b12, _ := addr.NewSignedMultiAddressFromString("/ip4/54.206.71.153/tcp/18514/ren/8MGbx8WcfkTaeHGX13VtDX4o2764R6", "zIyk9Q4bVyOOiJ9rT9ML1LK7vrxDYlgp/dGAkp0xxoMlV9oX0PLcw8le5d3iBHeYzXoFqdPV72TXSljH6cBSHQE=")
-		b13, _ := addr.NewSignedMultiAddressFromString("/ip4/35.180.181.6/tcp/18514/ren/8MHGc7XQSFJqaKTaxiDnTMW496qBGL", "TosgLLMSj04rKrrnIpbkJoDN0E1UqfnLORuYs90GuMU8oUvBaI7dhNRLTfv0i7pyLCa2LSgsYNyWZ4bNOHSJ0QA=")
+		b13, _ := addr.NewSignedMultiAddressFromString("/ip4/35.180.11.123/tcp/18514/ren/8MHGc7XQSFJqaKTaxiDnTMW496qBGL", "vwHHoI2vVLqW1wdNkc8sA4M8OU9Jm1lFdajBCibofKRlCE+kvx4dB+gDeEMbp0ikkDYMLb0FExXZ7tacP7XsqQE=")
 		bootstraps = append(bootstraps, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13)
 	case Devnet:
-		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/165.22.219.22/tcp/18514/ren/8MJjieFyX3bXB7kqPdQJiuFroKMjCa", "oqvHbUhGhsnEwZ0iBI9NxTglMTirFehiD0r9D5scYXwCAiheWHaMrr433lhk8ZqsoDXpgKBFYi7hO0EykCM+JwE=")
-		b2, _ := addr.NewSignedMultiAddressFromString("/ip4/159.203.177.223/tcp/18514/ren/8MGCtJ26XBZqLuYqshh14NHf1otmwc", "sfsJ9QGPA5anlU0uf7yG04musYqZgewEtak1uio4GRVtEhQ5kZUqoWW4Xj9Nmdypq3sE7+99XoojXmdS/XULewE=")
-		b3, _ := addr.NewSignedMultiAddressFromString("/ip4/165.22.233.100/tcp/18514/ren/8MGMwMxVzjh54S5BoTMGkEnyEyDFj5", "XGGvArLgA83G3wgeS6ZAOioPOf/sOJ+5omLCuHUwhb0VOQtg1VgWb597BEVhxh+5XD99DBo2zxjCwG3XGrSoXQA=")
-		b4, _ := addr.NewSignedMultiAddressFromString("/ip4/128.199.194.237/tcp/18514/ren/8MK9QTLA9XzptS9tdx5Je7BR5z9aen", "9oAvjlB1FJlskNM81I5ws9FsgrvqY+TWFy8wRoj19O1gHaxceR+PnYAN+Di/yEeHJ4D+qydX2h+a2N5E0CkhlgE=")
-		b5, _ := addr.NewSignedMultiAddressFromString("/ip4/159.65.218.182/tcp/18514/ren/8MJ3r6FwD5inuoCfHNJdBKzsBLJsDC", "1hwlAT7B6AS2QNzqf2/nOwkVNEY4ocg1Ede10KQe5rRd4hXGCuvKzp64IGgXzkLqwTf2HA3sUyeHDmB8RByFhwA=")
-		b6, _ := addr.NewSignedMultiAddressFromString("/ip4/142.93.172.163/tcp/18514/ren/8MHSgJ5eqebETYN7kd69gKakMZE9Ht", "U5A5bIze2cgO+SzqoMkGkihTOpRHoOZ6o7/yT30NsQJmTYCZfMBax05HPmSiDMz9kdzb9Ngfg2eFJqDEFttraQE=")
-		b7, _ := addr.NewSignedMultiAddressFromString("/ip4/54.233.186.124/tcp/18514/ren/8MJVSvCFo2zj7UNsr4ZMh6h3Bi4iB9", "Rto4k5x4TxPplY8y0uO2ksnQBpJHcrVHYw0wH3H699tMV0nt2qBPaWC4Rx6sHF/oGp1P/zxodD34uBKhmjuwmgE=")
-		b8, _ := addr.NewSignedMultiAddressFromString("/ip4/13.250.39.106/tcp/18514/ren/8MKVi5oAw1ULe9qpzMR8yLmGbSVeUb", "HEhzef0qKQgbhkJKeI51wXaJ/2OieifLc9czo2ANgow0ywRnIg0D5Up4zOQfLFGqKsJCP4UusPKMj8eqXObOwAE=")
-		b9, _ := addr.NewSignedMultiAddressFromString("/ip4/35.183.132.51/tcp/18514/ren/8MJjhHRyk5QjZsSDvcCJAzjat98BVu", "LjvRDJZWxGr/F41qmwG+GEAgX19uS4TrnxGiwmDiWrtjpSh7jJbyrjyhUF7u7QjPGTI/gDL8QtLM0frVJtLk4gE=")
-		b10, _ := addr.NewSignedMultiAddressFromString("/ip4/34.242.102.128/tcp/18514/ren/8MKbsQfDSNtnaH4JE7s2ewpCVgrSMJ", "d3xDdKFNeTX6cC297klU0euBLuUPbMyQ4MvIvMfZvrlkxXbalAU7zKucN4NzVhx+NpNUEwFffc+Vmih86XEingA=")
-		b11, _ := addr.NewSignedMultiAddressFromString("/ip4/52.77.226.237/tcp/18514/ren/8MHDjCSqpD1Kc8qPpty3ApiJHmzMbR", "lkNpaqFbtlUlKWJsM5AZm4tiAERb4Gt8iZRzzXsNvUtd9WnthBXvIEYTW+3F5Ac83Nga/HnikosVimdiGYXu3AE=")
-		b12, _ := addr.NewSignedMultiAddressFromString("/ip4/52.63.198.228/tcp/18514/ren/8MGx5J9M2qpUDvaGEqi4ABAb4ACKyx", "64thzydG6WjNeSOd11G5CoNp179vicGrzsjLR/tpCIxVP0YSO2RjdnyqwLNSaW9x1beOdRX3ISTxy28W2drcuwA=")
-		b13, _ := addr.NewSignedMultiAddressFromString("/ip4/18.185.81.195/tcp/18514/ren/8MKT3RBR1ZHTMU6ha8pdDDF4TgyDCq", "O3ILS5uTz3TopMaGZpx9fvNBlTX3zx3CNo/WFzTQggV65N1evYeZkFflF6zu+rztEwLf3x9jwzdxVccs8HqfZQA=")
+		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/165.22.219.22/tcp/18514/ren/8MHFSbCH9kGSdUhb81R95VbW7NyH1s", "9/y9N/wJ9fgs0WMAmkDgYQs0YceyHSRX54VkNQA9RdYNwYyOppjEDN5/bLAo6epKAUfX4PygNV4MzAB0duCtlwE=")
+		b2, _ := addr.NewSignedMultiAddressFromString("/ip4/159.203.177.223/tcp/18514/ren/8MKBEcM3GUgamumzMgAZMgc4YFqgdi", "6HxkVUS6smJgle6ih5I1jEaQsyOZ+ppV+4KFyY8Gorgmh8OQehRbqi9Xt/HSvW1f28XI796vcaJ2R9WK8tVRcQA=")
+		b3, _ := addr.NewSignedMultiAddressFromString("/ip4/165.22.233.100/tcp/18514/ren/8MJ7vqWk8MNzQ5bMY612k58vtEhVUp", "fVizw0+D0oOIhF//Elhlu73PXhKi8VMTgKbfF+3yRINEniyaK3VpqfDPTRM11rEVRyG89Q7THxXs2/m7tCxiywE=")
+		b4, _ := addr.NewSignedMultiAddressFromString("/ip4/128.199.194.237/tcp/18514/ren/8MJNg7V2BFj3WwLVe13X9qZLbmYsG1", "Q2cbVzCAE1nBqbkvh4NzIffQNvHmTElLNAwUfbh/cKNa7v3jggI5ypRZwpgYwRbFieJfP3UjKu/JvuQam+6jHwA=")
+		b5, _ := addr.NewSignedMultiAddressFromString("/ip4/159.65.218.182/tcp/18514/ren/8MJrmFLQ2b244rKsHpa5gukPhtUUVe", "TgIJgKbs8eIdgW2OaRZ71G7D7rLFsV7R9nadCXYI6MBeNtwBFtMk1YhZ4zsNw6CcUuWTiwvGhcyV4Fab6TfYlgE=")
+		b6, _ := addr.NewSignedMultiAddressFromString("/ip4/142.93.172.163/tcp/18514/ren/8MH1sWW9zVVDgtkuhJum59ixtJbsrs", "NHfLrg6iSXzeaFJWSk/dYDpz6Wgsa2s6HaowgdN5SLk3VSDnd4G1qoM79fvOO/IeLqvw+26KLN4CA1nsWVZKwAE=")
+		b7, _ := addr.NewSignedMultiAddressFromString("/ip4/54.233.186.124/tcp/18514/ren/8MHLNdxeQsLvfJn7SZDXRNb22Yxj86", "B64SXN0bGiVltdrVHE7LYxdyB/r2X0faWSq58P7GIUkdaoV3KqjQFrt+tiQ6B0O4L9lQMtrM/Kh3yH3C1sWmhAE=")
+		b8, _ := addr.NewSignedMultiAddressFromString("/ip4/13.250.39.106/tcp/18514/ren/8MGLtEHM7ePXsbsU2G8Uht2iu9HYrU", "h0ffp9XH98DpG7mv+YbSQrlDh74VZCZSXp45c19bOPVIZbFEZt80iz0Yyjw0GVIIy8BrKahdVSCVih1xfy7LhAA=")
+		b9, _ := addr.NewSignedMultiAddressFromString("/ip4/35.183.132.51/tcp/18514/ren/8MJHpwP6A6dTTxf2pbLHTsA4FwipbP", "Zh+rYVNh4OYcpgHcHs9HcfnlLp7jADzLm2DOidhW/40M2zLIOUQ7d3X8nXp9Ty5fTRYSFra+4kTAbe0wjgI/AwA=")
+		b10, _ := addr.NewSignedMultiAddressFromString("/ip4/34.242.102.128/tcp/18514/ren/8MGFYeCggDmVEssjuXwxmxag39c35d", "vZHZPgrJips/xnAvhXT+TPDCRi+ymEyHDZ72o7RtAh9cAGlKmaCUO8ESAH47+iZAo/0JusulRfsSVPmnWJX58wA=")
+		b11, _ := addr.NewSignedMultiAddressFromString("/ip4/52.77.226.237/tcp/18514/ren/8MGrCmU4vux78gMfYn2Sf3YdiktKza", "RNwvA22wcciIX3FJYnTZOvVcAcmb9/sAqibwa2AY/hBNi/lQGroJc2rBKhkAZumrlt6bEwaUAjlLkP/+1id71AA=")
+		b12, _ := addr.NewSignedMultiAddressFromString("/ip4/52.63.198.228/tcp/18514/ren/8MJ9DJxWxDT71zq2qKHY22guPX2PFm", "QzrLe5tBpm05OS6HMyBFzbopFZu1ydaNWbkPNYrhmg0HSR8UGZ9gST940e6VXU48cL9XAoJ3C+u85ZbodoYB1AA=")
+		b13, _ := addr.NewSignedMultiAddressFromString("/ip4/18.185.81.195/tcp/18514/ren/8MJ1k1Hp65mNhd9U29mHuXPQjTwJZU", "G2F54OFkbhz6z7YKQGoUuYhaXZPty4/GrPIkC5TKV1JVArPYRLv+arNTgRjJLSDw/2U/z748VpM3W8TkI85N2AA=")
 		bootstraps = append(bootstraps, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13)
 	default:
 		panic("unknown network")
@@ -137,46 +137,16 @@ func (network Network) BootstrapNodes() []addr.MultiAddress {
 	return bootstraps
 }
 
-func (network Network) DnrAddress() common.Address {
+func (network Network) ProtocolAddr() common.Address {
 	switch network {
 	case Mainnet:
 		panic("unimplemented")
 	case Chaosnet:
-		return common.HexToAddress("0xA1eb04Db7a0ffd6e458b1868660a0edAF8199Fa9")
+		return common.HexToAddress("0xeF4de0E97D92757520D78c4d49d8151964f6a85B")
 	case Testnet:
-		return common.HexToAddress("0x39238ddCc6b301068f6D5B3DCa3A981EB20ba9A3")
+		return common.HexToAddress("0x8E28748620EA6f1285761AF41f311Cf6d05b188B")
 	case Devnet:
-		return common.HexToAddress("0x6E1a6b85f05bfec5c24C7a26E302cB28e639651c")
-	default:
-		panic("unknown network")
-	}
-}
-
-func (network Network) ShiftRegistryAddress() common.Address {
-	switch network {
-	case Mainnet:
-		panic("unimplemented")
-	case Chaosnet:
-		return common.HexToAddress("0x5d9bF2Bad3dD710e4D533681ed16eD1cfeAc9e6F")
-	case Testnet:
-		return common.HexToAddress("0xbA563a8510d86dE95F5a50007E180d6d4966ad12")
-	case Devnet:
-		return common.HexToAddress("0xc7B310c18D78f175812CFfD8896d3cC959aC28d6")
-	default:
-		panic("unknown network")
-	}
-}
-
-func (network Network) DarknodePaymentAddress() common.Address {
-	switch network {
-	case Mainnet:
-		panic("unimplemented")
-	case Chaosnet:
-		return common.HexToAddress("0x376D835c6Dc5d06C6335915B36ffe9734D3E4faa")
-	case Testnet:
-		return common.HexToAddress("0x7e4E9ECeD2ba1EE5051C3B17dd1F81E7C1AfBFb1")
-	case Devnet:
-		return common.HexToAddress("0x1f1b1d015Fc31d425C616cC35E39e31686DA69A8")
+		return common.HexToAddress("0x1deb773b50b66b0e65e62e41380355a1a2bed2e1")
 	default:
 		panic("unknown network")
 	}

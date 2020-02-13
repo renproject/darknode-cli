@@ -5,6 +5,8 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+echo "Installing Darknode CLI..."
+
 # Install unzip if command not found
 if ! [ -x "$(command -v unzip)" ];then
   sudo apt-get install unzip

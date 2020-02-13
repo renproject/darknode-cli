@@ -117,7 +117,7 @@ resource "aws_instance" "darknode" {
 
 	inline = [
       "set -x",
-      "until sudo apt update; do sleep 2; done",
+      "until sudo apt update; do sleep 4; done",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",

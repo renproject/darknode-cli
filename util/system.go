@@ -22,6 +22,18 @@ func NodePath(name string) string {
 	return filepath.Join(Directory, "darknodes", name)
 }
 
+// BackUpConfig copies the config file of the node to the backup folder under
+// .darknode directory in case something unexpected happens.
+func BackUpConfig(name string) error{
+	path := NodePath(name)
+	backupFolder := filepath.Join(Directory, "backup", name)
+	if err := Run("mkdir", "-p", backupFolder); err != nil {
+		return err
+	}
+	backup := fmt.Sprintf("cp %v %v", filepath.Join(path, "config.json"), backupFolder)
+	return Run("bash", "-c", backup)
+}
+
 // run the command and pipe the output to the stdout
 func Run(name string, args ...string) error {
 	cmd := exec.Command(name, args...)

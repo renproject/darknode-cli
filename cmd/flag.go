@@ -17,24 +17,20 @@ var (
 	}
 	ScriptFlag = cli.StringFlag{
 		Name:  "script",
-		Usage: "path of the script file you want to run",
+		Usage: "A `string` containing commands you want the Darknode to run",
 	}
 	NetworkFlag = cli.StringFlag{
 		Name:  "network",
 		Value: "chaosnet",
-		Usage: "Darkpool network of your node (default: chaosnet)",
+		Usage: "Network of your Darknode (default: chaosnet)",
 	}
 	AddressFlag = cli.StringFlag{
 		Name:  "address",
-		Usage: "Ethereum address you want to withdraw the tokens to.",
+		Usage: "Ethereum address you want to withdraw the tokens to",
 	}
 	FileFlag = cli.StringFlag{
 		Name:  "file",
-		Usage: "path of the script file to run by the darknode",
-	}
-	UpdateConfigFlag = cli.BoolFlag{
-		Name:  "config, c",
-		Usage: "An optional configuration file used to update the configuration",
+		Usage: "Path of the script file you want the Darknode to run",
 	}
 	ForceFlag = cli.BoolFlag{
 		Name:  "force, f",
@@ -64,10 +60,6 @@ var (
 		Name:  "aws-instance",
 		Value: "t3.micro",
 		Usage: "An optional AWS EC2 instance type (default: t3.micro)",
-	}
-	AwsElasticIpFlag = cli.StringFlag{
-		Name:  "aws-elastic-ip",
-		Usage: "An optional allocation ID for an elastic IP address",
 	}
 	AwsProfileFlag = cli.StringFlag{
 		Name:  "aws-profile",
@@ -105,7 +97,7 @@ var (
 	}
 	GcpCredFlag = cli.StringFlag{
 		Name:  "gcp-credentials",
-		Usage: "Service Account credential file (JSON) to be used",
+		Usage: "Path of the Service Account credential file (JSON) to be used",
 	}
 	GcpMachineFlag = cli.StringFlag{
 		Name:  "gcp-machine",
