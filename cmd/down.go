@@ -40,13 +40,13 @@ const (
 func (s status) err() string {
 	switch s {
 	case pendingRegistration:
-		return "Node currently in pending registration status."
+		return "Darknode is currently pending registration."
 	case registered:
-		return "Node is still registered."
+		return "Darknode is still registered."
 	case pendingDeregistration:
-		return "Node currently in pending deregistration status."
+		return "Darknode is currently pending deregistration."
 	case notRefunded:
-		return "Nodes hasn't been refunded."
+		return "Darknode bond has not been withdrawn."
 	default:
 		return ""
 	}
@@ -62,12 +62,12 @@ func destroyNode(ctx *cli.Context) error {
 	if !force {
 		st, err := nodeStatus(name)
 		if err != nil {
-			color.Red("Cannot get your node registration status, err = %v", err)
+			color.Red("Failed to get Darknode registration status: %v", err)
 		}
 		switch st {
 		case pendingRegistration, pendingDeregistration, registered, notRefunded:
 			color.Red(st.err())
-			color.Red("Please try again after fully node has been fully deregistered and refunded.")
+			color.Red("Please try again once your Darknode has been fully deregistered and refunded.")
 			return nil
 		default:
 		}
@@ -87,7 +87,7 @@ func destroyNode(ctx *cli.Context) error {
 		return err
 	}
 
-	color.Green("Destroying your darknode ...")
+	color.Green("Destroying your Darknode...")
 	destroy := fmt.Sprintf("cd %v && terraform destroy --force && cd .. && rm -rf %v", path, name)
 	return util.Run("bash", "-c", destroy)
 }
