@@ -1,21 +1,26 @@
 package darknode
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"encoding/json"
 	"math/big"
 	"os"
-	"path/filepath"
 
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/renproject/aw"
 	"github.com/renproject/darknode-cli/darknode/addr"
+	"github.com/renproject/darknode-cli/darknode/bindings"
 	"github.com/renproject/darknode-cli/darknode/keystore"
 )
 
 // Config is an in-memory description of the configuration file that will be
-// loaded by a Darknode during boot.
+// loaded by a Darknode during boot. Comparing to the `GeneralConfig` struct,
+// this will always be the latest version of darknode config which we use to
+// generate new config when deploying.
 type Config struct {
 	// Private configuration
 	Keystore          keystore.Keystore `json:"keystore"`
@@ -28,14 +33,14 @@ type Config struct {
 	Bootstraps addr.MultiAddresses `json:"bootstraps"`
 
 	// Contract addresses
-	DarknodeRegistryAddress common.Address `json:"dnrAddress"`
-	DarknodePaymentAddress  common.Address `json:"dnpAddress"`
-	ShifterRegistryAddress  common.Address `json:"shifterRegistryAddress"`
+	ProtocolAddress common.Address `json:"protocolAddress"`
 
 	// Optional configuration
-	HomeDir     *string         `json:"homeDir"`
-	SentryDSN   *string         `json:"sentryDSN"`
-	PeerOptions *aw.PeerOptions `json:"peerOptions"`
+	HomeDir       *string                `json:"homeDir"`
+	SentryDSN     *string                `json:"sentryDSN"`
+	PeerOptions   *aw.PeerOptions        `json:"peerOptions"`
+	ClientOptions *aw.TCPConnPoolOptions `json:"clientOptions"`
+	ServerOptions *aw.TCPServerOptions   `json:"serverOptions"`
 }
 
 // NewConfig generate a new config.
@@ -45,6 +50,7 @@ func NewConfig(network Network) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	home := "/home/darknode/.darknode"
 
 	// Parse the config or create a new random one
 	return Config{
@@ -56,41 +62,60 @@ func NewConfig(network Network) (Config, error) {
 		Port:       18514,
 		Bootstraps: network.BootstrapNodes(),
 
-		DarknodeRegistryAddress: network.DnrAddress(),
-		DarknodePaymentAddress:  network.DarknodePaymentAddress(),
-		ShifterRegistryAddress:  network.ShiftRegistryAddress(),
+		ProtocolAddress: network.ProtocolAddr(),
 
-		HomeDir:   nil,
+		HomeDir:   &home,
 		SentryDSN: nil,
 		PeerOptions: &aw.PeerOptions{
-			DisablePeerDiscovery: true,
+			DisablePeerDiscovery: false,
 		},
 	}, nil
 }
 
+// GeneralConfig is the config struct which contains the common fields across
+// all versions of darknode configs.
+type GeneralConfig struct {
+	// Private configuration
+	Keystore          keystore.Keystore `json:"keystore"`
+	ECDSADistKeyShare ECDSADistKeyShare `json:"ecdsaDistKeyShare"`
+
+	// Public configuration
+	Network    Network             `json:"network"`
+	Host       string              `json:"host"`
+	Port       int                 `json:"port"`
+	Bootstraps addr.MultiAddresses `json:"bootstraps"`
+
+	// Contract addresses
+	ProtocolAddress         common.Address `json:"protocolAddress"`
+	DarknodeRegistryAddress common.Address `json:"dnrAddress"`
+}
+
+// DnrAddr returns the darknode registry contract address from the config. If
+// only the protocol address is specified, it will try read the dnr address from
+// the protocol contract.
+func (config GeneralConfig) DnrAddr(client *ethclient.Client) (common.Address, error) {
+	if bytes.Equal(config.DarknodeRegistryAddress.Bytes(), common.Address{}.Bytes()) {
+		protocol, err := bindings.NewProtocol(config.ProtocolAddress, client)
+		if err != nil {
+			return common.Address{}, err
+		}
+		return protocol.DarknodeRegistry(&bind.CallOpts{})
+	}
+	return config.DarknodeRegistryAddress, nil
+}
+
 // NewConfigFromJSONFile parses a json file that contains the config
 // options specified by Config.
-func NewConfigFromJSONFile(filename string) (Config, error) {
+func NewConfigFromJSONFile(filename string) (GeneralConfig, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		return Config{}, err
+		return GeneralConfig{}, err
 	}
 	defer file.Close()
 
-	conf := Config{}
-	if err := json.NewDecoder(file).Decode(&conf); err != nil {
-		return Config{}, err
-	}
-
-	if conf.HomeDir == nil {
-		homeDir := filepath.Join(os.Getenv("HOME"), ".darknode")
-		conf.HomeDir = &homeDir
-	}
-	if conf.PeerOptions == nil {
-		conf.PeerOptions = &aw.PeerOptions{}
-	}
-
-	return conf, nil
+	var conf GeneralConfig
+	err = json.NewDecoder(file).Decode(&conf)
+	return conf, err
 }
 
 // The ECDSADistKeyShare is a temporary object used to store a Shamir's secret

@@ -27,7 +27,8 @@ var (
 	ErrUnknownDarknode = errors.New("unknown darknode name")
 )
 
-// ParseNodesFromNameAndTags returns the darknode names which satisfies the name requirements or the tag requirements.
+// ParseNodesFromNameAndTags returns the darknode names which satisfies the name
+// requirements or the tag requirements.
 func ParseNodesFromNameAndTags(name, tags string) ([]string, error) {
 	if name == "" && tags == "" {
 		return nil, ErrEmptyNameAndTags
@@ -52,6 +53,12 @@ func ValidateNodeName(name string) error {
 		}
 	}
 	return ErrUnknownDarknode
+}
+
+// Config returns the config of the node with given name.
+func Config(name string) (darknode.GeneralConfig, error){
+	path := filepath.Join(NodePath(name), "config.json")
+	return darknode.NewConfigFromJSONFile(path)
 }
 
 // ID gets the ID of the node with given name.

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/fatih/color"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
 	"github.com/urfave/cli"
@@ -21,14 +22,14 @@ func updateServiceStatus(ctx *cli.Context, cmd string) error {
 	name := ctx.Args().First()
 
 	// Get the script we want to run depends on the command.
-	var script string
+	var script, message string
 	switch cmd {
 	case "start":
-		script = ActionStart
+		script, message = ActionStart, "started"
 	case "stop":
-		script = ActionStop
+		script, message = ActionStop, "stopped"
 	case "restart":
-		script = ActionRestart
+		script, message = ActionRestart, "restarted"
 	default:
 		panic(fmt.Sprintf("invalid switch command = %v", cmd))
 	}
@@ -41,6 +42,11 @@ func updateServiceStatus(ctx *cli.Context, cmd string) error {
 	errs := make([]error, len(nodes))
 	phi.ParForAll(nodes, func(i int) {
 		errs[i] = util.RemoteRun(nodes[i], script)
+		if errs[i] == nil {
+			color.Green("[%v] has been %v.", nodes[i], message)
+		} else {
+			color.Red("failed to %v [%v]: %v", script, nodes[i], errs[i])
+		}
 	})
 	return util.HandleErrs(errs)
 }

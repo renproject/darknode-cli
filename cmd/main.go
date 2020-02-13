@@ -30,7 +30,7 @@ func main() {
 	app.Usage = "A command-line tool for managing Darknodes."
 	app.Version = binaryVersion
 
-	// Fetch latest release and check if our version is bebind.
+	// Fetch latest release and check if our version is behind.
 	checkUpdates(app.Version)
 
 	// Define sub-commands
@@ -68,7 +68,7 @@ func main() {
 		{
 			Name:  "update",
 			Usage: "Update your Darknodes to the latest software and configuration",
-			Flags: []cli.Flag{TagsFlag, UpdateConfigFlag},
+			Flags: []cli.Flag{TagsFlag},
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
 			},

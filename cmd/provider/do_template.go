@@ -70,17 +70,17 @@ resource "digitalocean_droplet" "darknode" {
 	
 	inline = [
       "set -x",
-      "until sudo apt update; do sleep 2; done",
-      "until sudo apt-get -y update; do sleep 2; done",
+      "until sudo apt update; do sleep 4; done",
+      "until sudo apt-get -y update; do sleep 4; done",
       "sudo adduser darknode --gecos \",,,\" --disabled-password",
       "sudo rsync --archive --chown=darknode:darknode ~/.ssh /home/darknode",
 	  "curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash",
-      "sudo apt-get install ufw",
+      "until sudo apt-get install ufw; do sleep 4; done",
       "sudo ufw limit 22/tcp",
       "sudo ufw allow 18514/tcp", 
       "sudo ufw allow 18515/tcp", 
       "sudo ufw --force enable",
-      "until sudo apt-get -y install jq; do sleep 2; done",
+      "until sudo apt-get -y install jq; do sleep 4; done",
 	]
 
     connection {
