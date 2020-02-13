@@ -50,6 +50,7 @@ func NewConfig(network Network) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	home := "/home/darknode/.darknode"
 
 	// Parse the config or create a new random one
 	return Config{
@@ -63,7 +64,7 @@ func NewConfig(network Network) (Config, error) {
 
 		ProtocolAddress: network.ProtocolAddr(),
 
-		HomeDir:   nil,
+		HomeDir:   &home,
 		SentryDSN: nil,
 		PeerOptions: &aw.PeerOptions{
 			DisablePeerDiscovery: false,

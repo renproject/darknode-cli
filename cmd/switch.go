@@ -43,7 +43,7 @@ func updateServiceStatus(ctx *cli.Context, cmd string) error {
 	phi.ParForAll(nodes, func(i int) {
 		errs[i] = util.RemoteRun(nodes[i], script)
 		if errs[i] == nil {
-			color.Green("[%v] has been %v", nodes[i], message)
+			color.Green("[%v] has been %v.", nodes[i], message)
 		} else {
 			color.Red("fail to %v [%v], err = %v", script, nodes[i])
 		}

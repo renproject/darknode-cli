@@ -55,6 +55,12 @@ func ValidateNodeName(name string) error {
 	return ErrUnknownDarknode
 }
 
+// Config returns the config of the node with given name.
+func Config(name string) (darknode.GeneralConfig, error){
+	path := filepath.Join(NodePath(name), "config.json")
+	return darknode.NewConfigFromJSONFile(path)
+}
+
 // ID gets the ID of the node with given name.
 func ID(name string) (addr.ID, error) {
 	path := filepath.Join(NodePath(name), "config.json")
