@@ -190,7 +190,6 @@ func checkUpdates(curVer string) {
 	client := github.NewClient(nil)
 	release, _, err := client.Repositories.GetLatestRelease(ctx, "renproject", "darknode-cli")
 	if err != nil {
-		color.Red("cannot check latest release, err = %v", err)
 		return
 	}
 

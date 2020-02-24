@@ -76,8 +76,7 @@ func NewConfig(network Network) (Config, error) {
 // all versions of darknode configs.
 type GeneralConfig struct {
 	// Private configuration
-	Keystore          keystore.Keystore `json:"keystore"`
-	ECDSADistKeyShare ECDSADistKeyShare `json:"ecdsaDistKeyShare"`
+	Keystore keystore.Keystore `json:"keystore"`
 
 	// Public configuration
 	Network    Network             `json:"network"`

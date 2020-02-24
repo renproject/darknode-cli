@@ -56,7 +56,7 @@ func ValidateNodeName(name string) error {
 }
 
 // Config returns the config of the node with given name.
-func Config(name string) (darknode.GeneralConfig, error){
+func Config(name string) (darknode.GeneralConfig, error) {
 	path := filepath.Join(NodePath(name), "config.json")
 	return darknode.NewConfigFromJSONFile(path)
 }
@@ -118,21 +118,14 @@ func GetNodesByTags(tags string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	ts := strings.Split(strings.TrimSpace(tags), ",")
 	nodes := make([]string, 0)
 	for _, f := range files {
-		tagFile := filepath.Join(Directory, "darknodes", f.Name(), "tags.out")
-		tags, err := ioutil.ReadFile(tagFile)
+		path := filepath.Join(Directory, "darknodes", f.Name(), "tags.out")
+		tagFile, err := ioutil.ReadFile(path)
 		if err != nil {
 			continue
 		}
-		haveAllTags := true
-		for i := range ts {
-			if !strings.Contains(string(tags), ts[i]) {
-				haveAllTags = false
-			}
-		}
-		if !haveAllTags {
+		if !ValidateTags(string(tagFile), tags) {
 			continue
 		}
 
@@ -143,6 +136,16 @@ func GetNodesByTags(tags string) ([]string, error) {
 	}
 
 	return nodes, nil
+}
+
+func ValidateTags(have, required string) bool {
+	tagsStr := strings.Split(strings.TrimSpace(required), ",")
+	for _, tag := range tagsStr {
+		if !strings.Contains(have, tag) {
+			return false
+		}
+	}
+	return true
 }
 
 func isDeployed(name string) bool {

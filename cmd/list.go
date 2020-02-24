@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"sync/atomic"
 
+	"github.com/fatih/color"
 	"github.com/renproject/darknode-cli/cmd/provider"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
@@ -20,7 +22,7 @@ func listAllNodes(ctx *cli.Context) error {
 	}
 
 	nodes := make([][]string, len(nodesNames))
-	errs := map[string]error{}
+	var errs int64
 	phi.ParForAll(nodesNames, func(i int) {
 		name := nodesNames[i]
 		var err error
@@ -49,10 +51,13 @@ func listAllNodes(ctx *cli.Context) error {
 			return []string{name, id.String(), ip, provider, string(tags), ethAddr.Hex()}, nil
 		}()
 		if err != nil {
-			errs[name] = err
+			color.Red("[%v] cannot get detail of the darknode, err = %v", name, err)
+			atomic.AddInt64(&errs, 1)
 		}
 	})
-	if len(errs) == len(nodesNames) {
+
+	// Check if we can find any valid nodes.
+	if atomic.LoadInt64(&errs) == int64(len(nodesNames)) {
 		return fmt.Errorf("cannot find any node")
 	}
 
