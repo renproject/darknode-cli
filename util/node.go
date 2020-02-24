@@ -118,21 +118,14 @@ func GetNodesByTags(tags string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	ts := strings.Split(strings.TrimSpace(tags), ",")
 	nodes := make([]string, 0)
 	for _, f := range files {
-		tagFile := filepath.Join(Directory, "darknodes", f.Name(), "tags.out")
-		tags, err := ioutil.ReadFile(tagFile)
+		fileName := filepath.Join(Directory, "darknodes", f.Name(), "tags.out")
+		tagFile, err := ioutil.ReadFile(fileName)
 		if err != nil {
 			continue
 		}
-		haveAllTags := true
-		for i := range ts {
-			if !strings.Contains(string(tags), ts[i]) {
-				haveAllTags = false
-			}
-		}
-		if !haveAllTags {
+		if !ValidateTags(string(tagFile), tags){
 			continue
 		}
 
@@ -143,6 +136,16 @@ func GetNodesByTags(tags string) ([]string, error) {
 	}
 
 	return nodes, nil
+}
+
+func ValidateTags(have, required string) bool {
+	tagsStr := strings.Split(strings.TrimSpace(required), ",")
+	for _, tag := range tagsStr{
+		if !strings.Contains(have, tag){
+			return false
+		}
+	}
+	return true
 }
 
 func isDeployed(name string) bool {
