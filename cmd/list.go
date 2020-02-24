@@ -57,7 +57,7 @@ func listAllNodes(ctx *cli.Context) error {
 	})
 
 	// Check if we can find any valid nodes.
-	if atomic.LoadInt64(&errs) == int64(len(nodesNames)){
+	if atomic.LoadInt64(&errs) == int64(len(nodesNames)) {
 		return fmt.Errorf("cannot find any node")
 	}
 
