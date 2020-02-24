@@ -56,7 +56,7 @@ func ValidateNodeName(name string) error {
 }
 
 // Config returns the config of the node with given name.
-func Config(name string) (darknode.GeneralConfig, error){
+func Config(name string) (darknode.GeneralConfig, error) {
 	path := filepath.Join(NodePath(name), "config.json")
 	return darknode.NewConfigFromJSONFile(path)
 }

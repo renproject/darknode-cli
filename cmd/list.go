@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/fatih/color"
 	"github.com/renproject/darknode-cli/cmd/provider"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
@@ -18,9 +19,11 @@ func listAllNodes(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	if len(nodesNames) == 0 {
+		return fmt.Errorf("cannot find any node")
+	}
 
 	nodes := make([][]string, len(nodesNames))
-	errs := map[string]error{}
 	phi.ParForAll(nodesNames, func(i int) {
 		name := nodesNames[i]
 		var err error
@@ -49,12 +52,9 @@ func listAllNodes(ctx *cli.Context) error {
 			return []string{name, id.String(), ip, provider, string(tags), ethAddr.Hex()}, nil
 		}()
 		if err != nil {
-			errs[name] = err
+			color.Red("[%v] cannot get detail of the darknode, err = %v", name, err)
 		}
 	})
-	if len(errs) == len(nodesNames) {
-		return fmt.Errorf("cannot find any node")
-	}
 
 	fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s \n", "name", "id", "ip", "provider", "tags", "ethereum address")
 	for _, node := range nodes {

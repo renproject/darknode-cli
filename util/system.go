@@ -24,7 +24,7 @@ func NodePath(name string) string {
 
 // BackUpConfig copies the config file of the node to the backup folder under
 // .darknode directory in case something unexpected happens.
-func BackUpConfig(name string) error{
+func BackUpConfig(name string) error {
 	path := NodePath(name)
 	backupFolder := filepath.Join(Directory, "backup", name)
 	if err := Run("mkdir", "-p", backupFolder); err != nil {
