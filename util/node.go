@@ -32,7 +32,7 @@ func ParseNodesFromNameAndTags(name, tags string) ([]string, error) {
 	} else if name == "" && tags != "" {
 		return GetNodesByTags(tags)
 	} else if name != "" && tags == "" {
-		return []string{name}, nil
+		return []string{name}, ValidateNodeName(name)
 	} else {
 		return nil, ErrTooManyArguments
 	}

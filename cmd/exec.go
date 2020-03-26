@@ -12,9 +12,6 @@ import (
 // execScript execute a bash script on a darknode or a set of darknodes by the tags.
 func execScript(ctx *cli.Context) error {
 	name := ctx.Args().First()
-	if err := util.ValidateNodeName(name); err != nil {
-		return err
-	}
 	tags := ctx.String("tags")
 	file := ctx.String("file")
 	script := ctx.String("script")
