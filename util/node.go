@@ -22,9 +22,6 @@ var (
 
 	// ErrEmptyName is returned when user gives an empty node name.
 	ErrEmptyName = errors.New("node name cannot be empty")
-
-	// ErrUnknownDarknode is returned when the provided darknode name is unknown to us.
-	ErrUnknownDarknode = errors.New("unknown darknode name")
 )
 
 // ParseNodesFromNameAndTags returns the darknode names which satisfies the name
@@ -52,7 +49,7 @@ func ValidateNodeName(name string) error {
 			return nil
 		}
 	}
-	return ErrUnknownDarknode
+	return fmt.Errorf("darknode [%v] not found", name)
 }
 
 // Config returns the config of the node with given name.

@@ -36,6 +36,10 @@ var (
 		Name:  "force, f",
 		Usage: "Force destruction without interactive prompts",
 	}
+	VersionFlag = cli.StringFlag{
+		Name:  "version",
+		Usage: "Version of darknode you want to upgrade to",
+	}
 )
 
 // AWS flags

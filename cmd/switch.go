@@ -20,6 +20,9 @@ var (
 func updateServiceStatus(ctx *cli.Context, cmd string) error {
 	tags := ctx.String("tags")
 	name := ctx.Args().First()
+	if err := util.ValidateNodeName(name); err != nil {
+		return err
+	}
 
 	// Get the script we want to run depends on the command.
 	var script, message string

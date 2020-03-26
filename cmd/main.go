@@ -68,7 +68,7 @@ func main() {
 		{
 			Name:  "update",
 			Usage: "Update your Darknodes to the latest software and configuration",
-			Flags: []cli.Flag{TagsFlag},
+			Flags: []cli.Flag{TagsFlag, VersionFlag},
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
 			},
@@ -79,6 +79,9 @@ func main() {
 			Usage: "SSH into one of your Darknode",
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
+				if err := util.ValidateNodeName(name); err != nil {
+					return err
+				}
 				ip, err := util.IP(name)
 				if err != nil {
 					return err
