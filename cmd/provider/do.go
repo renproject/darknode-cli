@@ -33,10 +33,16 @@ func (p providerDo) Deploy(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 
+	latestVersion, err := util.LatestReleaseVersion()
+	if err != nil {
+		return err
+	}
 	region, droplet, err := validateRegionAndDroplet(ctx)
 	if err != nil {
 		return err
 	}
+
+	// Initialization
 	network, err := darknode.NewNetwork(ctx.String("network"))
 	if err != nil {
 		return err
@@ -46,7 +52,7 @@ func (p providerDo) Deploy(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := p.tfConfig(name, region, droplet, ipfsUrl(network)); err != nil {
+	if err := p.tfConfig(name, region, droplet, latestVersion); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {

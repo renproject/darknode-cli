@@ -23,8 +23,7 @@ import (
 // generate new config when deploying.
 type Config struct {
 	// Private configuration
-	Keystore          keystore.Keystore `json:"keystore"`
-	ECDSADistKeyShare ECDSADistKeyShare `json:"ecdsaDistKeyShare"`
+	Keystore keystore.Keystore `json:"keystore"`
 
 	// Public configuration
 	Network    Network             `json:"network"`
@@ -54,9 +53,7 @@ func NewConfig(network Network) (Config, error) {
 
 	// Parse the config or create a new random one
 	return Config{
-		Keystore:          ks,
-		ECDSADistKeyShare: ECDSADistKeyShare{PubKey: network.PublicKey()},
-
+		Keystore:   ks,
 		Network:    network,
 		Host:       "0.0.0.0",
 		Port:       18514,

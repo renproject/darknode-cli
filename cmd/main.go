@@ -17,7 +17,7 @@ import (
 )
 
 // This will be populated on build
-var binaryVersion = "undefined"
+var binaryVersion = "3.0.7"
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
