@@ -67,6 +67,10 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 
+	latestVersion, err := util.LatestReleaseVersion()
+	if err != nil {
+		return err
+	}
 	region, instance, err := p.validateRegionAndInstance(ctx)
 	if err != nil {
 		return err
@@ -82,7 +86,7 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := p.tfConfig(name, region, instance, ipfsUrl(network)); err != nil {
+	if err := p.tfConfig(name, region, instance, latestVersion); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {

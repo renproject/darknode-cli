@@ -1,11 +1,8 @@
 package darknode
 
 import (
-	"crypto/ecdsa"
 	"errors"
-	"math/big"
 
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/renproject/darknode-cli/darknode/addr"
 )
@@ -43,47 +40,6 @@ func NewNetwork(network string) (Network, error) {
 		return Mainnet, nil
 	default:
 		return "", errors.New("unknown network")
-	}
-}
-
-// PublicKey returns the public key of .
-func (network Network) PublicKey() ecdsa.PublicKey {
-	var x *big.Int
-	var xOk bool
-	switch network {
-	case Mainnet:
-		panic("unimplemented")
-	case Chaosnet:
-		x, xOk = big.NewInt(0).SetString("54769503130895894163949174470748707835675520766218565814337221309492303621497", 10)
-	case Testnet:
-		x, xOk = big.NewInt(0).SetString("6258831358146983420781042002047732738577946776960027585197438124940321371484", 10)
-	case Devnet:
-		x, xOk = big.NewInt(0).SetString("15988544014143623672381260113528425219902628559557338422452853193412094205021", 10)
-	}
-	if !xOk {
-		panic("invalid x for shared public key")
-	}
-
-	var y *big.Int
-	var yOk bool
-	switch network {
-	case Mainnet:
-		panic("unimplemented")
-	case Chaosnet:
-		y, yOk = big.NewInt(0).SetString("87745967375764291795837331450616094559320177780884666147029497390497322495569", 10)
-	case Testnet:
-		y, yOk = big.NewInt(0).SetString("22471449852503869623778529670369476102885501157580830978857986155713794677963", 10)
-	case Devnet:
-		y, yOk = big.NewInt(0).SetString("18856215896348556820657579775929067367606870869895908607019381042047463166252", 10)
-	}
-	if !yOk {
-		panic("invalid y for shared public key")
-	}
-
-	return ecdsa.PublicKey{
-		Curve: btcec.S256(),
-		X:     x,
-		Y:     y,
 	}
 }
 

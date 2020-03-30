@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/renproject/darknode-cli/darknode"
+	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -70,6 +71,10 @@ func (p providerGcp) Deploy(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 
+	latestVersion, err := util.LatestReleaseVersion()
+	if err != nil {
+		return err
+	}
 	projectID, err := p.projectID()
 	if err != nil {
 		return err
@@ -89,7 +94,7 @@ func (p providerGcp) Deploy(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := p.tfConfig(name, projectID, zone, machine, ipfsUrl(network)); err != nil {
+	if err := p.tfConfig(name, projectID, zone, machine, latestVersion); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {

@@ -18,10 +18,11 @@ type gcpTerraform struct {
 	ConfigPath     string
 	PubKeyPath     string
 	PriKeyPath     string
-	IPFS           string
+	ServiceFile    string
+	LatestVersion  string
 }
 
-func (p providerGcp) tfConfig(name, project, zone, machine, ipfs string) error {
+func (p providerGcp) tfConfig(name, project, zone, machine, latestVersion string) error {
 	tf := gcpTerraform{
 		Name:           name,
 		CredentialFile: p.credFile,
@@ -31,7 +32,8 @@ func (p providerGcp) tfConfig(name, project, zone, machine, ipfs string) error {
 		ConfigPath:     fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
 		PubKeyPath:     fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
 		PriKeyPath:     fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair", name),
-		IPFS:           ipfs,
+		ServiceFile:    darknodeService,
+		LatestVersion:  latestVersion,
 	}
 
 	t, err := template.New("gcp").Parse(gcpTemplate)
@@ -153,12 +155,20 @@ resource "google_compute_instance" "darknode" {
   provisioner "remote-exec" {
 	
 	inline = [
-      "wget -O darknode.gz {{.IPFS}}",
-      "tar -zxvf darknode.gz",
-	  "mkdir -p $HOME/.darknode",
+      "set -x",
+	  "mkdir -p $HOME/.darknode/bin",
+      "mkdir -p $HOME/.config/systemd/user",
       "mv $HOME/config.json $HOME/.darknode/config.json",
-      "./install.sh",
-      "rm -r darknode.gz bin config install.sh",
+	  "curl -sL https://www.github.com/renproject/darknode-release/releases/latest/download/darknode > ~/.darknode/bin/darknode",
+	  "chmod +x ~/.darknode/bin/darknode",
+      "echo {{.LatestVersion}} > ~/.darknode/version",
+	  <<EOT
+	  echo "{{.ServiceFile}}" > ~/.config/systemd/user/darknode.service
+      EOT
+      ,
+	  "loginctl enable-linger darknode",
+      "systemctl --user enable darknode.service",
+      "systemctl --user start darknode.service",
 	]
 
     connection {

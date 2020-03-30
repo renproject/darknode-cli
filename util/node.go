@@ -2,9 +2,11 @@ package util
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"path/filepath"
 	"strings"
 
@@ -22,9 +24,6 @@ var (
 
 	// ErrEmptyName is returned when user gives an empty node name.
 	ErrEmptyName = errors.New("node name cannot be empty")
-
-	// ErrUnknownDarknode is returned when the provided darknode name is unknown to us.
-	ErrUnknownDarknode = errors.New("unknown darknode name")
 )
 
 // ParseNodesFromNameAndTags returns the darknode names which satisfies the name
@@ -35,7 +34,7 @@ func ParseNodesFromNameAndTags(name, tags string) ([]string, error) {
 	} else if name == "" && tags != "" {
 		return GetNodesByTags(tags)
 	} else if name != "" && tags == "" {
-		return []string{name}, nil
+		return []string{name}, ValidateNodeName(name)
 	} else {
 		return nil, ErrTooManyArguments
 	}
@@ -52,7 +51,7 @@ func ValidateNodeName(name string) error {
 			return nil
 		}
 	}
-	return ErrUnknownDarknode
+	return fmt.Errorf("darknode [%v] not found", name)
 }
 
 // Config returns the config of the node with given name.
@@ -80,6 +79,16 @@ func IP(name string) (string, error) {
 	cmd := fmt.Sprintf("cd %v && terraform output ip", NodePath(name))
 	ip, err := CommandOutput(cmd)
 	return strings.TrimSpace(ip), err
+}
+
+// Version gets the version of the software the darknode currently is running.
+func Version(name string) (string, error) {
+	script := "cat ~/.darknode/version"
+	version, err := RemoteOutput(name, script)
+	if err != nil {
+		return "0.0.0", err
+	}
+	return string(version), nil
 }
 
 // Network gets the network of the darknode.
@@ -134,6 +143,9 @@ func GetNodesByTags(tags string) ([]string, error) {
 			nodes = append(nodes, f.Name())
 		}
 	}
+	if len(nodes) == 0 {
+		return nil, errors.New("cannot find any darknode with given tags")
+	}
 
 	return nodes, nil
 }
@@ -146,6 +158,25 @@ func ValidateTags(have, required string) bool {
 		}
 	}
 	return true
+}
+
+// LatestReleaseVersion checks the darknode release repo and return the version
+// of the latest release.
+func LatestReleaseVersion() (string, error) {
+	url := "https://api.github.com/repos/renproject/darknode-release/releases/latest"
+	response, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	if response.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("cannot get latest darknode release from github, error code = %v", response.StatusCode)
+	}
+
+	resp := struct {
+		TagName string `json:"tag_name"`
+	}{}
+	err = json.NewDecoder(response.Body).Decode(&resp)
+	return resp.TagName, err
 }
 
 func isDeployed(name string) bool {

@@ -61,42 +61,12 @@ func CommandOutput(commands string) (string, error) {
 
 // RemoteRun runs the script on the instance which host the darknode of given name.
 func RemoteRun(name, script string) error {
-	return RemoteRunWithUser(name, script, "darknode")
-}
-
-// RemoteRun runs the script on the instance as specific system user.
-func RemoteRunWithUser(name, script, user string) error {
-	key, err := ParseSshPrivateKey(name)
-	if err != nil {
-		return err
-	}
-	config := ssh.ClientConfig{
-		User: user,
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(key),
-		},
-		Timeout:         10 * time.Second,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-
-	// Connect to the instance using ssh
-	ip, err := IP(name)
-	if err != nil {
-		return err
-	}
-	client, err := ssh.Dial("tcp", fmt.Sprintf("%v:22", ip), &config)
+	session, err := connect(name, "darknode")
 	if err != nil {
 		return err
 	}
 
-	// Create a new session to run the script
-	session, err := client.NewSession()
-	if err != nil {
-		return err
-	}
-	defer session.Close()
-
-	// Redirect the remote stdin, stdout and stderr to local.
+	// Redirect the connect stdin, stdout and stderr to local.
 	sessStdIn, err := session.StdinPipe()
 	if err != nil {
 		return err
@@ -114,6 +84,46 @@ func RemoteRunWithUser(name, script, user string) error {
 	go io.Copy(os.Stderr, sessStdErr)
 
 	return session.Run(script)
+}
+
+// RemoteOutput runs the script on the instance which host the darknode of given
+// name and returns the output of the script.
+func RemoteOutput(name, script string) ([]byte, error) {
+	session, err := connect(name, "darknode")
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+
+	return session.Output(script)
+}
+
+// connect establishes a connection using SSH.
+func connect(name, user string) (*ssh.Session, error) {
+	key, err := ParseSshPrivateKey(name)
+	if err != nil {
+		return nil, err
+	}
+	config := ssh.ClientConfig{
+		User: user,
+		Auth: []ssh.AuthMethod{
+			ssh.PublicKeys(key),
+		},
+		Timeout:         10 * time.Second,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	// Connect to the instance using ssh
+	ip, err := IP(name)
+	if err != nil {
+		return nil, err
+	}
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%v:22", ip), &config)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.NewSession()
 }
 
 // OpenInBrowser tries to open the url with system default browser. It ignores the error if failing.

@@ -10,26 +10,28 @@ import (
 )
 
 type doTerraform struct {
-	Name       string
-	Token      string
-	Region     string
-	Size       string
-	ConfigPath string
-	PubKeyPath string
-	PriKeyPath string
-	IPFS       string
+	Name          string
+	Token         string
+	Region        string
+	Size          string
+	ConfigPath    string
+	PubKeyPath    string
+	PriKeyPath    string
+	ServiceFile   string
+	LatestVersion string
 }
 
-func (p providerDo) tfConfig(name, region, droplet, ipfs string) error {
+func (p providerDo) tfConfig(name, region, droplet, latestVersion string) error {
 	tf := doTerraform{
-		Name:       name,
-		Token:      p.token,
-		Region:     region,
-		Size:       droplet,
-		ConfigPath: fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
-		PubKeyPath: fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
-		PriKeyPath: fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair", name),
-		IPFS:       ipfs,
+		Name:          name,
+		Token:         p.token,
+		Region:        region,
+		Size:          droplet,
+		ConfigPath:    fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
+		PubKeyPath:    fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
+		PriKeyPath:    fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair", name),
+		ServiceFile:   darknodeService,
+		LatestVersion: latestVersion,
 	}
 
 	t, err := template.New("do").Parse(doTemplate)
@@ -107,12 +109,20 @@ resource "digitalocean_droplet" "darknode" {
   provisioner "remote-exec" {
 	
 	inline = [
-      "wget -O darknode.gz {{.IPFS}}",
-      "tar -zxvf darknode.gz",
-	  "mkdir -p $HOME/.darknode",
+      "set -x",
+	  "mkdir -p $HOME/.darknode/bin",
+      "mkdir -p $HOME/.config/systemd/user",
       "mv $HOME/config.json $HOME/.darknode/config.json",
-      "./install.sh",
-      "rm -r darknode.gz bin config install.sh",
+	  "curl -sL https://www.github.com/renproject/darknode-release/releases/latest/download/darknode > ~/.darknode/bin/darknode",
+	  "chmod +x ~/.darknode/bin/darknode",
+      "echo {{.LatestVersion}} > ~/.darknode/version",
+	  <<EOT
+	  echo "{{.ServiceFile}}" > ~/.config/systemd/user/darknode.service
+      EOT
+      ,
+	  "loginctl enable-linger darknode",
+      "systemctl --user enable darknode.service",
+      "systemctl --user start darknode.service",
 	]
 
     connection {

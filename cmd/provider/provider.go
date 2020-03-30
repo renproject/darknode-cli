@@ -32,6 +32,24 @@ var (
 	NameGcp = "gcp"
 )
 
+var darknodeService = `[Unit]
+Description=RenVM Darknode Daemon
+AssertPathExists=$HOME/.darknode
+
+[Service]
+WorkingDirectory=$HOME/.darknode
+ExecStart=$HOME/.darknode/bin/darknode --config $HOME/.darknode/config.json
+Restart=on-failure
+PrivateTmp=true
+NoNewPrivileges=true
+
+# Specifies which signal to use when killing a service. Defaults to SIGTERM.
+# SIGHUP gives parity time to exit cleanly before SIGKILL (default 90s)
+KillSignal=SIGHUP
+
+[Install]
+WantedBy=default.target`
+
 type Provider interface {
 	Name() string
 	Deploy(ctx *cli.Context) error
