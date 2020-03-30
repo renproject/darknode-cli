@@ -70,7 +70,7 @@ cp -a ~/.darknode/db/. ~/.darknode/db_bak/ &&
 ~/.darknode/bin/migration &&
 rm -rf ~/.darknode/db &&
 mv ~/.darknode/db_bak ~/.darknode/db &&
-echo %v > ~/.darknode/version.md &&
+echo %v > ~/.darknode/version &&
 systemctl --user restart darknode`, url, url, ver)
 		err = util.RemoteRun(name, script)
 		if err != nil {

@@ -33,7 +33,7 @@ var (
 )
 
 var darknodeService = `[Unit]
-Description=Republic Protocol's Darknode Daemon
+Description=RenVM Darknode Daemon
 AssertPathExists=$HOME/.darknode
 
 [Service]

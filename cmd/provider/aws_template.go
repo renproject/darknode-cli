@@ -164,7 +164,7 @@ resource "aws_instance" "darknode" {
       "mv $HOME/config.json $HOME/.darknode/config.json",
 	  "curl -sL https://www.github.com/renproject/darknode-release/releases/latest/download/darknode > ~/.darknode/bin/darknode",
 	  "chmod +x ~/.darknode/bin/darknode",
-      "echo {{.LatestVersion}} > ~/.darknode/version.md",
+      "echo {{.LatestVersion}} > ~/.darknode/version",
 	  <<EOT
 	  echo "{{.ServiceFile}}" > ~/.config/systemd/user/darknode.service
       EOT
