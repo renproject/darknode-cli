@@ -98,9 +98,9 @@ func (network Network) ProtocolAddr() common.Address {
 	case Mainnet:
 		panic("unimplemented")
 	case Chaosnet:
-		return common.HexToAddress("0xeF4de0E97D92757520D78c4d49d8151964f6a85B")
+		return common.HexToAddress("0xf61e97c464ec0cf48b33262c3a1ef42114275144")
 	case Testnet:
-		return common.HexToAddress("0x8E28748620EA6f1285761AF41f311Cf6d05b188B")
+		return common.HexToAddress("0x59e23c087cA9bd9ce162875811CD6e99134D6d0F")
 	case Devnet:
 		return common.HexToAddress("0x1deb773b50b66b0e65e62e41380355a1a2bed2e1")
 	default:
