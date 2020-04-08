@@ -102,7 +102,7 @@ func (network Network) ProtocolAddr() common.Address {
 	case Testnet:
 		return common.HexToAddress("0x59e23c087cA9bd9ce162875811CD6e99134D6d0F")
 	case Devnet:
-		return common.HexToAddress("0x1deb773b50b66b0e65e62e41380355a1a2bed2e1")
+		return common.HexToAddress("0x5045E727D9D9AcDe1F6DCae52B078EC30dC95455")
 	default:
 		panic("unknown network")
 	}
