@@ -23,13 +23,13 @@ cputype="$(uname -m)"
 
 # download darknode binary depending on the system and architecture
 if [ "$ostype" = 'Linux' -a "$cputype" = 'x86_64' ]; then
-    TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.12.12/terraform_0.12.12_linux_amd64.zip'
+    TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip'
     curl -sL 'https://www.github.com/renproject/darknode-cli/releases/latest/download/darknode_linux_amd64' > ./bin/darknode
 elif [ "$ostype" = 'Linux' -a "$cputype" = 'aarch64' ]; then
-    TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.12.12/terraform_0.12.12_linux_arm.zip'
+    TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_arm.zip'
     curl -sL 'https://www.github.com/renproject/darknode-cli/releases/latest/download/darknode_linux_arm' > ./bin/darknode
 elif [ "$ostype" = 'Darwin' -a "$cputype" = 'x86_64' ]; then
-    TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.12.12/terraform_0.12.12_darwin_amd64.zip'
+    TERRAFORM_URL='https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_darwin_amd64.zip'
     curl -sL 'https://www.github.com/renproject/darknode-cli/releases/latest/download/darknode_darwin_amd64' > ./bin/darknode
 else
    echo 'unsupported OS type or architecture'

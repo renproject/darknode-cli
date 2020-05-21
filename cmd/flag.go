@@ -21,8 +21,8 @@ var (
 	}
 	NetworkFlag = cli.StringFlag{
 		Name:  "network",
-		Value: "chaosnet",
-		Usage: "Network of your Darknode (default: chaosnet)",
+		Value: "mainnet",
+		Usage: "Network of your Darknode (default: mainnet)",
 	}
 	AddressFlag = cli.StringFlag{
 		Name:  "address",
