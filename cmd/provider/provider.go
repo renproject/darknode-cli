@@ -152,18 +152,3 @@ func outputURL(name string) error {
 	color.Green("Join the network by registering your Darknode at %s", url)
 	return util.OpenInBrowser(url)
 }
-
-func ipfsUrl(network darknode.Network) string {
-	switch network {
-	case darknode.Mainnet:
-		panic("unsupported")
-	case darknode.Chaosnet:
-		return "http://157.245.76.68:8080/ipns/QmVq3uLmSpxQoz7Zk7RBaeiBb1DVaKVcCSkPGZKG9xbqvy"
-	case darknode.Testnet:
-		return "http://178.128.49.72:8080/ipns/QmU955UGWJFbnEJZMHszhWTP9YBiaxqs2g4Hiw2AP3jXwn"
-	case darknode.Devnet:
-		return "http://178.128.49.72:8080/ipns/Qma5uQ7HL87FbuDQZhvQQzc4wyoXY4P7YfKRSCoBy6qgFv"
-	default:
-		panic("unknown network")
-	}
-}

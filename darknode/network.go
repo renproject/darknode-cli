@@ -23,7 +23,7 @@ const (
 	// with real-world incentives and punishments.
 	Chaosnet = Network("chaosnet")
 
-	// Mainnet is production network.
+	// Mainnet is the production network.
 	Mainnet = Network("mainnet")
 )
 
@@ -47,7 +47,8 @@ func (network Network) BootstrapNodes() []addr.MultiAddress {
 	bootstraps := make([]addr.MultiAddress, 0, 16)
 	switch network {
 	case Mainnet:
-		panic("unimplemented")
+		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/63.34.3.233/tcp/18514/ren/8MHeT3SETNbiYLDNCWeJfgH7WZGxp2", "g6WQ7vT1Oa3bRn2IfrsHEaQsQB+ukublxc3VcQvKuEkia/m8ozdAQ+ae7+rJXgv9Xa7gK53sgGK0IWNa9dhUTQA=")
+		bootstraps = append(bootstraps, b1)
 	case Chaosnet:
 		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/3.115.117.251/tcp/18514/ren/8MGrkr3CCG5gxnipWD5RUc8BMQnU1s", "3w8PoELIeSh0sqcb6qONy1FNgSIgP9hELVh44D/IE0saY518C9vWvBYSQn4xUmYRb7Y+nYNPY54NoH1y0zMnXAE=")
 		b2, _ := addr.NewSignedMultiAddressFromString("/ip4/18.182.28.215/tcp/18514/ren/8MGjmhtNxsqT4NphYt3usvJBXqVTeS", "YntncxzVBMHA+QNwgkdAQc95gSoWXrdf7r1T38+rtYkuCud5EkV7tWy0GDLeSKCvEuOpVtdPFlaVHXQyYNPwVAA=")
@@ -96,7 +97,7 @@ func (network Network) BootstrapNodes() []addr.MultiAddress {
 func (network Network) ProtocolAddr() common.Address {
 	switch network {
 	case Mainnet:
-		panic("unimplemented")
+		return common.HexToAddress("0xc25167fFa19B4d9d03c7d5aa4682c7063F345b66")
 	case Chaosnet:
 		return common.HexToAddress("0xf61e97c464ec0cf48b33262c3a1ef42114275144")
 	case Testnet:
