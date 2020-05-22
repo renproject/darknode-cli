@@ -47,7 +47,7 @@ func (network Network) BootstrapNodes() []addr.MultiAddress {
 	bootstraps := make([]addr.MultiAddress, 0, 16)
 	switch network {
 	case Mainnet:
-		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/63.34.3.233/tcp/18514/ren/8MHeT3SETNbiYLDNCWeJfgH7WZGxp2", "g6WQ7vT1Oa3bRn2IfrsHEaQsQB+ukublxc3VcQvKuEkia/m8ozdAQ+ae7+rJXgv9Xa7gK53sgGK0IWNa9dhUTQA=")
+		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/35.180.200.106/tcp/18514/ren/8MGaGCjCjrJMjp7kMrkKzxtmLpbX8q", "mOuxWXwTBDtFvy88ErPOwkux9rR/HHmCuFReSlvLrTBAqwRXVWDNu8e8FjFTdUYg3H3ctWczGLgBRY3CUgNGYwA=")
 		bootstraps = append(bootstraps, b1)
 	case Chaosnet:
 		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/3.115.117.251/tcp/18514/ren/8MGrkr3CCG5gxnipWD5RUc8BMQnU1s", "3w8PoELIeSh0sqcb6qONy1FNgSIgP9hELVh44D/IE0saY518C9vWvBYSQn4xUmYRb7Y+nYNPY54NoH1y0zMnXAE=")
