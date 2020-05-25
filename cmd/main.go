@@ -68,7 +68,7 @@ func main() {
 		{
 			Name:  "update",
 			Usage: "Update your Darknodes to the latest software and configuration",
-			Flags: []cli.Flag{TagsFlag, VersionFlag},
+			Flags: []cli.Flag{TagsFlag, VersionFlag, DowngradeFlag},
 			Action: func(c *cli.Context) error {
 				return updateNode(c)
 			},

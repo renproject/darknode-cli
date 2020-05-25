@@ -48,7 +48,8 @@ func listAllNodes(ctx *cli.Context) error {
 			if err != nil {
 				return nil, err
 			}
-			return []string{name, id.String(), ip, provider, string(tags), ethAddr.Hex()}, nil
+			version := util.Version(name)
+			return []string{name, id.String(), ip, provider, string(tags), ethAddr.Hex(), version}, nil
 		}()
 		if err != nil {
 			color.Red("[%v] cannot get detail of the darknode, err = %v", name, err)
@@ -61,10 +62,10 @@ func listAllNodes(ctx *cli.Context) error {
 		return fmt.Errorf("cannot find any node")
 	}
 
-	fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s \n", "name", "id", "ip", "provider", "tags", "ethereum address")
+	fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s | %-15s\n", "name", "id", "ip", "provider", "tags", "ethereum address", "version")
 	for _, node := range nodes {
 		if node != nil {
-			fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s\n", node[0], node[1], node[2], node[3], node[4], node[5])
+			fmt.Printf("%-20s | %-30s | %-15s | %-8s | %-15s | %-45s | %-15s\n", node[0], node[1], node[2], node[3], node[4], node[5], node[6])
 		}
 	}
 	return nil

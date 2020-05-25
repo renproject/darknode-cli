@@ -85,13 +85,13 @@ func IP(name string) (string, error) {
 }
 
 // Version gets the version of the software the darknode currently is running.
-func Version(name string) (string, error) {
+func Version(name string) string {
 	script := "cat ~/.darknode/version"
 	version, err := RemoteOutput(name, script)
 	if err != nil {
-		return "0.0.0", err
+		return "unknown"
 	}
-	return string(version), nil
+	return strings.TrimSpace(string(version))
 }
 
 // Network gets the network of the darknode.
