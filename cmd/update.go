@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
+	"github.com/google/go-github/v31/github"
 	"github.com/hashicorp/go-version"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
@@ -18,6 +21,7 @@ import (
 func updateNode(ctx *cli.Context) error {
 	name := ctx.Args().First()
 	tags := ctx.String("tags")
+	force := ctx.Bool("downgrade")
 	version := strings.TrimSpace(ctx.String("version"))
 	nodes, err := util.ParseNodesFromNameAndTags(name, tags)
 	if err != nil {
@@ -26,11 +30,12 @@ func updateNode(ctx *cli.Context) error {
 
 	// Use latest version if user doesn't provide a version number
 	if version == "" {
-		version, err = util.LatestReleaseVersion()
+		version, err = util.LatestStableRelease()
 		if err != nil {
 			return err
 		}
 	}
+
 	// Check if the target release exists on github
 	color.Green("Verifying darknode release ...")
 	if err := validateVersion(version); err != nil {
@@ -40,13 +45,13 @@ func updateNode(ctx *cli.Context) error {
 	color.Green("Updating darknodes...")
 	errs := make([]error, len(nodes))
 	phi.ParForAll(nodes, func(i int) {
-		errs[i] = updateSingleNode(nodes[i], version)
+		errs[i] = updateSingleNode(nodes[i], version, force)
 	})
 	return util.HandleErrs(errs)
 }
 
-func updateSingleNode(name, ver string) error {
-	v, _ := util.Version(name)
+func updateSingleNode(name, ver string, force bool) error {
+	v := util.Version(name)
 	curVersion, err := version.NewVersion(strings.TrimSpace(v))
 	if err != nil {
 		return err
@@ -57,23 +62,17 @@ func updateSingleNode(name, ver string) error {
 	case 0:
 		color.Green("darknode [%v] is running version [%v] already.", name, ver)
 	case 1:
-		color.Red("darknode [%v] is running with version %v, you cannot downgrade to a lower version %v", name, curVersion.String(), newVersion.String())
+		if !force {
+			color.Red("darknode [%v] is running with version %v, you cannot downgrade to a lower version %v", name, curVersion.String(), newVersion.String())
+			return nil
+		}
+		if err := update(name, ver); err != nil {
+			color.Red("cannot downgrade darknode %v, error = %v", name, err)
+		} else {
+			color.Green("[%s] has been downgraded to version %v", name, ver)
+		}
 	default:
-		url := fmt.Sprintf("https://github.com/renproject/darknode-release/releases/download/%v", ver)
-		script := fmt.Sprintf(`mv ~/.darknode/bin/darknode ~/.darknode/bin/darknode-backup && 
-curl -sL %v/darknode > ~/.darknode/bin/darknode && 
-curl -sL %v/migration > ~/.darknode/bin/migration &&
-chmod +x ~/.darknode/bin/darknode && 
-chmod +x ~/.darknode/bin/migration &&
-systemctl --user stop darknode &&
-cp -a ~/.darknode/db/. ~/.darknode/db_bak/ &&
-~/.darknode/bin/migration &&
-rm -rf ~/.darknode/db &&
-mv ~/.darknode/db_bak ~/.darknode/db &&
-echo %v > ~/.darknode/version &&
-systemctl --user restart darknode`, url, url, ver)
-		err = util.RemoteRun(name, script)
-		if err != nil {
+		if err := update(name, ver); err != nil {
 			color.Red("cannot update darknode %v, error = %v", name, err)
 		} else {
 			color.Green("[%s] has been updated to version %v", name, ver)
@@ -82,9 +81,26 @@ systemctl --user restart darknode`, url, url, ver)
 	return nil
 }
 
+func update(name, ver string) error {
+	url := fmt.Sprintf("https://github.com/renproject/darknode-release/releases/download/%v", ver)
+	script := fmt.Sprintf(`mv ~/.darknode/bin/darknode ~/.darknode/bin/darknode-backup && 
+curl -sL %v/darknode > ~/.darknode/bin/darknode && 
+chmod +x ~/.darknode/bin/darknode && 
+systemctl --user stop darknode &&
+cp -a ~/.darknode/db/. ~/.darknode/db_bak/ &&
+rm -rf ~/.darknode/db &&
+mv ~/.darknode/db_bak ~/.darknode/db &&
+echo %v > ~/.darknode/version &&
+systemctl --user restart darknode`, url, ver)
+	return util.RemoteRun(name, script)
+}
+
 func validateVersion(version string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/renproject/darknode-release/releases/tags/%v", version)
-	response, err := http.Get(url)
+	ctx, cancel := context.WithTimeout(context.Background(), 5 *time.Second)
+	defer cancel()
+
+	client := github.NewClient(nil)
+	_, response, err := client.Repositories.GetReleaseByTag(ctx, "renproject", "darknode-release", version)
 	if err != nil {
 		return err
 	}
