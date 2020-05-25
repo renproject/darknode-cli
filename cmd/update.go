@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/google/go-github/v31/github"
 	"github.com/hashicorp/go-version"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
@@ -26,7 +28,7 @@ func updateNode(ctx *cli.Context) error {
 
 	// Use latest version if user doesn't provide a version number
 	if version == "" {
-		version, err = util.LatestReleaseVersion()
+		version, err = util.LatestStableRelease()
 		if err != nil {
 			return err
 		}
@@ -62,16 +64,13 @@ func updateSingleNode(name, ver string) error {
 		url := fmt.Sprintf("https://github.com/renproject/darknode-release/releases/download/%v", ver)
 		script := fmt.Sprintf(`mv ~/.darknode/bin/darknode ~/.darknode/bin/darknode-backup && 
 curl -sL %v/darknode > ~/.darknode/bin/darknode && 
-curl -sL %v/migration > ~/.darknode/bin/migration &&
 chmod +x ~/.darknode/bin/darknode && 
-chmod +x ~/.darknode/bin/migration &&
 systemctl --user stop darknode &&
 cp -a ~/.darknode/db/. ~/.darknode/db_bak/ &&
-~/.darknode/bin/migration &&
 rm -rf ~/.darknode/db &&
 mv ~/.darknode/db_bak ~/.darknode/db &&
 echo %v > ~/.darknode/version &&
-systemctl --user restart darknode`, url, url, ver)
+systemctl --user restart darknode`, url, ver)
 		err = util.RemoteRun(name, script)
 		if err != nil {
 			color.Red("cannot update darknode %v, error = %v", name, err)
@@ -83,8 +82,8 @@ systemctl --user restart darknode`, url, url, ver)
 }
 
 func validateVersion(version string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/renproject/darknode-release/releases/tags/%v", version)
-	response, err := http.Get(url)
+	client := github.NewClient(nil)
+	_, response ,err := client.Repositories.GetReleaseByTag(context.Background(), "renproject", "darknode-release", version )
 	if err != nil {
 		return err
 	}

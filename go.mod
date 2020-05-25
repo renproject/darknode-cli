@@ -8,7 +8,7 @@ require (
 	github.com/ethereum/go-ethereum v1.9.6
 	github.com/fatih/color v1.7.0
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/go-github/v31 v31.0.0
 	github.com/hashicorp/go-version v1.2.0
 	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6
 	github.com/multiformats/go-multiaddr v0.1.1

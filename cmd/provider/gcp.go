@@ -71,7 +71,7 @@ func (p providerGcp) Deploy(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
 
-	latestVersion, err := util.LatestReleaseVersion()
+	latestVersion, err := util.LatestStableRelease()
 	if err != nil {
 		return err
 	}
