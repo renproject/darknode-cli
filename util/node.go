@@ -167,7 +167,7 @@ func ValidateTags(have, required string) bool {
 // of the latest release.
 func LatestStableRelease() (string, error) {
 	client := github.NewClient(nil)
-	releases, response ,err := client.Repositories.ListReleases(context.Background(), "renproject", "darknode-release", nil )
+	releases, response, err := client.Repositories.ListReleases(context.Background(), "renproject", "darknode-release", nil)
 	if err != nil {
 		return "", err
 	}
@@ -186,22 +186,21 @@ func LatestStableRelease() (string, error) {
 			return "", err
 		}
 		if match {
-			ver, err:= version.NewVersion(*release.TagName)
+			ver, err := version.NewVersion(*release.TagName)
 			if err != nil {
 				return "", err
 			}
-			if ver.GreaterThan(latest){
+			if ver.GreaterThan(latest) {
 				latest = ver
 			}
 		}
 	}
-	if latest.String() == "0.0.0"{
+	if latest.String() == "0.0.0" {
 		return "", errors.New("cannot find any stable release")
 	}
 
 	return latest.String(), nil
 }
-
 
 func isDeployed(name string) bool {
 	path := NodePath(name)

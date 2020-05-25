@@ -33,6 +33,7 @@ func updateNode(ctx *cli.Context) error {
 			return err
 		}
 	}
+
 	// Check if the target release exists on github
 	color.Green("Verifying darknode release ...")
 	if err := validateVersion(version); err != nil {
@@ -83,7 +84,7 @@ systemctl --user restart darknode`, url, ver)
 
 func validateVersion(version string) error {
 	client := github.NewClient(nil)
-	_, response ,err := client.Repositories.GetReleaseByTag(context.Background(), "renproject", "darknode-release", version )
+	_, response, err := client.Repositories.GetReleaseByTag(context.Background(), "renproject", "darknode-release", version)
 	if err != nil {
 		return err
 	}
