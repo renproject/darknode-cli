@@ -167,7 +167,7 @@ func ValidateTags(have, required string) bool {
 // LatestStableRelease checks the darknode release repo and return the version
 // of the latest release.
 func LatestStableRelease() (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5 *time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	client := github.NewClient(nil)
