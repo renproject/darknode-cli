@@ -1,3 +1,6 @@
+## 3.0.11
+- Use suggest gas price for withdrawing ETH.
+
 ## 3.0.10
 - Improve `update` command to support suffix tags #61 
 - Show darknodes versions when from the `list` command.
