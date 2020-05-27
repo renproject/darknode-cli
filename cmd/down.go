@@ -97,6 +97,11 @@ func destroyNode(ctx *cli.Context) error {
 
 // Withdraw ETH and REN in the darknode address to the provided receiver address
 func withdraw(ctx *cli.Context) error {
+	// Create a context for the entire withdraw process
+	c, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Parse the input parameters
 	name := ctx.Args().First()
 	if err := util.ValidateNodeName(name); err != nil {
 		return err
@@ -122,11 +127,13 @@ func withdraw(ctx *cli.Context) error {
 	}
 
 	// Create a transactor for ethereum tx
+	gasPrice, err := client.EthClient().SuggestGasPrice(c)
+	if err != nil {
+		return err
+	}
 	ethAddr := crypto.PubkeyToAddress(config.Keystore.Ecdsa.PublicKey)
-	c, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
 	auth := bind.NewKeyedTransactor(config.Keystore.Ecdsa.PrivateKey)
-	auth.GasPrice = big.NewInt(5000000000) // Set GasPrise to 5 Gwei
+	auth.GasPrice = gasPrice
 	auth.Context = c
 
 	// Check REN balance first
@@ -164,7 +171,7 @@ func withdraw(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	gas := ethtypes.Gwei(5 * 21000)
+	gas := ethtypes.Wei(gasPrice.Uint64() * 21000)
 	zero := ethtypes.Wei(0)
 	if balance.Gt(zero) {
 		if balance.Gt(gas) {
