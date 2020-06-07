@@ -71,3 +71,8 @@ You can specify with which [Machine Type](https://cloud.google.com/compute/docs/
 ```sh
 darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLOADED_JSON_FILE --gcp-machine-type f1-micro
 ```
+
+### How to fix a faulty installation/deploy or reinstall
+
+You can use the configuration file to fix a registred darknode that didn't deploy right or  for some other reason does'nt connect. simply deploy another darknode without registering, then copy the config.json file from the faulty installation to the new darknode installation both locally and remote. locally the file will be located on ```~/.darknode/darknodes/YourNodeName/config.json``` and remotely ```/home/darknode/config.json```
+Once copied the darknode should atuomatically connect.
