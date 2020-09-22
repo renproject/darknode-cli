@@ -1,0 +1,86 @@
+name: release
+on:
+    push:
+        branches:
+            - master
+            - feat/CI
+jobs:
+    release:
+        container: techknowlogick/xgo:latest
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v2
+            - name: Parse the new version number check against current release
+              run: |
+                  echo ::set-env name=VER::$(cat ./VERSION | tr -d "[:space:]")
+                  chmod +x ./test/version.sh
+                  ./test/version.sh
+            - name: Build the binary
+              run: |
+                  make
+                  mv $(make target_name) ./artifacts/darknode_linux_amd64
+                  env GOOS=linux CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc-6 CXX=aarch64-linux-gnu-g++-6 GOARCH=arm64 make
+                  mv $(make target_name) ./artifacts/darknode_linux_arm
+                  env GOOS=darwin CGO_ENABLED=1 CC=o64-clang CXX=o64-clang++ GOARCH=amd64 make
+                  mv $(make target_name) ./artifacts/darknode_darwin_amd64
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name:  ${{ env.VER }}
+                  release_name: ${{ env.VER }}
+                  draft: false
+                  prerelease: false
+            - name: Upload binary for darwin/amd64
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./artifacts/darknode_darwin_amd64
+                  asset_name: darknode_darwin_amd64
+                  asset_content_type: application/octet-stream
+            - name: Upload binary for linux/amd64
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./artifacts/darknode_linux_amd64
+                  asset_name: darknode_linux_amd64
+                  asset_content_type: application/octet-stream
+            - name: Upload binary for linux/arm
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./artifacts/darknode_linux_arm
+                  asset_name: darknode_linux_arm
+                  asset_content_type: application/octet-stream
+            - name: Upload install script
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./artifacts/install.sh
+                  asset_name: install.sh
+                  asset_content_type: text/x-sh; charset=utf-8
+            - name: Upload update script
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./artifacts/update.sh
+                  asset_name: update.sh
+                  asset_content_type: text/x-sh; charset=utf-8
+            - name: Verify the installation process
+              run: |
+                  curl https://www.github.com/renproject/darknode-cli/releases/latest/download/install.sh -sSfL | sh
+                  export PATH=$PATH:$HOME/.darknode/bin
+                  darknode --version
