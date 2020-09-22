@@ -14,8 +14,6 @@ jobs:
             - name: Parse the new version number check against current release
               run: |
                   echo ::set-env name=VER::$(cat ./VERSION | tr -d "[:space:]")
-                  chmod +x ./test/version.sh
-                  ./test/version.sh
             - name: Build the binary
               run: |
                   make
