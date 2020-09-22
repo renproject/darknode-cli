@@ -179,7 +179,7 @@ func withdraw(ctx *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			color.Green("Your ETH has been withdrawn from your darknode to [%v]. TxHash: %v.", receiverAddr.Hex(), tx.Hash().Hex())
+			color.Green("Your ETH has been withdrawn from your darknode to [%v]. TxHash: %v", receiverAddr.Hex(), tx.Hash().Hex())
 		} else {
 			return fmt.Errorf("your account has %v wei which is not enough to cover the transaction fee %v on ethereum", balance, gas)
 		}
