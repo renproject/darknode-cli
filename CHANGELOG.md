@@ -1,3 +1,9 @@
+## 3.0.13
+- Fix pagination issue when fetching latest darknode releases from github.
+
+## 3.0.12
+- Fix connection issue when withdrawing gas 
+
 ## 3.0.11
 - Use suggest gas price for withdrawing ETH.
 
