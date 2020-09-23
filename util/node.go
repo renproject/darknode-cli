@@ -171,33 +171,45 @@ func LatestStableRelease() (string, error) {
 	defer cancel()
 
 	client := github.NewClient(nil)
-	releases, response, err := client.Repositories.ListReleases(ctx, "renproject", "darknode-release", nil)
-	if err != nil {
-		return "", err
+	opts := &github.ListOptions{
+		PerPage: 25,
 	}
-	if response.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("cannot get latest darknode release from github, error code = %v", response.StatusCode)
-	}
-
 	latest, err := version.NewVersion("0.0.0")
 	if err != nil {
 		return "", err
 	}
-	verReg := "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"
-	for _, release := range releases {
-		match, err := regexp.MatchString(verReg, *release.TagName)
+
+	// Fetch all releases and find the latest stable release tag
+	for {
+		releases, response, err := client.Repositories.ListReleases(ctx, "renproject", "darknode-release", opts)
 		if err != nil {
 			return "", err
 		}
-		if match {
-			ver, err := version.NewVersion(*release.TagName)
+
+		if response.StatusCode != http.StatusOK {
+			return "", fmt.Errorf("cannot get latest darknode release from github, error code = %v", response.StatusCode)
+		}
+
+		verReg := "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"
+		for _, release := range releases {
+			match, err := regexp.MatchString(verReg, *release.TagName)
 			if err != nil {
 				return "", err
 			}
-			if ver.GreaterThan(latest) {
-				latest = ver
+			if match {
+				ver, err := version.NewVersion(*release.TagName)
+				if err != nil {
+					return "", err
+				}
+				if ver.GreaterThan(latest) {
+					latest = ver
+				}
 			}
 		}
+		if response.NextPage == 0{
+			break
+		}
+		opts.Page = response.NextPage
 	}
 	if latest.String() == "0.0.0" {
 		return "", errors.New("cannot find any stable release")
