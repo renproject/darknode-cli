@@ -10,24 +10,26 @@ import (
 )
 
 type sshTerraform struct {
-	Name          string
-	User          string
-	Hostname      string
-	PriKeyPath    string
-	ConfigPath    string
-	ServiceFile   string
-	LatestVersion string
+	Name           string
+	User           string
+	Hostname       string
+	PubKeyPath     string
+	RootPriKeyPath string
+	ConfigPath     string
+	ServiceFile    string
+	LatestVersion  string
 }
 
 func (p providerSsh) tfConfig(name, latestVersion string) error {
 	tf := sshTerraform{
-		Name:          name,
-		User:          p.user,
-		Hostname:      p.hostname,
-		ConfigPath:    fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
-		PriKeyPath:    fmt.Sprintf(p.priKeyPath),
-		ServiceFile:   darknodeService,
-		LatestVersion: latestVersion,
+		Name:           name,
+		User:           p.user,
+		Hostname:       p.hostname,
+		ConfigPath:     fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
+		PubKeyPath:     fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
+		RootPriKeyPath: fmt.Sprintf(p.priKeyPath),
+		ServiceFile:    darknodeService,
+		LatestVersion:  latestVersion,
 	}
 
 	t, err := template.New("ssh").Parse(sshTemplate)
@@ -64,7 +66,7 @@ resource "null_resource" "darknode" {
 			host        = "{{.Hostname}}"
 			type        = "ssh"
 			user        = "{{.User}}"
-			private_key = file("{{.PriKeyPath}}")
+			private_key = file("{{.RootPriKeyPath}}")
 		}
 	}
 
@@ -76,7 +78,7 @@ resource "null_resource" "darknode" {
 			host        = "{{.Hostname}}"
 			type        = "ssh"
 			user        = "darknode"
-			private_key = file("{{.PriKeyPath}}")
+			private_key = file("{{.RootPriKeyPath}}")
 		}
 	}
 
@@ -102,7 +104,19 @@ resource "null_resource" "darknode" {
 			host        = "{{.Hostname}}"
 			type        = "ssh"
 			user        = "darknode"
-			private_key = file("{{.PriKeyPath}}")
+			private_key = file("{{.RootPriKeyPath}}")
+		}
+	}
+
+	provisioner "file" {
+		source      = "{{.PubKeyPath}}"
+		destination = "$HOME/.ssh/authorized_keys"
+
+		connection {
+			host        = "{{.Hostname}}"
+			type        = "ssh"
+			user        = "darknode"
+			private_key = file("{{.RootPriKeyPath}}")
 		}
 	}
 }
