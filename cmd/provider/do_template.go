@@ -82,7 +82,6 @@ resource "digitalocean_droplet" "darknode" {
       "sudo ufw allow 18514/tcp", 
       "sudo ufw allow 18515/tcp", 
       "sudo ufw --force enable",
-      "until sudo apt-get -y install jq; do sleep 4; done",
 	]
 
     connection {
@@ -113,7 +112,7 @@ resource "digitalocean_droplet" "darknode" {
 	  "mkdir -p $HOME/.darknode/bin",
       "mkdir -p $HOME/.config/systemd/user",
       "mv $HOME/config.json $HOME/.darknode/config.json",
-	  "curl -sL https://www.github.com/renproject/darknode-release/releases/latest/download/darknode > ~/.darknode/bin/darknode",
+	  "curl -sL https://www.github.com/renproject/darknode-release/releases/download/{{.LatestVersion}}/darknode > ~/.darknode/bin/darknode",
 	  "chmod +x ~/.darknode/bin/darknode",
       "echo {{.LatestVersion}} > ~/.darknode/version",
 	  <<EOT

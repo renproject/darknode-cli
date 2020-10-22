@@ -21,7 +21,7 @@ import (
 func updateNode(ctx *cli.Context) error {
 	name := ctx.Args().First()
 	tags := ctx.String("tags")
-	force := ctx.Bool("downgrade")
+	force := ctx.Bool("force")
 	version := strings.TrimSpace(ctx.String("version"))
 	nodes, err := util.ParseNodesFromNameAndTags(name, tags)
 	if err != nil {
@@ -60,7 +60,15 @@ func updateSingleNode(name, ver string, force bool) error {
 	res := curVersion.Compare(newVersion)
 	switch res {
 	case 0:
-		color.Green("darknode [%v] is running version [%v] already.", name, ver)
+		if !force {
+			color.Green("darknode [%v] is running version [%v] already.", name, ver)
+			return nil
+		}
+		if err := update(name, ver); err != nil {
+			color.Red("cannot update darknode %v, error = %v", name, err)
+		} else {
+			color.Green("[%s] has been updated to version %v", name, ver)
+		}
 	case 1:
 		if !force {
 			color.Red("darknode [%v] is running with version %v, you cannot downgrade to a lower version %v", name, curVersion.String(), newVersion.String())
@@ -82,14 +90,10 @@ func updateSingleNode(name, ver string, force bool) error {
 }
 
 func update(name, ver string) error {
-	url := fmt.Sprintf("https://github.com/renproject/darknode-release/releases/download/%v", ver)
-	script := fmt.Sprintf(`mv ~/.darknode/bin/darknode ~/.darknode/bin/darknode-backup && 
-curl -sL %v/darknode > ~/.darknode/bin/darknode && 
+	url := fmt.Sprintf("https://www.github.com/renproject/darknode-release/releases/download/%v", ver)
+	script := fmt.Sprintf(`curl -sL %v/darknode > ~/.darknode/bin/darknode-new && 
+mv ~/.darknode/bin/darknode-new ~/.darknode/bin/darknode &&
 chmod +x ~/.darknode/bin/darknode && 
-systemctl --user stop darknode &&
-cp -a ~/.darknode/db/. ~/.darknode/db_bak/ &&
-rm -rf ~/.darknode/db &&
-mv ~/.darknode/db_bak ~/.darknode/db &&
 echo %v > ~/.darknode/version &&
 systemctl --user restart darknode`, url, ver)
 	return util.RemoteRun(name, script)
