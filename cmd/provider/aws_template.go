@@ -126,7 +126,6 @@ resource "aws_instance" "darknode" {
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade",
       "sudo DEBIAN_FRONTEND=noninteractive apt-get -y autoremove",
-      "sudo apt-get -y install jq",
       "sudo apt-get install ufw",
       "sudo ufw limit 22/tcp",
       "sudo ufw allow 18514/tcp", 
@@ -162,7 +161,7 @@ resource "aws_instance" "darknode" {
 	  "mkdir -p $HOME/.darknode/bin",
       "mkdir -p $HOME/.config/systemd/user",
       "mv $HOME/config.json $HOME/.darknode/config.json",
-	  "curl -sL https://www.github.com/renproject/darknode-release/releases/latest/download/darknode > ~/.darknode/bin/darknode",
+	  "curl -sL https://www.github.com/renproject/darknode-release/releases/download/{{.LatestVersion}}/darknode > ~/.darknode/bin/darknode",
 	  "chmod +x ~/.darknode/bin/darknode",
       "echo {{.LatestVersion}} > ~/.darknode/version",
 	  <<EOT

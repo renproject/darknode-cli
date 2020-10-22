@@ -40,9 +40,9 @@ var (
 		Name:  "version",
 		Usage: "Version of darknode you want to upgrade to",
 	}
-	DowngradeFlag = cli.BoolFlag{
-		Name:  "downgrade",
-		Usage: "Force downgrading to an older version without interactive prompts",
+	ForceUpdateFlag = cli.BoolFlag{
+		Name:  "force, f",
+		Usage: "Force updating to an older version without interactive prompts",
 	}
 )
 

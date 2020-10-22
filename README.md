@@ -10,7 +10,7 @@ To jump straight into running your first Darknode on AWS, checkout our [Getting 
 
 ## Getting Started on Digital Ocean
  
-Checkout the instructions for [Creating a Personal Access Token](https://github.com/renproject/darknode-cli#digital-ocean) on Digital Ocean.
+Checkout the instructions for [Creating a Personal Access Token](https://www.github.com/renproject/darknode-cli#digital-ocean) on Digital Ocean.
 
 
 ## Installing the tool

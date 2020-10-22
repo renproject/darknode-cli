@@ -29,7 +29,7 @@ commands:
             - run:
                 name: Publish release to github
                 command: |
-                    wget https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
+                    wget https://www.github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
                     tar xvzf ghr_v0.13.0_linux_amd64.tar.gz
                     mv ghr_v0.13.0_linux_amd64/ghr ghr
                     ./ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -soft $(cat ./VERSION) ./artifacts/
