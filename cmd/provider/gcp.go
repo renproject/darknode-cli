@@ -70,6 +70,7 @@ func (p providerGcp) Name() string {
 func (p providerGcp) Deploy(ctx *cli.Context) error {
 	name := ctx.String("name")
 	tags := ctx.String("tags")
+	config := ctx.String("config")
 
 	latestVersion, err := util.LatestStableRelease()
 	if err != nil {
@@ -89,7 +90,7 @@ func (p providerGcp) Deploy(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := initNode(name, tags, network); err != nil {
+	if err := initNode(name, tags, network, config); err != nil {
 		return err
 	}
 
