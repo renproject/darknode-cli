@@ -40,7 +40,7 @@ func main() {
 			Usage: "Deploy a new Darknode",
 			Flags: []cli.Flag{
 				// General
-				NameFlag, TagsFlag, NetworkFlag,
+				NameFlag, TagsFlag, NetworkFlag, ConfigFlag,
 				// AWS
 				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag, AwsInstanceFlag, AwsRegionFlag, AwsProfileFlag,
 				// Digital Ocean

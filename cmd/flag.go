@@ -24,6 +24,10 @@ var (
 		Value: "mainnet",
 		Usage: "Network of your Darknode (default: mainnet)",
 	}
+	ConfigFlag = cli.StringFlag{
+		Name: "config",
+		Usage: "Path of the config file",
+	}
 	AddressFlag = cli.StringFlag{
 		Name:  "address",
 		Usage: "Ethereum address you want to withdraw the tokens to",

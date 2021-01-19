@@ -83,7 +83,7 @@ func GetProvider(name string) (string, error) {
 }
 
 // initialise all files needed by deploying a new node
-func initNode(name, tags string, network darknode.Network) error {
+func initNode(name, tags string, network darknode.Network, configFile string) error {
 	if err := initNodeDirectory(name, tags); err != nil {
 		return err
 	}
@@ -91,12 +91,32 @@ func initNode(name, tags string, network darknode.Network) error {
 		return err
 	}
 
-	// Generate a new config and write to a file.
-	config, err := darknode.NewConfig(network)
-	if err != nil {
-		return err
+	// Use given config for the new darknode
+	var conf darknode.Config
+	if configFile != "" {
+		path, err := filepath.Abs(configFile)
+		if err != nil{
+			return errors.New("invalid config path")
+		}
+
+		file, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("cannot open config file, err = %v", err)
+		}
+		defer file.Close()
+
+		if err := json.NewDecoder(file).Decode(&conf); err != nil {
+			return err
+		}
+	} else {
+		var err error
+		conf, err = darknode.NewConfig(network)
+		if err != nil {
+			return err
+		}
 	}
-	configData, err := json.MarshalIndent(config, "", "    ")
+
+	configData, err := json.MarshalIndent(conf, "", "    ")
 	if err != nil {
 		return err
 	}
