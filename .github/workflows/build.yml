@@ -12,6 +12,8 @@ jobs:
             - name: Check out code
               uses: actions/checkout@v2
             - name: Parse the new version number check against current release
+              env:
+                  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
               run: |
                   echo ::set-env name=VER::$(cat ./VERSION | tr -d "[:space:]")
             - name: Build the binary
