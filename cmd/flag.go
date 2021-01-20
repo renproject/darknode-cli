@@ -121,3 +121,23 @@ var (
 		Usage: "An optional Google Cloud Zone (default: random)",
 	}
 )
+
+// SSH flags
+var (
+	SshFlag = cli.BoolFlag{
+		Name:  provider.NameSsh,
+		Usage: "The darknode will be installed on an existing server with SSH",
+	}
+	SshUserFlag = cli.StringFlag{
+		Name:  "ssh-user",
+		Usage: "SSH User",
+	}
+	SshHostnameFlag = cli.StringFlag{
+		Name:  "ssh-hostname",
+		Usage: "SSH Hostname",
+	}
+	SshPrivateKeyFlag = cli.StringFlag{
+		Name:  "ssh-private-key",
+		Usage: "SSH Private key",
+	}
+)

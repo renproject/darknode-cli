@@ -30,6 +30,7 @@ var (
 	NameAws = "aws"
 	NameDo  = "do"
 	NameGcp = "gcp"
+	NameSsh = "ssh"
 )
 
 var darknodeService = `[Unit]
@@ -66,6 +67,10 @@ func ParseProvider(ctx *cli.Context) (Provider, error) {
 
 	if ctx.Bool(NameGcp) {
 		return NewGcp(ctx)
+	}
+
+	if ctx.Bool(NameSsh) {
+		return NewSsh(ctx)
 	}
 
 	return nil, ErrUnknownProvider

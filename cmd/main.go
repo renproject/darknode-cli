@@ -47,6 +47,8 @@ func main() {
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 				// Google Cloud Platform
 				GcpFlag, GcpZoneFlag, GcpCredFlag, GcpMachineFlag,
+				// SSH
+				SshFlag, SshUserFlag, SshHostnameFlag, SshPrivateKeyFlag,
 			},
 			Action: func(c *cli.Context) error {
 				p, err := provider.ParseProvider(c)
