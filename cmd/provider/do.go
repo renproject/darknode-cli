@@ -62,6 +62,10 @@ func (p providerDo) Deploy(ctx *cli.Context) error {
 	return outputURL(name)
 }
 
+func (p providerDo) DeployMultiple(ctx *cli.Context) error {
+	panic("implement me")
+}
+
 func validateRegionAndDroplet(ctx *cli.Context) (string, string, error) {
 	region := ctx.String("do-region")
 	droplet := ctx.String("do-droplet")

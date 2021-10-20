@@ -105,6 +105,10 @@ func (p providerGcp) Deploy(ctx *cli.Context) error {
 	return outputURL(name)
 }
 
+func (p providerGcp) DeployMultiple(ctx *cli.Context) error {
+	panic("implement me")
+}
+
 func (p providerGcp) projectID() (string, error) {
 	data, err := ioutil.ReadFile(p.credFile)
 	if err != nil {

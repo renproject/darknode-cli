@@ -11,6 +11,10 @@ var (
 		Name:  "name",
 		Usage: "A unique human-readable `string` for identifying the Darknode",
 	}
+	NumberFlag = cli.IntFlag{
+		Name:  "n",
+		Usage: "Number of darknodes to deploy",
+	}
 	TagsFlag = cli.StringFlag{
 		Name:  "tags",
 		Usage: "Multiple human-readable comma separated `strings` for identifying groups of Darknodes",
@@ -25,7 +29,7 @@ var (
 		Usage: "Network of your Darknode (default: mainnet)",
 	}
 	ConfigFlag = cli.StringFlag{
-		Name: "config",
+		Name:  "config",
 		Usage: "Path of the config file",
 	}
 	AddressFlag = cli.StringFlag{

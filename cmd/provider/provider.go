@@ -53,6 +53,7 @@ WantedBy=default.target`
 type Provider interface {
 	Name() string
 	Deploy(ctx *cli.Context) error
+	DeployMultiple(ctx *cli.Context) error
 }
 
 func ParseProvider(ctx *cli.Context) (Provider, error) {
@@ -95,7 +96,7 @@ func initNode(name, tags string, network darknode.Network, configFile string) er
 	var conf darknode.Config
 	if configFile != "" {
 		path, err := filepath.Abs(configFile)
-		if err != nil{
+		if err != nil {
 			return errors.New("invalid config path")
 		}
 
@@ -159,6 +160,17 @@ func runTerraform(name string) error {
 	fmt.Println("Deploying darknode ... ")
 	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", path)
 	return util.Run("bash", "-c", apply)
+}
+
+func runTerraformSilent(name string) error {
+	path := util.NodePath(name)
+	init := fmt.Sprintf("cd %v && terraform init", path)
+	if err := util.SilentRun("bash", "-c", init); err != nil {
+		return err
+	}
+
+	apply := fmt.Sprintf("cd %v && terraform apply -auto-approve -no-color", path)
+	return util.SilentRun("bash", "-c", apply)
 }
 
 // outputURL writes success message and the URL for registering the node to the terminal.

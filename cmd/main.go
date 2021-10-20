@@ -57,6 +57,25 @@ func main() {
 			},
 		},
 		{
+			Name:  "multi-up",
+			Usage: "Deploy multiple",
+			Flags: []cli.Flag{
+				// General
+				NameFlag, TagsFlag, NetworkFlag, NumberFlag,
+				// AWS
+				AwsFlag, AwsAccessKeyFlag, AwsSecretKeyFlag,
+				// Digital Ocean
+				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
+			},
+			Action: func(c *cli.Context) error {
+				p, err := provider.ParseProvider(c)
+				if err != nil {
+					return err
+				}
+				return p.DeployMultiple(c)
+			},
+		},
+		{
 			Name:    "destroy",
 			Usage:   "Destroy one of your Darknode",
 			Aliases: []string{"down"},

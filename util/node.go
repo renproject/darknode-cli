@@ -172,7 +172,7 @@ func LatestStableRelease() (string, error) {
 
 	client := github.NewClient(nil)
 	opts := &github.ListOptions{
-		PerPage: 25,
+		PerPage: 50,
 	}
 	latest, err := version.NewVersion("0.0.0")
 	if err != nil {
@@ -206,7 +206,7 @@ func LatestStableRelease() (string, error) {
 				}
 			}
 		}
-		if response.NextPage == 0{
+		if response.NextPage == 0 {
 			break
 		}
 		opts.Page = response.NextPage
