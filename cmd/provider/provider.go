@@ -117,7 +117,7 @@ func initNode(name, tags string, network darknode.Network, configFile string) er
 		}
 	}
 
-	configData, err := json.MarshalIndent(conf, "", "    ")
+	configData, err := json.MarshalIndent(conf, "", "	")
 	if err != nil {
 		return err
 	}

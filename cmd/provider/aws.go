@@ -224,12 +224,12 @@ func (p providerAws) AvailableRegions() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	regions := make([]string, len(result.Regions))
+	regions := make([]string, 0, len(result.Regions))
 	for i := range result.Regions {
 		if *result.Regions[i].RegionName == "us-east-1" || *result.Regions[i].RegionName == "" {
 			continue
 		}
-		regions[i] = *result.Regions[i].RegionName
+		regions = append(regions, *result.Regions[i].RegionName)
 	}
 	return regions, nil
 }

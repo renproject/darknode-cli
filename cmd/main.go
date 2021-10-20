@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"math/rand"
 	"os"
@@ -12,6 +13,8 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/hashicorp/go-version"
 	"github.com/renproject/darknode-cli/cmd/provider"
+	"github.com/renproject/darknode-cli/darknode"
+	"github.com/renproject/darknode-cli/darknode/addr"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
@@ -168,20 +171,59 @@ func main() {
 		{
 			Name:  "register",
 			Usage: "Redirect you to the register page of a particular darknode",
-			Flags: []cli.Flag{},
+			Flags: []cli.Flag{TagsFlag},
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
-				if err := util.ValidateNodeName(name); err != nil {
-					return err
-				}
+				tags := c.String("tags")
 
-				url, err := util.RegisterUrl(name)
-				if err != nil {
-					return err
+				type Call struct {
+					DarknodeName   string `json:"darknode_name"`
+					DarknodeID     string `json:"_darknodeID"`
 				}
-				color.Green("If the browser doesn't open for you, please copy the following url and open in browser.")
-				color.Green(url)
-				return util.OpenInBrowser(url)
+				if tags != "" {
+					nodes, err := util.GetNodesByTags(tags)
+					if err != nil {
+						return err
+					}
+					calls := make([]Call, len(nodes))
+
+					for i, node := range nodes {
+						path := filepath.Join(util.NodePath(node), "config.json")
+						config, err := darknode.NewConfigFromJSONFile(path)
+						if err != nil {
+							return err
+						}
+						id := addr.FromPublicKey(config.Keystore.Ecdsa.PublicKey)
+						ethAddr, err := id.ToEthereumAddress()
+						if err != nil {
+							return err
+						}
+						calls[i] = Call{
+							DarknodeName: node,
+							DarknodeID:   ethAddr.Hex(),
+						}
+					}
+
+					data, err := json.MarshalIndent(calls, "", "	")
+					if err != nil {
+						return err
+					}
+					color.Green("%v", string(data))
+
+					return nil
+				} else {
+					if err := util.ValidateNodeName(name); err != nil {
+						return err
+					}
+
+					url, err := util.RegisterUrl(name)
+					if err != nil {
+						return err
+					}
+					color.Green("If the browser doesn't open for you, please copy the following url and open in browser.")
+					color.Green(url)
+					return util.OpenInBrowser(url)
+				}
 			},
 		},
 	}
