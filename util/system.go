@@ -60,8 +60,8 @@ func CommandOutput(commands string) (string, error) {
 }
 
 // RemoteRun runs the script on the instance which host the darknode of given name.
-func RemoteRun(name, script string) error {
-	session, err := connect(name, "darknode")
+func RemoteRun(name, script, username string) error {
+	session, err := connect(name, username)
 	if err != nil {
 		return err
 	}

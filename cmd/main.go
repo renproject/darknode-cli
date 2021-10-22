@@ -9,15 +9,14 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/google/go-github/github"
 	"github.com/hashicorp/go-version"
 	"github.com/renproject/darknode-cli/cmd/provider"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
 
-// This will be populated on build
-var binaryVersion = "undefined"
+// BinaryVersion will be populated when building the binary.
+var BinaryVersion = "undefined"
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -28,7 +27,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "Darknode CLI"
 	app.Usage = "A command-line tool for managing Darknodes."
-	app.Version = binaryVersion
+	app.Version = BinaryVersion
 
 	// Fetch latest release and check if our version is behind.
 	checkUpdates(app.Version)
@@ -46,7 +45,7 @@ func main() {
 				// Digital Ocean
 				DoFlag, DoRegionFlag, DoSizeFlag, DoTokenFlag,
 				// Google Cloud Platform
-				GcpFlag, GcpZoneFlag, GcpCredFlag, GcpMachineFlag,
+				GcpFlag, GcpRegionFlag, GcpCredFlag, GcpMachineFlag,
 			},
 			Action: func(c *cli.Context) error {
 				p, err := provider.ParseProvider(c)
@@ -79,7 +78,7 @@ func main() {
 			Usage: "SSH into one of your Darknode",
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
-				if err := util.ValidateNodeName(name); err != nil {
+				if err := util.NodeExistence(name); err != nil {
 					return err
 				}
 				ip, err := util.IP(name)
@@ -152,7 +151,7 @@ func main() {
 			Flags: []cli.Flag{},
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
-				if err := util.ValidateNodeName(name); err != nil {
+				if err := util.NodeExistence(name); err != nil {
 					return err
 				}
 
@@ -167,7 +166,7 @@ func main() {
 		},
 	}
 
-	// Show error message and display the help page for the app
+	// Show error message and display the help page when command not found.
 	app.CommandNotFound = func(c *cli.Context, command string) {
 		if err := cli.ShowAppHelp(c); err != nil {
 			panic(err)
@@ -187,10 +186,11 @@ func main() {
 // checkUpdates fetches the latest release of `darknode-cli` from github and compare the versions. It warns the user if
 // current version is older than the latest release.
 func checkUpdates(curVer string) {
-	// Get latest release
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client := github.NewClient(nil)
+
+	// Fetch the latest release
+	client := util.GithubClient(ctx)
 	release, _, err := client.Repositories.GetLatestRelease(ctx, "renproject", "darknode-cli")
 	if err != nil {
 		return

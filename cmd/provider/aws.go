@@ -5,31 +5,13 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/renproject/darknode-cli/darknode"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
-
-// All available regions on AWS.
-var AllAwsRegions = []string{
-	"ap-northeast-1",
-	"ap-northeast-2",
-	"ap-south-1",
-	"ap-southeast-1",
-	"ap-southeast-2",
-	"ca-central-1",
-	"eu-central-1",
-	"eu-north-1",
-	"eu-west-1",
-	"eu-west-2",
-	"eu-west-3",
-	"sa-east-1",
-	"us-east-1",
-	"us-east-2",
-	"us-west-1",
-	"us-west-2",
-}
 
 type providerAws struct {
 	accessKey string
@@ -64,25 +46,25 @@ func (p providerAws) Name() string {
 }
 
 func (p providerAws) Deploy(ctx *cli.Context) error {
-	name := ctx.String("name")
-	tags := ctx.String("tags")
-	config := ctx.String("config")
-
-	latestVersion, err := util.LatestStableRelease()
-	if err != nil {
+	// Validate all input params
+	if err := validateCommonParams(ctx); err != nil {
 		return err
 	}
+
+	name := ctx.String("name")
 	region, instance, err := p.validateRegionAndInstance(ctx)
 	if err != nil {
 		return err
 	}
 
-	// Initialization
-	network, err := darknode.NewNetwork(ctx.String("network"))
+	// Get the latest darknode version
+	latestVersion, err := util.LatestStableRelease()
 	if err != nil {
 		return err
 	}
-	if err := initNode(name, tags, network, config); err != nil {
+
+	// Initialize folder and files for the node
+	if err := initNode(ctx); err != nil {
 		return err
 	}
 
@@ -98,20 +80,62 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 }
 
 func (p providerAws) validateRegionAndInstance(ctx *cli.Context) (string, string, error) {
-	// TODO : use aws api to validate the region and instance type
+	cred := credentials.NewStaticCredentials(p.accessKey, p.secretKey, "")
 	region := strings.ToLower(strings.TrimSpace(ctx.String("aws-region")))
 	instance := strings.ToLower(strings.TrimSpace(ctx.String("aws-instance")))
 
+	// Get all available regions
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("us-east-1"),
+		Credentials: cred,
+	})
+	service := ec2.New(sess)
+	input := &ec2.DescribeRegionsInput{}
+	result, err := service.DescribeRegions(input)
+	if err != nil {
+		return "", "", err
+	}
+	regions := make([]string, len(result.Regions))
+	for i := range result.Regions {
+		regions[i] = *result.Regions[i].RegionName
+	}
+
 	if region == "" {
-		region = AllAwsRegions[rand.Intn(len(AllAwsRegions))]
+		// Randomly select a region which has the given droplet size.
+		indexes := rand.Perm(len(result.Regions))
+		for _, index := range indexes {
+			region = *result.Regions[index].RegionName
+			if err := p.instanceTypesAvailability(cred, region, instance); err == nil {
+				return region, instance, nil
+			}
+		}
+		return "", "", fmt.Errorf("selected instance type [%v] is not available across all regions", instance)
+	} else {
+		err = p.instanceTypesAvailability(cred, region, instance)
+		return region, instance, err
 	}
-	if !util.StringInSlice(region, AllAwsRegions) {
-		return "", "", fmt.Errorf("aws region [%v] is not supported yet", region)
-	}
+}
 
-	if instance == "" {
-		return "", "", fmt.Errorf("instance type [%v] is not supported yet", instance)
+func (p providerAws) instanceTypesAvailability(cred *credentials.Credentials, region, instance string) error {
+	instanceSession, err := session.NewSession(&aws.Config{
+		Region:      aws.String(region),
+		Credentials: cred,
+	})
+	if err != nil {
+		return err
 	}
-
-	return region, instance, nil
+	service := ec2.New(instanceSession)
+	instanceInput := &ec2.DescribeInstanceTypesInput{
+		InstanceTypes: []*string{aws.String(instance)},
+	}
+	instanceResult, err := service.DescribeInstanceTypes(instanceInput)
+	if err != nil {
+		return err
+	}
+	for _, res := range instanceResult.InstanceTypes {
+		if *res.InstanceType == instance {
+			return nil
+		}
+	}
+	return fmt.Errorf("instance not avaliable")
 }

@@ -23,9 +23,6 @@ func GenerateSshKeyAndWriteToDir(name string) error {
 		return err
 	}
 	key.Precompute()
-	if err != nil {
-		return err
-	}
 
 	// Write the private key to file
 	priKeyBytes := x509.MarshalPKCS1PrivateKey(key)
@@ -47,12 +44,6 @@ func GenerateSshKeyAndWriteToDir(name string) error {
 	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
 
 	return ioutil.WriteFile(pubKeyPath, pubKeyBytes, 0600)
-}
-
-func StringifySshPubKey(key ssh.PublicKey) string {
-	pubKeyBytes := ssh.MarshalAuthorizedKey(key)
-
-	return string(pubKeyBytes)
 }
 
 func ParseSshPrivateKey(name string) (ssh.Signer, error) {

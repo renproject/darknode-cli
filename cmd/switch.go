@@ -41,7 +41,7 @@ func updateServiceStatus(ctx *cli.Context, cmd string) error {
 	}
 	errs := make([]error, len(nodes))
 	phi.ParForAll(nodes, func(i int) {
-		errs[i] = util.RemoteRun(nodes[i], script)
+		errs[i] = util.RemoteRun(nodes[i], script, "darknode")
 		if errs[i] == nil {
 			color.Green("[%v] has been %v.", nodes[i], message)
 		} else {

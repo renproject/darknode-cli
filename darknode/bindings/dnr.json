@@ -1,48 +1,11 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_VERSION",
-        "type": "string"
-      },
-      {
-        "internalType": "contract RenToken",
-        "name": "_renAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "contract DarknodeRegistryStore",
-        "name": "_storeAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_minimumBond",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_minimumPodSize",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_minimumEpochIntervalSeconds",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_operator",
+        "name": "_darknodeOperator",
         "type": "address"
       },
       {
@@ -60,31 +23,12 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "_operator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "LogDarknodeOwnerRefunded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "contract IDarknodePayment",
         "name": "_previousDarknodePayment",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "contract IDarknodePayment",
         "name": "_nextDarknodePayment",
         "type": "address"
@@ -99,7 +43,32 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_operator",
+        "name": "_darknodeOperator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_darknodeID",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "LogDarknodeRefunded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_darknodeOperator",
         "type": "address"
       },
       {
@@ -124,7 +93,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_operator",
+        "name": "_darknodeOperator",
         "type": "address"
       },
       {
@@ -223,13 +192,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "_previousSlasher",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "_nextSlasher",
         "type": "address"
@@ -270,6 +239,21 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "blacklistRecoverableToken",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -341,6 +325,21 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "deregistrationInterval",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [],
     "name": "epoch",
@@ -379,7 +378,7 @@
         "type": "address"
       }
     ],
-    "name": "getDarknodeOwner",
+    "name": "getDarknodeOperator",
     "outputs": [
       {
         "internalType": "address payable",
@@ -462,6 +461,66 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_VERSION",
+        "type": "string"
+      },
+      {
+        "internalType": "contract RenToken",
+        "name": "_renAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "contract DarknodeRegistryStore",
+        "name": "_storeAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_minimumBond",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_minimumPodSize",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_minimumEpochIntervalSeconds",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_deregistrationIntervalSeconds",
+        "type": "uint256"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_nextOwner",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -815,6 +874,21 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "pendingOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "previousEpoch",
     "outputs": [
       {
@@ -980,7 +1054,7 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract DarknodeRegistry",
+        "internalType": "contract DarknodeRegistryLogicV1",
         "name": "_newOwner",
         "type": "address"
       }

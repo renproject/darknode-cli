@@ -1,3 +1,17 @@
+## 3.1.0
+- Support Apple Silicon chip (M1)
+- Improve installation/update scripts
+- Bug fixes
+- Update package dependency 
+- Move from CircleCI to github action
+
+## 3.0.15
+- Support deploying a new darknode using an existing config file.
+
+## 3.0.14
+- Fix bug when fetching latest darknode-release during darknode installation
+- Remove `jq` from darknode installation
+
 ## 3.0.13
 - Fix pagination issue when fetching latest darknode releases from github.
 

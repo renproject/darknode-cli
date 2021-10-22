@@ -25,7 +25,7 @@ var (
 		Usage: "Network of your Darknode (default: mainnet)",
 	}
 	ConfigFlag = cli.StringFlag{
-		Name: "config",
+		Name:  "config",
 		Usage: "Path of the config file",
 	}
 	AddressFlag = cli.StringFlag{
@@ -116,8 +116,8 @@ var (
 		Value: "n1-standard-1",
 		Usage: "An optional Google Cloud machine type (default: n1-standard-1)",
 	}
-	GcpZoneFlag = cli.StringFlag{
-		Name:  "gcp-zone",
-		Usage: "An optional Google Cloud Zone (default: random)",
+	GcpRegionFlag = cli.StringFlag{
+		Name:  "gcp-region",
+		Usage: "An optional Google Cloud Region (default: random)",
 	}
 )

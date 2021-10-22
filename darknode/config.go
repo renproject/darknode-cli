@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"math/big"
 	"os"
+	"path/filepath"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -69,6 +70,43 @@ func NewConfig(network Network) (Config, error) {
 	}, nil
 }
 
+// NewConfigFromJSONFile parses a json file that contains the config
+// options specified by Config.
+func NewConfigFromJSONFile(filename string) (Config, error) {
+	path, err := filepath.Abs(filename)
+	if err != nil {
+		return Config{}, err
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return Config{}, err
+	}
+	defer file.Close()
+
+	var conf Config
+	err = json.NewDecoder(file).Decode(&conf)
+	return conf, err
+}
+
+// ConfigToFile writes the Config to the target file in json format.
+func ConfigToFile(config Config, path string) error {
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "	")
+	return encoder.Encode(config)
+}
+
 // GeneralConfig is the config struct which contains the common fields across
 // all versions of darknode configs.
 type GeneralConfig struct {
@@ -100,9 +138,9 @@ func (config GeneralConfig) DnrAddr(client *ethclient.Client) (common.Address, e
 	return config.DarknodeRegistryAddress, nil
 }
 
-// NewConfigFromJSONFile parses a json file that contains the config
-// options specified by Config.
-func NewConfigFromJSONFile(filename string) (GeneralConfig, error) {
+// NewGeneralConfigFromJSONFile parses a json file that contains the config
+// options specified by GeneralConfig.
+func NewGeneralConfigFromJSONFile(filename string) (GeneralConfig, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return GeneralConfig{}, err
