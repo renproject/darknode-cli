@@ -126,40 +126,42 @@ func (p providerAws) DeployMultiple(ctx *cli.Context) error {
 	for i := 0; i < 5; i++ {
 		go func() {
 			for {
-				config := <-ch
-				name := config.Name
+				func() {
+					config := <-ch
+					name := config.Name
+					defer wg.Done()
 
-				// Initialization
-				network, err := darknode.NewNetwork(ctx.String("network"))
-				if err != nil {
-					color.Red("invalid network, %v", err)
-					return
-				}
-				if err := initNode(name, tags, network, ""); err != nil {
-					color.Red("failed to initialize darknode, %v", err)
-					return
-				}
+					// Initialization
+					network, err := darknode.NewNetwork(ctx.String("network"))
+					if err != nil {
+						color.Red("invalid network, %v", err)
+						return
+					}
+					if err := initNode(name, tags, network, ""); err != nil {
+						color.Red("failed to initialize darknode, %v", err)
+						return
+					}
 
-				t, err := template.New("aws").Parse(awsTemplate)
-				if err != nil {
-					color.Red("failed to initialize aws template, %v", err)
-					return
-				}
-				tfFile, err := os.Create(filepath.Join(util.NodePath(name), "main.tf"))
-				if err != nil {
-					color.Red("failed to create terraform config, %v", err)
-					return
-				}
-				if err := t.Execute(tfFile, config); err != nil {
-					color.Red("failed to execute terraform, %v", err)
-					return
-				}
+					t, err := template.New("aws").Parse(awsTemplate)
+					if err != nil {
+						color.Red("failed to initialize aws template, %v", err)
+						return
+					}
+					tfFile, err := os.Create(filepath.Join(util.NodePath(name), "main.tf"))
+					if err != nil {
+						color.Red("failed to create terraform config, %v", err)
+						return
+					}
+					if err := t.Execute(tfFile, config); err != nil {
+						color.Red("failed to execute terraform, %v", err)
+						return
+					}
 
-				if err := runTerraformSilent(name); err != nil {
-					color.Red("failed to create terraform config, %v", err)
-					return
-				}
-				wg.Done()
+					if err := runTerraformSilent(name); err != nil {
+						color.Red("failed to create terraform config, %v", err)
+						return
+					}
+				}()
 			}
 		}()
 	}
@@ -169,7 +171,19 @@ func (p providerAws) DeployMultiple(ctx *cli.Context) error {
 		return err
 	}
 
-	for i := 1; i <= n; i++ {
+	// Found the starting index
+	startIndex := 1
+	for ; startIndex <= 1000; startIndex ++ {
+		name := fmt.Sprintf("%v-%v", prefix, startIndex)
+		if err := util.ValidateNodeName(name); err != nil {
+			break
+		}
+	}
+	if startIndex == 999 {
+		return fmt.Errorf("try using a different prefix for your darknodes")
+	}
+
+	for i := startIndex; i < startIndex + n ; i++ {
 		name := fmt.Sprintf("%v-%v", prefix, i)
 		tf := awsTerraform{
 			Name:          name,
