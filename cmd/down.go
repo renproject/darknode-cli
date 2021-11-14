@@ -56,7 +56,7 @@ func (s status) err() string {
 func destroyNode(ctx *cli.Context) error {
 	force := ctx.Bool("force")
 	name := ctx.Args().First()
-	if err := util.NodeExistence(name); err != nil {
+	if err := util.ValidateNodeExistence(name); err != nil {
 		return err
 	}
 	path := util.NodePath(name)
@@ -103,7 +103,7 @@ func withdraw(ctx *cli.Context) error {
 
 	// Parse the input parameters
 	name := ctx.Args().First()
-	if err := util.NodeExistence(name); err != nil {
+	if err := util.ValidateNodeExistence(name); err != nil {
 		return err
 	}
 	withdrawAddress := ctx.String("address")

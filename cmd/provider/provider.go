@@ -77,7 +77,7 @@ func validateCommonParams(ctx *cli.Context) error {
 	if err := util.ValidateName(name); err != nil {
 		return err
 	}
-	if err := util.NodeExistence(name); err == nil {
+	if err := util.ValidateNodeExistence(name); err == nil {
 		return fmt.Errorf("node [%v] already exist", name)
 	}
 

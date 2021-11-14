@@ -34,7 +34,7 @@ func ParseNodesFromNameAndTags(name, tags string) ([]string, error) {
 	} else if name == "" && tags != "" {
 		return GetNodesByTags(tags)
 	} else if name != "" && tags == "" {
-		return []string{name}, NodeExistence(name)
+		return []string{name}, ValidateNodeExistence(name)
 	} else {
 		return nil, ErrTooManyArguments
 	}
@@ -59,8 +59,8 @@ func ValidateName(name string) error {
 	return nil
 }
 
-// NodeExistence checks if there exists a node with given name.
-func NodeExistence(name string) error {
+// ValidateNodeExistence checks if there exists a node with given name.
+func ValidateNodeExistence(name string) error {
 	path := filepath.Join(Directory, "darknodes", name)
 	_, err := os.Stat(path)
 	return err

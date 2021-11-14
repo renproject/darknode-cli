@@ -78,7 +78,7 @@ func main() {
 			Usage: "SSH into one of your Darknode",
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
-				if err := util.NodeExistence(name); err != nil {
+				if err := util.ValidateNodeExistence(name); err != nil {
 					return err
 				}
 				ip, err := util.IP(name)
@@ -151,7 +151,7 @@ func main() {
 			Flags: []cli.Flag{},
 			Action: func(c *cli.Context) error {
 				name := c.Args().First()
-				if err := util.NodeExistence(name); err != nil {
+				if err := util.ValidateNodeExistence(name); err != nil {
 					return err
 				}
 
