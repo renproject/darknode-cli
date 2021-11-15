@@ -37,7 +37,7 @@ main(){
   progressBar 40 100
 
   # Update the binary
-  current=$(darknode --version | grep "darknode-cli version" | cut -d ' ' -f 3)
+  current=$(darknode --version | grep "Darknode CLI version" | cut -d ' ' -f 4)
   latest=$(get_latest_release "renproject/darknode-cli")
   vercomp $current $latest
   if [ "$?" -eq "2" ]; then
