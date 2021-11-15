@@ -226,3 +226,7 @@ or a script file
 ```sh
 darknode exec YOUR-DARKNODE-NAME --file test.sh
 ``` 
+
+### Github rate limiting
+
+You can set the `GITHUB_TOKEN` environment variable to increase your github rate limit. 

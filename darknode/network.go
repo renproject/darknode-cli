@@ -19,10 +19,6 @@ const (
 	// without incurring real-world costs.
 	Testnet = Network("testnet")
 
-	// Chaosnet is the pre-production version of mainnet for production testing
-	// with real-world incentives and punishments.
-	Chaosnet = Network("chaosnet")
-
 	// Mainnet is the production network.
 	Mainnet = Network("mainnet")
 )
@@ -34,8 +30,6 @@ func NewNetwork(network string) (Network, error) {
 		return Devnet, nil
 	case "testnet":
 		return Testnet, nil
-	case "chaosnet":
-		return Chaosnet, nil
 	case "mainnet":
 		return Mainnet, nil
 	default:
@@ -49,15 +43,6 @@ func (network Network) BootstrapNodes() []addr.MultiAddress {
 	case Mainnet:
 		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/35.180.200.106/tcp/18514/ren/8MGaGCjCjrJMjp7kMrkKzxtmLpbX8q", "mOuxWXwTBDtFvy88ErPOwkux9rR/HHmCuFReSlvLrTBAqwRXVWDNu8e8FjFTdUYg3H3ctWczGLgBRY3CUgNGYwA=")
 		bootstraps = append(bootstraps, b1)
-	case Chaosnet:
-		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/3.115.117.251/tcp/18514/ren/8MGrkr3CCG5gxnipWD5RUc8BMQnU1s", "3w8PoELIeSh0sqcb6qONy1FNgSIgP9hELVh44D/IE0saY518C9vWvBYSQn4xUmYRb7Y+nYNPY54NoH1y0zMnXAE=")
-		b2, _ := addr.NewSignedMultiAddressFromString("/ip4/18.182.28.215/tcp/18514/ren/8MGjmhtNxsqT4NphYt3usvJBXqVTeS", "YntncxzVBMHA+QNwgkdAQc95gSoWXrdf7r1T38+rtYkuCud5EkV7tWy0GDLeSKCvEuOpVtdPFlaVHXQyYNPwVAA=")
-		b3, _ := addr.NewSignedMultiAddressFromString("/ip4/35.180.66.220/tcp/18514/ren/8MHEtUrZBQuRRtxAgBTTM6Zov3imfP", "Smw7e2DZ7nyPOr94oVuWmezAIDz1+uAkwkmQnH5nI0d+w6bECUV96wlJgvylILIL0cVITn5M1Mfm3fQeMWwVHQE=")
-		b4, _ := addr.NewSignedMultiAddressFromString("/ip4/15.188.15.210/tcp/18514/ren/8MGob6LJcneeFSiQStU9FvP83W3xMA", "gcePwG3m0JonXpVZD8xJtWr7RnBsBuNViOkZElNAkaEDgYXmOdTBtXd1HMTjbwAilIG+hVlpIRpyC97n2F2z6gE=")
-		b5, _ := addr.NewSignedMultiAddressFromString("/ip4/18.138.225.107/tcp/18514/ren/8MKUZzR3oM4ALnQ5vjQti1X41DwkEW", "iiiRnd/bkQlVVxr5XKrKi0uHhk4tAs5ct3rUjrYf8NAzhn49D/CAuVYFlxlmM31mCqOFOa1xO7HHZbV4zQJyggE=")
-		b6, _ := addr.NewSignedMultiAddressFromString("/ip4/3.9.164.193/tcp/18514/ren/8MJSu4N1FgyT4ZYRH9faB9G6oMUUiF", "mmVxayVx6vyOaGR/r4hWezXhszGf9MC3OQxgBuc7kL8+OyvtUl6TwmzmXIXUoZqPRN07IwmGY11BUH1W43lsAgE=")
-		b7, _ := addr.NewSignedMultiAddressFromString("/ip4/13.209.5.177/tcp/18514/ren/8MG7JhRuoj6SSQuzCWeWCdXRXd6Mn3", "CeHap47KDuH3oLcSUQOvtF/nK8HhjyejOqF+93FqhR0B2yRdOqHoHVUeY6Zsy2kOplo+2YNTpkzL9tDH2CpI2gE=")
-		bootstraps = append(bootstraps, b1, b2, b3, b4, b5, b6, b7)
 	case Testnet:
 		b1, _ := addr.NewSignedMultiAddressFromString("/ip4/165.22.58.69/tcp/18514/ren/8MHjCu8ZiFaPShXx7SfJ93hpHRMLwv", "5QQTiQuEIWoVotCLDPd4BdjyJPKr+YDT6WsMYxps/q9a+ZwBZMRQbQscfnBQgUwEC2rPVVbTfZITjPKcbVIRJAA=")
 		b2, _ := addr.NewSignedMultiAddressFromString("/ip4/165.22.193.227/tcp/18514/ren/8MJWSxiNmY3ghCYYo14yB1VPq7Su5h", "DEEByr1HSuV0gwyrZSh20Ym9RAP4J0iC+ErUJSpiojwG5TG1y9CI+umHD/gPXkjGdNfkB1wiplFYM6VSeRFidgE=")
@@ -98,8 +83,6 @@ func (network Network) ProtocolAddr() common.Address {
 	switch network {
 	case Mainnet:
 		return common.HexToAddress("0xc25167fFa19B4d9d03c7d5aa4682c7063F345b66")
-	case Chaosnet:
-		return common.HexToAddress("0xf61e97c464ec0cf48b33262c3a1ef42114275144")
 	case Testnet:
 		return common.HexToAddress("0x59e23c087cA9bd9ce162875811CD6e99134D6d0F")
 	case Devnet:

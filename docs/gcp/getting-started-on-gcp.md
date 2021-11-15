@@ -58,11 +58,19 @@ darknode list
 
 ### Choosing a compute zone
 
-You can specify in which [Compute Engine Zone](https://cloud.google.com/compute/docs/regions-zones/) you deploy your node with the --gcp-zone flag. If omitted, a random zone is selected.
+You can specify in which [Compute Engine Zone](https://cloud.google.com/compute/docs/regions-zones/) you deploy your node with the --gcp-region flag and a random zone in that region will be selected.
 
 ```sh
-darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLOADED_JSON_FILE --gcp-zone europe-west1-b
+darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLOADED_JSON_FILE --gcp-region europe-west1
 ```
+
+You can also specify a zone you want to use.
+
+```sh
+darknode up --name my-first-darknode --gcp --gcp-credentials PATH_TO_YOUR_DOWNLOADED_JSON_FILE --gcp-region europe-west1-b
+```
+
+A random region and zone will be used if this flag is not provided.
 
 ### Choosing a machine type
 

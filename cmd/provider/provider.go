@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -71,6 +70,46 @@ func ParseProvider(ctx *cli.Context) (Provider, error) {
 	return nil, ErrUnknownProvider
 }
 
+// Validate the params which are general to all providers.
+func validateCommonParams(ctx *cli.Context) error {
+	// Check the name valida and not been used
+	name := ctx.String("name")
+	if err := util.ValidateName(name); err != nil {
+		return err
+	}
+	if err := util.ValidateNodeExistence(name); err == nil {
+		return fmt.Errorf("node [%v] already exist", name)
+	}
+
+	// Parse the network
+	network := darknode.Network(ctx.String("network"))
+	switch network {
+	case darknode.Mainnet:
+	case darknode.Testnet:
+	case darknode.Devnet:
+	default:
+		return errors.New("unknown RenVM network")
+	}
+
+	// Verify the config file if user wants to use their own config
+	configFile := ctx.String("config")
+	if configFile != "" {
+		// verify the config exist and of the right format
+		path, err := filepath.Abs(configFile)
+		if err != nil {
+			return err
+		}
+		if _, err := os.Stat(path); err != nil {
+			return errors.New("config file doesn't exist")
+		}
+		_, err = darknode.NewConfigFromJSONFile(path)
+		if err != nil {
+			return fmt.Errorf("incompatible config, err = %w", err)
+		}
+	}
+	return nil
+}
+
 // Provider returns the provider of a darknode instance.
 func GetProvider(name string) (string, error) {
 	if name == "" {
@@ -79,14 +118,32 @@ func GetProvider(name string) (string, error) {
 
 	cmd := fmt.Sprintf("cd %v && terraform output provider", util.NodePath(name))
 	provider, err := util.CommandOutput(cmd)
+	if strings.HasPrefix(provider, "\"") {
+		provider = strings.Trim(provider, "\"")
+	}
 	return strings.TrimSpace(provider), err
 }
 
 // initialise all files needed by deploying a new node
-func initNode(name, tags string, network darknode.Network, configFile string) error {
-	if err := initNodeDirectory(name, tags); err != nil {
+func initNode(ctx *cli.Context) error {
+	name := ctx.String("name")
+	path := util.NodePath(name)
+	configFile := ctx.String("config")
+	network := darknode.Network(ctx.String("network"))
+
+	// Create directory for the Darknode
+	if err := os.MkdirAll(path, 0700); err != nil {
 		return err
 	}
+
+	// Create `tags.out` file
+	tags := []byte(strings.TrimSpace(ctx.String("tags")))
+	tagsPath := filepath.Join(path, "tags.out")
+	if err := ioutil.WriteFile(tagsPath, tags, 0600); err != nil {
+		return err
+	}
+
+	// Create `ssh_keypair` and `ssh_keypair.pub` files for the remote instance
 	if err := util.GenerateSshKeyAndWriteToDir(name); err != nil {
 		return err
 	}
@@ -94,19 +151,10 @@ func initNode(name, tags string, network darknode.Network, configFile string) er
 	// Use given config for the new darknode
 	var conf darknode.Config
 	if configFile != "" {
-		path, err := filepath.Abs(configFile)
-		if err != nil{
-			return errors.New("invalid config path")
-		}
-
-		file, err := os.Open(path)
+		var err error
+		conf, err = darknode.NewConfigFromJSONFile(path)
 		if err != nil {
-			return fmt.Errorf("cannot open config file, err = %v", err)
-		}
-		defer file.Close()
-
-		if err := json.NewDecoder(file).Decode(&conf); err != nil {
-			return err
+			return errors.New("invalid config file")
 		}
 	} else {
 		var err error
@@ -116,37 +164,7 @@ func initNode(name, tags string, network darknode.Network, configFile string) er
 		}
 	}
 
-	configData, err := json.MarshalIndent(conf, "", "    ")
-	if err != nil {
-		return err
-	}
-	configPath := filepath.Join(util.NodePath(name), "config.json")
-	return ioutil.WriteFile(configPath, configData, 0600)
-}
-
-func initNodeDirectory(name, tags string) error {
-	if name == "" {
-		return util.ErrEmptyName
-	}
-	path := util.NodePath(name)
-
-	// Ask user to destroy the old node first if there's already a node with the name.
-	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("Node [%v] already exist. \nIf you want to do a fresh deployment, destroy the old one first.", name)
-	}
-
-	// Make a directory for the new node
-	if err := os.Mkdir(path, 0700); err != nil {
-		return err
-	}
-
-	// Create the `tags.out` file if not exist.
-	tagsPath := filepath.Join(path, "tags.out")
-	if _, err := os.Stat(tagsPath); err != nil {
-		return ioutil.WriteFile(tagsPath, []byte(strings.TrimSpace(tags)), 0600)
-	}
-
-	return nil
+	return darknode.ConfigToFile(conf, filepath.Join(util.NodePath(name), "config.json"))
 }
 
 func runTerraform(name string) error {

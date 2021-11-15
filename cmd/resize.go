@@ -29,7 +29,7 @@ var (
 
 func resize(ctx *cli.Context) error {
 	name := ctx.Args().Get(0)
-	if err := util.ValidateNodeName(name); err != nil {
+	if err := util.ValidateNodeExistence(name); err != nil {
 		return err
 	}
 	newSize := ctx.Args().Get(1)

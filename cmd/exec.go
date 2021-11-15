@@ -35,11 +35,11 @@ func execSingleNode(name, file, script string) error {
 		if err != nil {
 			return err
 		}
-		return util.RemoteRun(name, string(script))
+		return util.RemoteRun(name, string(script), "darknode")
 	}
 
 	if script != "" {
-		return util.RemoteRun(name, script)
+		return util.RemoteRun(name, script, "darknode")
 	}
 
 	return errors.New("please provide a script file or scripts to run ")

@@ -56,7 +56,7 @@ func (s status) err() string {
 func destroyNode(ctx *cli.Context) error {
 	force := ctx.Bool("force")
 	name := ctx.Args().First()
-	if err := util.ValidateNodeName(name); err != nil {
+	if err := util.ValidateNodeExistence(name); err != nil {
 		return err
 	}
 	path := util.NodePath(name)
@@ -103,7 +103,7 @@ func withdraw(ctx *cli.Context) error {
 
 	// Parse the input parameters
 	name := ctx.Args().First()
-	if err := util.ValidateNodeName(name); err != nil {
+	if err := util.ValidateNodeExistence(name); err != nil {
 		return err
 	}
 	withdrawAddress := ctx.String("address")
@@ -200,7 +200,7 @@ func transfer(transactor *bind.TransactOpts, receiver common.Address, amount eth
 // renAddress on different network
 func renAddress(network darknode.Network) string {
 	switch network {
-	case darknode.Mainnet, darknode.Chaosnet:
+	case darknode.Mainnet:
 		return "0x408e41876cCCDC0F92210600ef50372656052a38"
 	case darknode.Testnet, darknode.Devnet:
 		return "0x2CD647668494c1B15743AB283A0f980d90a87394"
@@ -213,7 +213,7 @@ func renAddress(network darknode.Network) string {
 func connect(network darknode.Network) (ethclient.Client, error) {
 	logger := logrus.New()
 	switch network {
-	case darknode.Mainnet, darknode.Chaosnet:
+	case darknode.Mainnet:
 		return ethclient.New(logger, ethtypes.Mainnet)
 	case darknode.Testnet, darknode.Devnet:
 		return ethclient.New(logger, ethtypes.Kovan)

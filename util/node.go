@@ -1,19 +1,15 @@
 package util
 
 import (
-	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
-	"github.com/google/go-github/v31/github"
-	"github.com/hashicorp/go-version"
 	"github.com/renproject/darknode-cli/darknode"
 	"github.com/renproject/darknode-cli/darknode/addr"
 	"golang.org/x/crypto/ssh"
@@ -38,30 +34,42 @@ func ParseNodesFromNameAndTags(name, tags string) ([]string, error) {
 	} else if name == "" && tags != "" {
 		return GetNodesByTags(tags)
 	} else if name != "" && tags == "" {
-		return []string{name}, ValidateNodeName(name)
+		return []string{name}, ValidateNodeExistence(name)
 	} else {
 		return nil, ErrTooManyArguments
 	}
 }
 
-// ValidateNodeName checks if there exists a node with given name.
-func ValidateNodeName(name string) error {
-	files, err := ioutil.ReadDir(filepath.Join(Directory, "/darknodes"))
+// ValidateName validates the given darknode name. It should
+// 1) Only contains letter, number, "-" and "_".
+// 2) No more than 32 characters
+// 3) Do not contain any whitespace
+func ValidateName(name string) error {
+	if strings.TrimSpace(name) != name {
+		return fmt.Errorf("name cannot have whitespace")
+	}
+
+	nameRegex, err := regexp.Compile("^[a-zA-Z0-9_-]{1,32}$")
 	if err != nil {
 		return err
 	}
-	for _, f := range files {
-		if f.Name() == name {
-			return nil
-		}
+	if !nameRegex.MatchString(name) {
+		return fmt.Errorf("darknode name should be less than 32 characters and not contain any special character")
 	}
-	return fmt.Errorf("darknode [%v] not found", name)
+	return nil
+}
+
+// ValidateNodeExistence checks if there exists a node with given name.
+func ValidateNodeExistence(name string) error {
+	path := filepath.Join(Directory, "darknodes", name)
+	_, err := os.Stat(path)
+	return err
 }
 
 // Config returns the config of the node with given name.
 func Config(name string) (darknode.GeneralConfig, error) {
 	path := filepath.Join(NodePath(name), "config.json")
-	return darknode.NewConfigFromJSONFile(path)
+	return darknode.NewGeneralConfigFromJSONFile(path)
 }
 
 // ID gets the ID of the node with given name.
@@ -82,6 +90,9 @@ func IP(name string) (string, error) {
 
 	cmd := fmt.Sprintf("cd %v && terraform output ip", NodePath(name))
 	ip, err := CommandOutput(cmd)
+	if strings.HasPrefix(ip, "\"") {
+		ip = strings.Trim(ip, "\"")
+	}
 	return strings.TrimSpace(ip), err
 }
 
@@ -162,60 +173,6 @@ func ValidateTags(have, required string) bool {
 		}
 	}
 	return true
-}
-
-// LatestStableRelease checks the darknode release repo and return the version
-// of the latest release.
-func LatestStableRelease() (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	client := github.NewClient(nil)
-	opts := &github.ListOptions{
-		PerPage: 25,
-	}
-	latest, err := version.NewVersion("0.0.0")
-	if err != nil {
-		return "", err
-	}
-
-	// Fetch all releases and find the latest stable release tag
-	for {
-		releases, response, err := client.Repositories.ListReleases(ctx, "renproject", "darknode-release", opts)
-		if err != nil {
-			return "", err
-		}
-
-		if response.StatusCode != http.StatusOK {
-			return "", fmt.Errorf("cannot get latest darknode release from github, error code = %v", response.StatusCode)
-		}
-
-		verReg := "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"
-		for _, release := range releases {
-			match, err := regexp.MatchString(verReg, *release.TagName)
-			if err != nil {
-				return "", err
-			}
-			if match {
-				ver, err := version.NewVersion(*release.TagName)
-				if err != nil {
-					return "", err
-				}
-				if ver.GreaterThan(latest) {
-					latest = ver
-				}
-			}
-		}
-		if response.NextPage == 0{
-			break
-		}
-		opts.Page = response.NextPage
-	}
-	if latest.String() == "0.0.0" {
-		return "", errors.New("cannot find any stable release")
-	}
-
-	return latest.String(), nil
 }
 
 func isDeployed(name string) bool {

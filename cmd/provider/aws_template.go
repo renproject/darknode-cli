@@ -115,6 +115,11 @@ resource "aws_instance" "darknode" {
     Name = "{{.Name}}"
   }
 
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = 15
+  }
+
   provisioner "remote-exec" {
 
 	inline = [
@@ -189,9 +194,3 @@ output "provider" {
 output "ip" {
   value = aws_instance.darknode.public_ip
 }`
-
-// {{if .AllocationID}}
-// resource "aws_eip_association" "eip_assoc" {
-// instance_id   = "${aws_instance.darknode.id}"
-// allocation_id = "${var.allocation_id}"
-// }{{else}}{{end}}
