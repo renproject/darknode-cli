@@ -23,15 +23,17 @@ main(){
     requiredMinor="$(echo $min_terraform_ver | cut -d. -f2)"
     requiredPatch="$(echo $min_terraform_ver | cut -d. -f3)"
     if [ "$major" -lt "$requiredMajor" ]; then
-      err "Please upgrade your terraform to version above $min_terraform_ver"
+      echo "Please upgrade your terraform to version above $min_terraform_ver"
+    elif [ "$major" -eq "$requiredMajor" ]; then
+      if [ "$minor" -lt "$requiredMinor" ]; then
+        echo "Please upgrade your terraform to version above $min_terraform_ver"
+      elif [ "$minor" -eq "$requiredMinor" ]; then
+        if [ "$patch" -lt "$requiredPatch" ]; then
+          echo "Please upgrade your terraform to version above $min_terraform_ver"
+        fi
+      fi
     fi
-    if [ "$minor" -lt "$requiredMinor" ]; then
-      err "Please upgrade your terraform to version above $min_terraform_ver"
-    fi
-    if [ "$patch" -lt "$requiredPatch" ]; then
-      err "Please upgrade your terraform to version above $min_terraform_ver"
-    fi
-  else
+  elsev1.2
     install_terraform $cur_terraform_ver
   fi
   progressBar 40 100
@@ -87,14 +89,12 @@ check_cmd() {
 downloader() {
     if check_cmd curl; then
         if ! check_help_for curl --proto --tlsv1.2; then
-            echo "Warning: Not forcing TLS v1.2, this is potentially less secure"
             curl --silent --show-error --fail --location "$1" --output "$2"
         else
             curl --proto '=https' --tlsv1.2 --silent --show-error --fail --location "$1" --output "$2"
         fi
     elif check_cmd wget; then
         if ! check_help_for wget --https-only --secure-protocol; then
-            echo "Warning: Not forcing TLS v1.2, this is potentially less secure"
             wget "$1" -O "$2"
         else
             wget --https-only --secure-protocol=TLSv1_2 "$1" -O "$2"
@@ -140,36 +140,31 @@ get_latest_release() {
     sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
 }
 
-# source : https://stackoverflow.com/questions/4023830/how-to-compare-two-strings-in-dot-separated-version-format-in-bash
 vercomp () {
     if [[ $1 == $2 ]]
     then
         return 0
     fi
-    local IFS=.
-    local i ver1=($1) ver2=($2)
-    # fill empty fields in ver1 with zeros
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-    do
-        ver1[i]=0
-    done
-    for ((i=0; i<${#ver1[@]}; i++))
-    do
-        if [[ -z ${ver2[i]} ]]
-        then
-            # fill empty fields in ver2 with zeros
-            ver2[i]=0
+    major1="$(echo $1 | cut -d. -f1)"
+    minor1="$(echo $1 | cut -d. -f2)"
+    patch1="$(echo $1 | cut -d. -f3)"
+    major2="$(echo $2 | cut -d. -f1)"
+    minor2="$(echo $2 | cut -d. -f2)"
+    patch2="$(echo $2 | cut -d. -f3)"
+
+    if [ "$major1" -lt "$major2" ]; then
+      return 2
+    elif [ "$major1" -eq "$major2" ]; then
+      if [ "$minor1" -lt "$minor2" ]; then
+        return 2
+      elif [ "$minor1" -eq "$minor2" ]; then
+        if [ "$patch1" -lt "$patch2" ]; then
+          return 2
         fi
-        if ((10#${ver1[i]} > 10#${ver2[i]}))
-        then
-            return 1
-        fi
-        if ((10#${ver1[i]} < 10#${ver2[i]}))
-        then
-            return 2
-        fi
-    done
-    return 0
+      fi
+    fi
+
+    return 1
 }
 
 # Source: https://github.com/fearside/ProgressBar
