@@ -33,7 +33,7 @@ main(){
         fi
       fi
     fi
-  elsev1.2
+  else
     install_terraform $cur_terraform_ver
   fi
   progressBar 40 100
