@@ -15,13 +15,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/color"
 	"github.com/renproject/darknode-cli/darknode"
 	"github.com/renproject/darknode-cli/darknode/bindings"
 	"github.com/renproject/darknode-cli/util"
-	"github.com/renproject/mercury/sdk/client/ethclient"
-	"github.com/renproject/mercury/types/ethtypes"
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
@@ -121,13 +119,13 @@ func withdraw(ctx *cli.Context) error {
 	}
 
 	// Connect to Ethereum
-	client, err := connect(config.Network)
+	client, err := ethclient.Dial("https://ren-mercury.herokuapp.com/eth/mainnet")
 	if err != nil {
 		return err
 	}
 
 	// Create a transactor for ethereum tx
-	gasPrice, err := client.EthClient().SuggestGasPrice(c)
+	gasPrice, err := client.SuggestGasPrice(c)
 	if err != nil {
 		return err
 	}
@@ -138,7 +136,7 @@ func withdraw(ctx *cli.Context) error {
 
 	// Check REN balance first
 	renAddress := renAddress(config.Network)
-	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), client.EthClient())
+	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), client)
 	if err != nil {
 		return err
 	}
@@ -155,7 +153,7 @@ func withdraw(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		receipt, err := bind.WaitMined(c, client.EthClient(), tx)
+		receipt, err := bind.WaitMined(c, client, tx)
 		if err != nil {
 			return err
 		}
@@ -167,15 +165,15 @@ func withdraw(ctx *cli.Context) error {
 
 	// Check the ETH balance
 	fmt.Println("Checking ETH balance...")
-	balance, err := client.Balance(c, ethtypes.Address(ethAddr))
+	balance, err := client.BalanceAt(c, ethAddr, nil)
 	if err != nil {
 		return err
 	}
-	gas := ethtypes.Wei(gasPrice.Uint64() * 21000)
-	zero := ethtypes.Wei(0)
-	if balance.Gt(zero) {
-		if balance.Gt(gas) {
-			tx, err := transfer(auth, receiverAddr, balance.Sub(gas), client)
+	gas := gasPrice.Mul(gasPrice, big.NewInt(21000))
+	zero := big.NewInt(0)
+	if balance.Cmp(zero) == 1 {
+		if balance.Cmp(gas) == 1 {
+			tx, err := transfer(auth, receiverAddr, balance.Sub(balance, gas), client)
 			if err != nil {
 				return err
 			}
@@ -190,9 +188,9 @@ func withdraw(ctx *cli.Context) error {
 }
 
 // transfer ETH to the provided address.
-func transfer(transactor *bind.TransactOpts, receiver common.Address, amount ethtypes.Amount, client ethclient.Client) (*types.Transaction, error) {
-	bound := bind.NewBoundContract(receiver, abi.ABI{}, nil, client.EthClient(), nil)
-	transactor.Value = amount.ToBig()
+func transfer(transactor *bind.TransactOpts, receiver common.Address, amount *big.Int, client *ethclient.Client) (*types.Transaction, error) {
+	bound := bind.NewBoundContract(receiver, abi.ABI{}, nil, client, nil)
+	transactor.Value = amount
 	transactor.GasLimit = 21000
 	return bound.Transfer(transactor)
 }
@@ -209,19 +207,6 @@ func renAddress(network darknode.Network) string {
 	}
 }
 
-// connect to Ethereum.
-func connect(network darknode.Network) (ethclient.Client, error) {
-	logger := logrus.New()
-	switch network {
-	case darknode.Mainnet:
-		return ethclient.New(logger, ethtypes.Mainnet)
-	case darknode.Testnet, darknode.Devnet:
-		return ethclient.New(logger, ethtypes.Kovan)
-	default:
-		return nil, errors.New("unknown network")
-	}
-}
-
 // nodeStatus returns the registration status of the darknode with given name.
 func nodeStatus(name string) (status, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -233,15 +218,15 @@ func nodeStatus(name string) (status, error) {
 	address := crypto.PubkeyToAddress(config.Keystore.Ecdsa.PublicKey)
 
 	// Connect to Ethereum
-	client, err := connect(config.Network)
+	client, err := ethclient.Dial("https://ren-mercury.herokuapp.com/eth/mainnet")
 	if err != nil {
 		return 0, err
 	}
-	dnrAddr, err := config.DnrAddr(client.EthClient())
+	dnrAddr, err := config.DnrAddr(client)
 	if err != nil {
 		return 0, err
 	}
-	dnr, err := bindings.NewDarknodeRegistry(dnrAddr, client.EthClient())
+	dnr, err := bindings.NewDarknodeRegistry(dnrAddr, client)
 	if err != nil {
 		return 0, err
 	}
