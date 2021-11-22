@@ -7,13 +7,9 @@ require (
 	github.com/aws/aws-sdk-go v1.41.8
 	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
-	github.com/dgraph-io/badger v1.6.1 // indirect
-	github.com/dgraph-io/ristretto v0.0.3 // indirect
-	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/digitalocean/godo v1.69.1
 	github.com/ethereum/go-ethereum v1.9.6
 	github.com/fatih/color v1.7.0
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-github/v39 v39.2.0
 	github.com/google/uuid v1.1.5 // indirect
@@ -28,7 +24,7 @@ require (
 	github.com/multiformats/go-multihash v0.0.8
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/renproject/aw v0.3.7
-	github.com/renproject/mercury v0.3.16
+	github.com/renproject/mercury v0.3.15
 	github.com/renproject/phi v0.1.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.7.0 // indirect
@@ -40,7 +36,6 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210816183151-1e6c022a8912 // indirect
 	google.golang.org/api v0.15.0
-	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
