@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"math/big"
 	"os"
 	"strings"
@@ -128,7 +127,6 @@ func withdraw(ctx *cli.Context) error {
 	// Create a transactor for ethereum tx
 	gasPrice, err := client.SuggestGasPrice(c)
 	if err != nil {
-		log.Print(1)
 		return err
 	}
 	ethAddr := crypto.PubkeyToAddress(config.Keystore.Ecdsa.PublicKey)
@@ -140,13 +138,10 @@ func withdraw(ctx *cli.Context) error {
 	renAddress := renAddress(config.Network)
 	tokenContract, err := bindings.NewERC20(common.HexToAddress(renAddress), client)
 	if err != nil {
-		log.Print(2)
 		return err
 	}
-	log.Printf("ethaddrs = %v, contract = %v", ethAddr.Hex(), renAddress)
 	renBalance, err := tokenContract.BalanceOf(&bind.CallOpts{}, ethAddr)
 	if err != nil {
-		log.Print(3)
 		return err
 	}
 
