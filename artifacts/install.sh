@@ -35,10 +35,18 @@ main() {
     fi
     if ! check_cmd terraform; then
         terraform_url="https://releases.hashicorp.com/terraform/${cur_terraform_ver}/terraform_${cur_terraform_ver}_${ostype}_${cputype}.zip"
-        ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform.zip"
-        ensure unzip -qq "$HOME/.darknode/bin/terraform.zip" -d "$HOME/.darknode/bin"
-        ensure chmod +x "$HOME/.darknode/bin/terraform"
-        rm "$HOME/.darknode/bin/terraform.zip"
+
+        # The official terraform download page doesn't have bins for apple silicon before v1.0.0
+        # so we have to build ourselves and upload to the cli release
+        if [ "$ostype" = 'darwin' -a "$cputype" = 'arm64' ];then
+            terraform_url="https://www.github.com/renproject/darknode-cli/releases/download/3.1.0/terraform_darwin_arm64"
+            ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform"
+        else 
+            ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform.zip"
+            ensure unzip -qq "$HOME/.darknode/bin/terraform.zip" -d "$HOME/.darknode/bin"
+            ensure chmod +x "$HOME/.darknode/bin/terraform"
+            rm "$HOME/.darknode/bin/terraform.zip"    
+        fi
     fi
     progressBar 50 100
 
@@ -118,7 +126,7 @@ check_architecture() {
         :
     elif [ "$ostype" = 'linux' -a "$cputype" = 'aarch64' ]; then
         :
-    elif [ "$ostype" = 'darwin' -a "$cputype" = 'x86_64' ]; then
+    elif [ "$ostype" = 'darwin' ]; then
         if [ "$cputype" = 'x86_64' ]; then
             :
         elif [ "$cputype" = 'arm64' ]; then
