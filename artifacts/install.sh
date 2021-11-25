@@ -35,10 +35,18 @@ main() {
     fi
     if ! check_cmd terraform; then
         terraform_url="https://releases.hashicorp.com/terraform/${cur_terraform_ver}/terraform_${cur_terraform_ver}_${ostype}_${cputype}.zip"
-        ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform.zip"
-        ensure unzip -qq "$HOME/.darknode/bin/terraform.zip" -d "$HOME/.darknode/bin"
-        ensure chmod +x "$HOME/.darknode/bin/terraform"
-        rm "$HOME/.darknode/bin/terraform.zip"
+
+        # The official terraform download page doesn't have bins for apple silicon before v1.0.0
+        # so we have to build ourselves and upload to the cli release
+        if [ "$ostype" = 'darwin' -a "$cputype" = 'arm64' ];then
+            terraform_url="https://www.github.com/renproject/darknode-cli/releases/download/3.1.0/terraform_darwin_arm64"
+            ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform"
+        else 
+            ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform.zip"
+            ensure unzip -qq "$HOME/.darknode/bin/terraform.zip" -d "$HOME/.darknode/bin"
+            ensure chmod +x "$HOME/.darknode/bin/terraform"
+            rm "$HOME/.darknode/bin/terraform.zip"    
+        fi
     fi
     progressBar 50 100
 
@@ -98,13 +106,15 @@ prerequisites() {
         requiredPatch="$(echo $1 | cut -d. -f3)"
 
         if [ "$major" -lt "$requiredMajor" ]; then
-          err "Please upgrade your terraform to version above $min_terraform_ver"
-        fi
-        if [ "$minor" -lt "$requiredMinor" ]; then
-          err "Please upgrade your terraform to version above $min_terraform_ver"
-        fi
-        if [ "$patch" -lt "$requiredPatch" ]; then
-          err "Please upgrade your terraform to version above $min_terraform_ver"
+            echo "Please upgrade your terraform to version above $min_terraform_ver"
+        elif [ "$major" -eq "$requiredMajor" ]; then
+            if [ "$minor" -lt "$requiredMinor" ]; then
+                echo "Please upgrade your terraform to version above $min_terraform_ver"
+            elif [ "$minor" -eq "$requiredMinor" ]; then
+                if [ "$patch" -lt "$requiredPatch" ]; then
+                    echo "Please upgrade your terraform to version above $min_terraform_ver"
+                fi
+            fi
         fi
     fi
 }
@@ -118,7 +128,7 @@ check_architecture() {
         :
     elif [ "$ostype" = 'linux' -a "$cputype" = 'aarch64' ]; then
         :
-    elif [ "$ostype" = 'darwin' -a "$cputype" = 'x86_64' ]; then
+    elif [ "$ostype" = 'darwin' ]; then
         if [ "$cputype" = 'x86_64' ]; then
             :
         elif [ "$cputype" = 'arm64' ]; then
@@ -140,6 +150,9 @@ check_architecture() {
                 ;;
             11.*)
                 # We assume Big Sur will be OK for now
+                ;;
+            12.*)
+                # We assume Monterey will be OK for now
                 ;;
             *)
                 # Unknown product version, warn and continue
@@ -209,14 +222,12 @@ ensure() {
 downloader() {
     if check_cmd curl; then
         if ! check_help_for curl --proto --tlsv1.2; then
-            echo "Warning: Not forcing TLS v1.2, this is potentially less secure"
             curl --silent --show-error --fail --location "$1" --output "$2"
         else
             curl --proto '=https' --tlsv1.2 --silent --show-error --fail --location "$1" --output "$2"
         fi
     elif check_cmd wget; then
         if ! check_help_for wget --https-only --secure-protocol; then
-            echo "Warning: Not forcing TLS v1.2, this is potentially less secure"
             wget "$1" -O "$2"
         else
             wget --https-only --secure-protocol=TLSv1_2 "$1" -O "$2"

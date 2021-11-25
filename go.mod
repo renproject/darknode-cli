@@ -20,7 +20,6 @@ require (
 	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6
 	github.com/karalabe/usb v0.0.0-20211005121534-4c5740d64559 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/multiformats/go-multiaddr v0.1.1
 	github.com/multiformats/go-multihash v0.0.8
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
