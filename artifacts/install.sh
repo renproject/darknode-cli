@@ -41,6 +41,7 @@ main() {
         if [ "$ostype" = 'darwin' -a "$cputype" = 'arm64' ];then
             terraform_url="https://www.github.com/renproject/darknode-cli/releases/download/3.1.0/terraform_darwin_arm64"
             ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform"
+            ensure chmod +x "$HOME/.darknode/bin/terraform"
         else 
             ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform.zip"
             ensure unzip -qq "$HOME/.darknode/bin/terraform.zip" -d "$HOME/.darknode/bin"

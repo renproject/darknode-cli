@@ -72,11 +72,18 @@ install_terraform(){
   if [ $cputype = "x86_64" ];then
       cputype="amd64"
   fi
-  terraform_url="https://releases.hashicorp.com/terraform/${terraform_ver}/terraform_${terraform_ver}_${ostype}_${cputype}.zip"
-  ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform.zip"
-  ensure unzip -qq "$HOME/.darknode/bin/terraform.zip" -d "$HOME/.darknode/bin"
-  ensure chmod +x "$HOME/.darknode/bin/terraform"
-  rm "$HOME/.darknode/bin/terraform.zip"
+
+  if [ "$ostype" = 'darwin' -a "$cputype" = 'arm64' ];then
+    terraform_url="https://www.github.com/renproject/darknode-cli/releases/download/3.1.0/terraform_darwin_arm64"
+    ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform"
+    ensure chmod +x "$HOME/.darknode/bin/terraform"
+  else
+    terraform_url="https://releases.hashicorp.com/terraform/${cur_terraform_ver}/terraform_${cur_terraform_ver}_${ostype}_${cputype}.zip"
+    ensure downloader "$terraform_url" "$HOME/.darknode/bin/terraform.zip"
+    ensure unzip -qq "$HOME/.darknode/bin/terraform.zip" -d "$HOME/.darknode/bin"
+    ensure chmod +x "$HOME/.darknode/bin/terraform"
+    rm "$HOME/.darknode/bin/terraform.zip"
+  fi
 }
 
 # Source: https://sh.rustup.rs
