@@ -84,7 +84,7 @@ func (network Network) ProtocolAddr() common.Address {
 	case Mainnet:
 		return common.HexToAddress("0xc25167fFa19B4d9d03c7d5aa4682c7063F345b66")
 	case Testnet:
-		return common.HexToAddress("0x59e23c087cA9bd9ce162875811CD6e99134D6d0F")
+		return common.HexToAddress("0x9e2Ed544eE281FBc4c00f8cE7fC2Ff8AbB4899D1")
 	case Devnet:
 		return common.HexToAddress("0x5045E727D9D9AcDe1F6DCae52B078EC30dC95455")
 	default:
