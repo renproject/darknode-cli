@@ -90,10 +90,11 @@ func IP(name string) (string, error) {
 
 	cmd := fmt.Sprintf("cd %v && terraform output ip", NodePath(name))
 	ip, err := CommandOutput(cmd)
+	ip = strings.TrimSpace(ip)
 	if strings.HasPrefix(ip, "\"") {
 		ip = strings.Trim(ip, "\"")
 	}
-	return strings.TrimSpace(ip), err
+	return ip, err
 }
 
 // Version gets the version of the software the darknode currently is running.
