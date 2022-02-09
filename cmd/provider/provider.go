@@ -152,7 +152,7 @@ func initNode(ctx *cli.Context) error {
 	var conf darknode.Config
 	if configFile != "" {
 		var err error
-		conf, err = darknode.NewConfigFromJSONFile(path)
+		conf, err = darknode.NewConfigFromJSONFile(configFile)
 		if err != nil {
 			return errors.New("invalid config file")
 		}
