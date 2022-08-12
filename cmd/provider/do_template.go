@@ -6,32 +6,33 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/renproject/darknode-cli/darknode"
 	"github.com/renproject/darknode-cli/util"
 )
 
 type doTerraform struct {
-	Name          string
-	Token         string
-	Region        string
-	Size          string
-	ConfigPath    string
-	PubKeyPath    string
-	PriKeyPath    string
-	ServiceFile   string
-	LatestVersion string
+	Name            string
+	Network         string
+	Token           string
+	Region          string
+	Size            string
+	NodePath        string
+	DarknodeService string
+	GethService     string
+	LatestVersion   string
 }
 
-func (p providerDo) tfConfig(name, region, droplet, latestVersion string) error {
+func (p providerDo) tfConfig(name, region, droplet, latestVersion string, network darknode.Network) error {
 	tf := doTerraform{
-		Name:          name,
-		Token:         p.token,
-		Region:        region,
-		Size:          droplet,
-		ConfigPath:    fmt.Sprintf("~/.darknode/darknodes/%v/config.json", name),
-		PubKeyPath:    fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair.pub", name),
-		PriKeyPath:    fmt.Sprintf("~/.darknode/darknodes/%v/ssh_keypair", name),
-		ServiceFile:   darknodeService,
-		LatestVersion: latestVersion,
+		Name:            name,
+		Network:         string(network),
+		Token:           p.token,
+		Region:          region,
+		Size:            droplet,
+		NodePath:        fmt.Sprintf("~/.darknode/darknodes/%v", name),
+		DarknodeService: darknodeService,
+		GethService:     gethService(network, p.Name()),
+		LatestVersion:   latestVersion,
 	}
 
 	t, err := template.New("do").Parse(doTemplate)
@@ -52,7 +53,60 @@ provider "digitalocean" {
 
 resource "digitalocean_ssh_key" "darknode" {
    name       = "{{.Name}}"
-   public_key = file("{{.PubKeyPath}}")
+   public_key = file("{{.NodePath}}/ssh_keypair.pub")
+}
+
+resource "digitalocean_firewall" "darknode" {
+  name = "only-22-80-and-443"
+
+  droplet_ids = [digitalocean_droplet.darknode.id]
+
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "22"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "18514-18515"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "8545"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "30301"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "udp"
+    port_range       = "30301"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "udp"
+    port_range            = "1-65535"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "icmp"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
 }
 
 resource "digitalocean_droplet" "darknode" {
@@ -81,27 +135,30 @@ resource "digitalocean_droplet" "darknode" {
       "sudo ufw limit 22/tcp",
       "sudo ufw allow 18514/tcp", 
       "sudo ufw allow 18515/tcp", 
+      "sudo ufw allow 8545/tcp", 
+      "sudo ufw allow 30301", 
       "sudo ufw --force enable",
+      "sudo systemctl restart systemd-journald"
 	]
 
     connection {
       host        = self.ipv4_address
       type        = "ssh"
       user        = "root"
-      private_key = file("{{.PriKeyPath}}")
+      private_key = file("{{.NodePath}}/ssh_keypair")
     }
   }
 
   provisioner "file" {
 
-    source      = "{{.ConfigPath}}"
+    source      = "{{.NodePath}}/config.json"
     destination = "$HOME/config.json"
 
     connection {
       host        = self.ipv4_address
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.PriKeyPath}}")
+      private_key = file("{{.NodePath}}/ssh_keypair")
     }
   }
 
@@ -116,7 +173,7 @@ resource "digitalocean_droplet" "darknode" {
 	  "chmod +x ~/.darknode/bin/darknode",
       "echo {{.LatestVersion}} > ~/.darknode/version",
 	  <<EOT
-	  echo "{{.ServiceFile}}" > ~/.config/systemd/user/darknode.service
+	  echo "{{.DarknodeService}}" > ~/.config/systemd/user/darknode.service
       EOT
       ,
 	  "loginctl enable-linger darknode",
@@ -128,7 +185,48 @@ resource "digitalocean_droplet" "darknode" {
       host        = self.ipv4_address
       type        = "ssh"
       user        = "darknode"
-      private_key = file("{{.PriKeyPath}}")
+      private_key = file("{{.NodePath}}/ssh_keypair")
+    }
+  }
+
+  provisioner "file" {
+
+    source      = "{{.NodePath}}/key.prv"
+    destination = "$HOME/key.prv"
+
+    connection {
+      host        = self.ipv4_address
+      type        = "ssh"
+      user        = "darknode"
+      private_key = file("{{.NodePath}}/ssh_keypair")
+    }
+  }
+
+  provisioner "remote-exec" {
+	
+	inline = [
+      "set -x",
+	  "mkdir -p $HOME/.ethereum/bin",
+	  "curl -sL https://www.github.com/tok-kkk/node/releases/download/0.0.2/geth > ~/.ethereum/bin/geth",
+	  "chmod +x ~/.ethereum/bin/geth",
+	  "curl -sL https://www.github.com/tok-kkk/node/releases/download/0.0.1/genesis-{{.Network}}.json > ~/.ethereum/genesis.json",
+	  "~/.ethereum/bin/geth init ~/.ethereum/genesis.json",
+      "mv $HOME/key.prv $HOME/.ethereum/key.prv",
+      "echo '\n' > ~/.ethereum/password",
+	  "~/.ethereum/bin/geth account import --password ~/.ethereum/password ~/.ethereum/key.prv",
+	  <<EOT
+	  echo "{{.GethService}}" > ~/.config/systemd/user/geth.service
+      EOT
+      ,
+      "systemctl --user enable geth.service",
+      "systemctl --user start geth.service",
+	]
+
+    connection {
+      host        = self.ipv4_address
+      type        = "ssh"
+      user        = "darknode"
+      private_key = file("{{.NodePath}}/ssh_keypair")
     }
   }
 }

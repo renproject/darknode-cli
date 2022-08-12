@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/renproject/darknode-cli/darknode"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
@@ -58,7 +59,8 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 	}
 
 	// Get the latest darknode version
-	latestVersion, err := util.LatestStableRelease()
+	network := darknode.Network(ctx.String("network"))
+	latestVersion, err := util.LatestRelease(network)
 	if err != nil {
 		return err
 	}
@@ -69,7 +71,7 @@ func (p providerAws) Deploy(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := p.tfConfig(name, region, instance, latestVersion); err != nil {
+	if err := p.tfConfig(name, region, instance, latestVersion, network); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {

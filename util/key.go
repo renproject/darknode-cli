@@ -1,13 +1,21 @@
 package util
 
 import (
+	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -53,4 +61,41 @@ func ParseSshPrivateKey(name string) (ssh.Signer, error) {
 		return nil, err
 	}
 	return ssh.ParsePrivateKey(sshKey)
+}
+
+// EcdsaPrivateKeyToFile writes given private key to the target path in hex encoding.
+func EcdsaPrivateKeyToFile(key *ecdsa.PrivateKey, path string) error {
+	privateKeyBytes := crypto.FromECDSA(key)
+	pkhex := hexutil.Encode(privateKeyBytes)
+	pkhex = strings.Trim(pkhex, "0x")
+	if len(pkhex) != 64 {
+		return fmt.Errorf("invalid ecdsa key, expected 64 characters, got %v characters", len(pkhex))
+	}
+
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return ioutil.WriteFile(path, []byte(pkhex), 0600)
+}
+
+// NewKeystoreFromECDSA parses a existing ecdsa key to a keystore.
+func NewKeystoreFromECDSA(privateKeyECDSA *ecdsa.PrivateKey) *keystore.Key {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		panic(fmt.Sprintf("Could not create random uuid: %v", err))
+	}
+	key := &keystore.Key{
+		Id:         id,
+		Address:    crypto.PubkeyToAddress(privateKeyECDSA.PublicKey),
+		PrivateKey: privateKeyECDSA,
+	}
+	return key
 }

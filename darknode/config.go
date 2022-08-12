@@ -2,13 +2,10 @@ package darknode
 
 import (
 	"bytes"
-	"crypto/ecdsa"
 	"encoding/json"
-	"math/big"
 	"os"
 	"path/filepath"
 
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -70,9 +67,9 @@ func NewConfig(network Network) (Config, error) {
 	}, nil
 }
 
-// NewConfigFromJSONFile parses a json file that contains the config
+// NewConfigFromFile parses a json file that contains the config
 // options specified by Config.
-func NewConfigFromJSONFile(filename string) (Config, error) {
+func NewConfigFromFile(filename string) (Config, error) {
 	path, err := filepath.Abs(filename)
 	if err != nil {
 		return Config{}, err
@@ -96,7 +93,7 @@ func ConfigToFile(config Config, path string) error {
 		return err
 	}
 
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -127,6 +124,7 @@ type GeneralConfig struct {
 // DnrAddr returns the darknode registry contract address from the config. If
 // only the protocol address is specified, it will try read the dnr address from
 // the protocol contract.
+// TODO : move to bindings or somewhere else
 func (config GeneralConfig) DnrAddr(client *ethclient.Client) (common.Address, error) {
 	if bytes.Equal(config.DarknodeRegistryAddress.Bytes(), common.Address{}.Bytes()) {
 		protocol, err := bindings.NewProtocol(config.ProtocolAddress, client)
@@ -138,71 +136,21 @@ func (config GeneralConfig) DnrAddr(client *ethclient.Client) (common.Address, e
 	return config.DarknodeRegistryAddress, nil
 }
 
-// NewGeneralConfigFromJSONFile parses a json file that contains the config
+// NewGeneralConfigFromFile parses a json file that contains the config
 // options specified by GeneralConfig.
-func NewGeneralConfigFromJSONFile(filename string) (GeneralConfig, error) {
-	file, err := os.Open(filename)
+func NewGeneralConfigFromFile(filename string) (GeneralConfig, error) {
+	path, err := filepath.Abs(filename)
+	if err != nil {
+		return GeneralConfig{}, err
+	}
+
+	file, err := os.Open(path)
 	if err != nil {
 		return GeneralConfig{}, err
 	}
 	defer file.Close()
 
-	var conf GeneralConfig
-	err = json.NewDecoder(file).Decode(&conf)
-	return conf, err
-}
-
-// The ECDSADistKeyShare is a temporary object used to store a Shamir's secret
-// share of a ECDSA distributed key. Such a key is used by RenVM to sign
-// transactions and messages as part of shifting tokens in/out of various
-// distributed ledgers. In the future, it will be replaced by runtime storage so
-// that there can be multiple ECDSA distributed keys that are constantly
-// changed.
-type ECDSADistKeyShare struct {
-	PubKey       ecdsa.PublicKey `json:"pubKey"`
-	PrivKeyShare []byte          `json:"privKeyShare,omitempty"`
-}
-
-// MarshalJSON implements the `json.Marshaler` interface for the
-// ECDSADistKeyShare type.
-func (dk ECDSADistKeyShare) MarshalJSON() ([]byte, error) {
-	pubKey := map[string]interface{}{}
-	pubKey["x"] = dk.PubKey.X
-	pubKey["y"] = dk.PubKey.Y
-	return json.Marshal(map[string]interface{}{
-		"pubKey":       pubKey,
-		"privKeyShare": dk.PrivKeyShare,
-	})
-}
-
-// UnmarshalJSON implements the `json.Unmarshaler` interface for the
-// ECDSADistKeyShare type.
-func (dk *ECDSADistKeyShare) UnmarshalJSON(data []byte) (err error) {
-	m := map[string]json.RawMessage{}
-	if err = json.Unmarshal(data, &m); err != nil {
-		return
-	}
-
-	pubKeyRaw := map[string]json.RawMessage{}
-	if err = json.Unmarshal(m["pubKey"], &pubKeyRaw); err != nil {
-		return
-	}
-
-	// Public key
-	dk.PubKey.X = big.NewInt(0)
-	if err = dk.PubKey.X.UnmarshalJSON(pubKeyRaw["x"]); err != nil {
-		return
-	}
-	dk.PubKey.Y = big.NewInt(0)
-	if err = dk.PubKey.Y.UnmarshalJSON(pubKeyRaw["y"]); err != nil {
-		return
-	}
-	dk.PubKey.Curve = btcec.S256()
-
-	// Private key share
-	if err = json.Unmarshal(m["privKeyShare"], &dk.PrivKeyShare); err != nil {
-		return
-	}
-
-	return nil
+	var opts GeneralConfig
+	err = json.NewDecoder(file).Decode(&opts)
+	return opts, err
 }

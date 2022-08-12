@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -34,7 +35,7 @@ func BackUpConfig(name string) error {
 	return Run("bash", "-c", backup)
 }
 
-// run the command and pipe the output to the stdout
+// Run the command and pipe the output to the stdout
 func Run(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	cmd.Stdin = os.Stdin
@@ -148,4 +149,11 @@ func CheckWSL() bool {
 		return false
 	}
 	return strings.Contains(string(file), "Microsoft")
+}
+
+// Prompt will display the given text and return the string user enters.
+func Prompt(display string) (string, error) {
+	fmt.Println(display)
+	reader := bufio.NewReader(os.Stdin)
+	return reader.ReadString('\n')
 }

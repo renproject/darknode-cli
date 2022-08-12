@@ -37,6 +37,7 @@ func NewNetwork(network string) (Network, error) {
 	}
 }
 
+// BootstrapNodes returns the bootstraps addresses of the given network.
 func (network Network) BootstrapNodes() []addr.MultiAddress {
 	bootstraps := make([]addr.MultiAddress, 0, 16)
 	switch network {
@@ -79,12 +80,37 @@ func (network Network) BootstrapNodes() []addr.MultiAddress {
 	return bootstraps
 }
 
+// GethBootstrapNodes returns the geth bootstraps addresses of the given network.
+func (network Network) GethBootstrapNodes() string {
+	switch network {
+	case Mainnet:
+		return "enode://1f6feede142638f7c927fe5a2dcb4ee9e3915f57099879957f5e76407cb8fb941bf4fd94fd82e55f4ea7e888d067063dfdd33af8107139cc109920a08a302210@159.223.46.219:31004"
+	case Testnet:
+		return "enode://f64ed2aa0a5ec85bfa6324193b2b5ab6dce366cebd1c58c8742b17f9534d73a3579cab75d8a28bca98f3a0a8e51581941220acca69ca8f1d3f4b2841b3e0b9e3@46.101.207.101:31000"
+	default:
+		panic("unknown network")
+	}
+}
+
+// GethNetworkID returns network ID of the given network.
+func (network Network) GethNetworkID() string {
+	switch network {
+	case Mainnet:
+		return "3120"
+	case Testnet:
+		return "18414"
+	default:
+		panic("unknown network")
+	}
+}
+
+// ProtocolAddr returns the protocol contract address of the given network.
 func (network Network) ProtocolAddr() common.Address {
 	switch network {
 	case Mainnet:
 		return common.HexToAddress("0xc25167fFa19B4d9d03c7d5aa4682c7063F345b66")
 	case Testnet:
-		return common.HexToAddress("0x9e2Ed544eE281FBc4c00f8cE7fC2Ff8AbB4899D1")
+		return common.HexToAddress("0x59e23c087cA9bd9ce162875811CD6e99134D6d0F")
 	case Devnet:
 		return common.HexToAddress("0x5045E727D9D9AcDe1F6DCae52B078EC30dC95455")
 	default:

@@ -59,6 +59,14 @@ func ValidateName(name string) error {
 	return nil
 }
 
+// NodeExistence checks if there exists a node with given name. It returns nil
+// if node exists.
+func NodeExistence(name string) error {
+	path := filepath.Join(Directory, "darknodes", name)
+	_, err := os.Stat(path)
+	return err
+}
+
 // ValidateNodeExistence checks if there exists a node with given name.
 func ValidateNodeExistence(name string) error {
 	path := filepath.Join(Directory, "darknodes", name)
@@ -69,13 +77,13 @@ func ValidateNodeExistence(name string) error {
 // Config returns the config of the node with given name.
 func Config(name string) (darknode.GeneralConfig, error) {
 	path := filepath.Join(NodePath(name), "config.json")
-	return darknode.NewGeneralConfigFromJSONFile(path)
+	return darknode.NewGeneralConfigFromFile(path)
 }
 
 // ID gets the ID of the node with given name.
 func ID(name string) (addr.ID, error) {
 	path := filepath.Join(NodePath(name), "config.json")
-	config, err := darknode.NewConfigFromJSONFile(path)
+	config, err := darknode.NewConfigFromFile(path)
 	if err != nil {
 		return addr.ID{}, err
 	}
@@ -110,7 +118,7 @@ func Version(name string) string {
 // Network gets the network of the darknode.
 func Network(name string) (darknode.Network, error) {
 	path := filepath.Join(NodePath(name), "config.json")
-	config, err := darknode.NewConfigFromJSONFile(path)
+	config, err := darknode.NewConfigFromFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -120,7 +128,7 @@ func Network(name string) (darknode.Network, error) {
 // RegisterUrl returns the url for registering a particular darknode.
 func RegisterUrl(name string) (string, error) {
 	path := filepath.Join(NodePath(name), "config.json")
-	config, err := darknode.NewConfigFromJSONFile(path)
+	config, err := darknode.NewConfigFromFile(path)
 	if err != nil {
 		return "", err
 	}

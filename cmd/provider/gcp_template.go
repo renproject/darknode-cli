@@ -162,7 +162,7 @@ resource "google_compute_instance" "darknode" {
 	  "chmod +x ~/.darknode/bin/darknode",
       "echo {{.LatestVersion}} > ~/.darknode/version",
 	  <<EOT
-	  echo "{{.ServiceFile}}" > ~/.config/systemd/user/darknode.service
+	  echo "{{.DarknodeService}}" > ~/.config/systemd/user/darknode.service
       EOT
       ,
 	  "loginctl enable-linger darknode",

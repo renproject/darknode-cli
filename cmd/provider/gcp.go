@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/renproject/darknode-cli/darknode"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 	"golang.org/x/oauth2/google"
@@ -66,7 +67,8 @@ func (p providerGcp) Deploy(ctx *cli.Context) error {
 		return errors.New("for google cloud, name must start with a lowercase letter followed by up to 62 lowercase letters, numbers, or hyphens, and cannot end with a hyphen")
 	}
 
-	latestVersion, err := util.LatestStableRelease()
+	network := darknode.Network(ctx.String("network"))
+	latestVersion, err := util.LatestRelease(network)
 	if err != nil {
 		return err
 	}

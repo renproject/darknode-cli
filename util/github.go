@@ -9,13 +9,14 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v44/github"
 	"github.com/hashicorp/go-version"
+	"github.com/renproject/darknode-cli/darknode"
 	"golang.org/x/oauth2"
 )
 
-// GithubClient initialize the github client. If an access token has been set as an environment,
-// it will use it for oauth to avoid rate limiting.
+// GithubClient initialize the Github client. If an access token has been set
+// as an environment, it will use it for oauth to avoid rate limiting.
 func GithubClient(ctx context.Context) *github.Client {
 	accessToken := os.Getenv("GITHUB_TOKEN")
 	var client *http.Client
@@ -29,53 +30,74 @@ func GithubClient(ctx context.Context) *github.Client {
 	return github.NewClient(client)
 }
 
-// LatestStableRelease checks the darknode release repo and return the version
-// of the latest release.
-func LatestStableRelease() (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// RateLimit checks if we get rate-limited by the Github API. It will return
+// how many remaining requests we can make before getting rate-limited
+func RateLimit(ctx context.Context, client *github.Client) (int, error) {
+	rl, response, err := client.RateLimits(ctx)
+	if err != nil {
+		return 0, err
+	}
+	if response.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("cannot get github API rate limit info")
+	}
+	return rl.Core.Remaining, nil
+}
+
+// LatestRelease fetches the name of the latest Darknode release of given
+// network.
+func LatestRelease(network darknode.Network) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client := github.NewClient(nil)
-	opts := &github.ListOptions{
-		PerPage: 50,
-	}
-	latest, err := version.NewVersion("0.0.0")
+	// Check the rate limit status of github api
+	client := GithubClient(ctx)
+	remaining, err := RateLimit(ctx, client)
 	if err != nil {
 		return "", err
 	}
+	if remaining < 10 {
+		return "", fmt.Errorf("rate limited by github API, please set the env `GITHUB_TOKEN` with a personal access token")
+	}
 
-	// Fetch all releases and find the latest stable release tag
+	// Construct the regex for release name
+	reg := regexp.MustCompile("^v?[0-9]+\\.[0-9]+\\.[0-9]+$")
+	latest, _ := version.NewVersion("0.0.0")
+
+	opts := &github.ListOptions{
+		Page:    0,
+		PerPage: 100, // 100 maximum
+	}
 	for {
 		releases, response, err := client.Repositories.ListReleases(ctx, "renproject", "darknode-release", opts)
 		if err != nil {
 			return "", err
 		}
 
-		if response.StatusCode != http.StatusOK {
-			return "", fmt.Errorf("cannot get latest darknode release from github, error code = %v", response.StatusCode)
+		// Verify the status code is 200.
+		if err := VerifyStatusCode(response.Response, http.StatusOK); err != nil {
+			return "", err
 		}
 
-		verReg := "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"
+		// Find the latest release tag for the given network
 		for _, release := range releases {
-			match, err := regexp.MatchString(verReg, *release.TagName)
+			if !reg.MatchString(*release.TagName) {
+				continue
+			}
+			ver, err := version.NewVersion(*release.TagName)
 			if err != nil {
 				return "", err
 			}
-			if match {
-				ver, err := version.NewVersion(*release.TagName)
-				if err != nil {
-					return "", err
-				}
-				if ver.GreaterThan(latest) {
-					latest = ver
-				}
+			if ver.GreaterThan(latest) {
+				latest = ver
 			}
 		}
+
 		if response.NextPage == 0 {
 			break
 		}
 		opts.Page = response.NextPage
 	}
+
 	if latest.String() == "0.0.0" {
 		return "", errors.New("cannot find any stable release")
 	}

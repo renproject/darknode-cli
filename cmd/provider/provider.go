@@ -18,7 +18,7 @@ var (
 	// ErrUnknownProvider is returned when user tries to deploy a darknode with an unknown cloud provider.
 	ErrUnknownProvider = errors.New("unknown cloud provider")
 
-	// ErrUnsupportedInstanceType is returned when the selected instance type cannot be created to user account.
+	// ErrInstanceTypeNotAvailable is returned when the selected instance type cannot be created to user account.
 	ErrInstanceTypeNotAvailable = errors.New("selected instance type is not available")
 
 	// ErrRegionNotAvailable is returned when the selected region is not available to user account.
@@ -49,6 +49,60 @@ KillSignal=SIGHUP
 [Install]
 WantedBy=default.target`
 
+func gethService(network darknode.Network, provider string) string {
+	bootstrapNode := network.GethBootstrapNodes()
+	networkID := network.GethNetworkID()
+
+	ip := ""
+	switch provider {
+	case NameAws:
+		ip = "public_ip"
+	case NameDo:
+		ip = "ipv4_address"
+	default:
+		panic("unknown provider")
+	}
+
+	return fmt.Sprintf(`[Unit]
+Description=RenVM Geth Darknode Daemon
+AssertPathExists=$HOME/.ethereum
+
+[Service]
+WorkingDirectory=$HOME/.ethereum
+ExecStart=$HOME/.ethereum/bin/geth \
+	--http.port=8545 \
+	--port=30301 \
+	--rpc.allow-unprotected-txs \
+	--http.vhosts=* \
+	--bootnodes='%v' \
+	--mine \
+	--networkid=%v \
+	--syncmode='full' \
+	--http \
+	--http.addr='0.0.0.0' \
+	--http.corsdomain='*' \
+	--http.api='personal,clique,eth,net,web3,txpool,miner,admin' \
+	--miner.gasprice='0' \
+	--gpo.ignoreprice='0' \
+	--txpool.pricelimit='0' \
+	--mine \
+	--password $HOME/.ethereum/password \
+	--allow-insecure-unlock \
+	--unlock=0 \
+	--nat=extip:${self.%v}
+
+Restart=on-failure
+PrivateTmp=true
+NoNewPrivileges=true
+
+# Specifies which signal to use when killing a service. Defaults to SIGTERM.
+# SIGHUP gives parity time to exit cleanly before SIGKILL (default 90s)
+KillSignal=SIGHUP
+
+[Install]
+WantedBy=default.target`, bootstrapNode, networkID, ip)
+}
+
 type Provider interface {
 	Name() string
 	Deploy(ctx *cli.Context) error
@@ -77,18 +131,14 @@ func validateCommonParams(ctx *cli.Context) error {
 	if err := util.ValidateName(name); err != nil {
 		return err
 	}
-	if err := util.ValidateNodeExistence(name); err == nil {
+	if err := util.NodeExistence(name); err == nil {
 		return fmt.Errorf("node [%v] already exist", name)
 	}
 
-	// Parse the network
-	network := darknode.Network(ctx.String("network"))
-	switch network {
-	case darknode.Mainnet:
-	case darknode.Testnet:
-	case darknode.Devnet:
-	default:
-		return errors.New("unknown RenVM network")
+	// Verify the input network
+	_, err := ParseNetwork(ctx)
+	if err != nil {
+		return err
 	}
 
 	// Verify the config file if user wants to use their own config
@@ -102,12 +152,25 @@ func validateCommonParams(ctx *cli.Context) error {
 		if _, err := os.Stat(path); err != nil {
 			return errors.New("config file doesn't exist")
 		}
-		_, err = darknode.NewConfigFromJSONFile(path)
+		_, err = darknode.NewConfigFromFile(path)
 		if err != nil {
 			return fmt.Errorf("incompatible config, err = %w", err)
 		}
 	}
 	return nil
+}
+
+// ParseNetwork parses the network from input arguments.
+func ParseNetwork(ctx *cli.Context) (darknode.Network, error) {
+	network := darknode.Network(ctx.String("network"))
+	switch network {
+	case darknode.Mainnet:
+	case darknode.Testnet:
+	case darknode.Devnet:
+	default:
+		return "", errors.New("unknown RenVM network")
+	}
+	return network, nil
 }
 
 // Provider returns the provider of a darknode instance.
@@ -152,7 +215,7 @@ func initNode(ctx *cli.Context) error {
 	var conf darknode.Config
 	if configFile != "" {
 		var err error
-		conf, err = darknode.NewConfigFromJSONFile(configFile)
+		conf, err = darknode.NewConfigFromFile(configFile)
 		if err != nil {
 			return errors.New("invalid config file")
 		}
@@ -164,7 +227,14 @@ func initNode(ctx *cli.Context) error {
 		}
 	}
 
-	return darknode.ConfigToFile(conf, filepath.Join(util.NodePath(name), "config.json"))
+	// Store the config in a local file
+	if err := darknode.ConfigToFile(conf, filepath.Join(util.NodePath(name), "config.json")); err != nil {
+		return err
+	}
+
+	// Generate the account key file
+	pkPath := filepath.Join(util.NodePath(name), "key.prv")
+	return util.EcdsaPrivateKeyToFile(conf.Keystore.Ecdsa.PrivateKey, pkPath)
 }
 
 func runTerraform(name string) error {

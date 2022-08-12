@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
+	"github.com/renproject/darknode-cli/darknode"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/urfave/cli"
 )
@@ -42,7 +43,8 @@ func (p providerDo) Deploy(ctx *cli.Context) error {
 	}
 
 	// Get the latest darknode version
-	latestVersion, err := util.LatestStableRelease()
+	network := darknode.Network(ctx.String("network"))
+	latestVersion, err := util.LatestRelease(network)
 	if err != nil {
 		return err
 	}
@@ -53,7 +55,7 @@ func (p providerDo) Deploy(ctx *cli.Context) error {
 	}
 
 	// Generate terraform config and start deploying
-	if err := p.tfConfig(name, region.Slug, droplet, latestVersion); err != nil {
+	if err := p.tfConfig(name, region.Slug, droplet, latestVersion, network); err != nil {
 		return err
 	}
 	if err := runTerraform(name); err != nil {

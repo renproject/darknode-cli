@@ -122,11 +122,11 @@ func main() {
 			},
 		},
 		{
-			Name:  "withdraw",
-			Usage: "Withdraw all the ETH and REN the Darknode address holds",
-			Flags: []cli.Flag{AddressFlag},
+			Name:  "export",
+			Usage: "Export the darknode into a keystore file",
+			Flags: []cli.Flag{},
 			Action: func(c *cli.Context) error {
-				return withdraw(c)
+				return export(c)
 			},
 		},
 		{

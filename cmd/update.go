@@ -10,6 +10,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/hashicorp/go-version"
+	"github.com/renproject/darknode-cli/darknode"
 	"github.com/renproject/darknode-cli/util"
 	"github.com/renproject/phi"
 	"github.com/urfave/cli"
@@ -29,7 +30,9 @@ func updateNode(ctx *cli.Context) error {
 
 	// Use latest version if user doesn't provide a version number
 	if version == "" {
-		version, err = util.LatestStableRelease()
+		// todo : network
+		network := darknode.Mainnet
+		version, err = util.LatestRelease(network)
 		if err != nil {
 			return err
 		}

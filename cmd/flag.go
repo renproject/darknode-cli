@@ -48,6 +48,10 @@ var (
 		Name:  "force, f",
 		Usage: "Force updating to an older version without interactive prompts",
 	}
+	OutputFlag = cli.StringFlag{
+		Name:  "output, out",
+		Usage: "Output file for the keystore (default = current directory)",
+	}
 )
 
 // AWS flags
@@ -70,8 +74,8 @@ var (
 	}
 	AwsInstanceFlag = cli.StringFlag{
 		Name:  "aws-instance",
-		Value: "t3.micro",
-		Usage: "An optional AWS EC2 instance type (default: t3.micro)",
+		Value: "t3.medium",
+		Usage: "An optional AWS EC2 instance type (default: t3.medium)",
 	}
 	AwsProfileFlag = cli.StringFlag{
 		Name:  "aws-profile",
