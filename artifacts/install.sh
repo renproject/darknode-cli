@@ -33,6 +33,9 @@ main() {
     if [ $cputype = "x86_64" ];then
       cputype="amd64"
     fi
+    if [ $cputype = "aarch64" ];then
+      cputype="arm"
+    fi
     if ! check_cmd terraform; then
         terraform_url="https://releases.hashicorp.com/terraform/${cur_terraform_ver}/terraform_${cur_terraform_ver}_${ostype}_${cputype}.zip"
 
