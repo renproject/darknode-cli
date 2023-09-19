@@ -21,7 +21,7 @@ jobs:
               run: |
                   go build -o darknode_linux_amd64 -ldflags "-s -w -X main.BinaryVersion=${GIT_TAG_NAME}" ./cmd/*.go
                   mv darknode_linux_amd64 ./artifacts/
-                  env GOOS=linux CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc-6 CXX=aarch64-linux-gnu-g++-6 GOARCH=arm64 go build -o darknode_linux_arm -ldflags "-s -w -X main.BinaryVersion=${GIT_TAG_NAME}" ./cmd/*.go
+                  env GOOS=linux CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc-9 CXX=aarch64-linux-gnu-g++-6 GOARCH=arm64 go build -o darknode_linux_arm -ldflags "-s -w -X main.BinaryVersion=${GIT_TAG_NAME}" ./cmd/*.go
                   mv darknode_linux_arm ./artifacts/
                   env GOOS=darwin CGO_ENABLED=1 CC=o64-clang CXX=o64-clang++ GOARCH=amd64 go build -o darknode_darwin_amd64 -ldflags "-s -w -X main.BinaryVersion=${GIT_TAG_NAME}" ./cmd/*.go
                   mv darknode_darwin_amd64 ./artifacts/
